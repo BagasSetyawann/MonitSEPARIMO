@@ -549,6 +549,13 @@
               >
                 By SLS
               </button>
+              <button
+                onclick="switchTableView('kec')"
+                id="tBtnKec"
+                class="px-2.5 py-1.5 rounded font-semibold text-gray-500 hover:bg-gray-100"
+              >
+                By Kecamatan
+              </button>
             </div>
           </div>
         </div>
@@ -1394,15 +1401,23 @@
       // ============================================================
       function switchTableView(view) {
         tableView = view;
-        ["ppl", "sls"].forEach((v) => {
+        ["ppl", "sls", "kec"].forEach((v) => {
           const btn = document.getElementById("tBtn" + v.toUpperCase());
           if (btn)
             btn.className = `px-2.5 py-1.5 rounded font-semibold ${v === view ? "bg-bps-blue text-white" : "text-gray-500 hover:bg-gray-100"}`;
         });
         document.getElementById("tableTitle").textContent =
-          view === "ppl" ? "Data per PPL" : "Data per SLS";
+          view === "ppl"
+            ? "Data per PPL"
+            : view === "sls"
+              ? "Data per SLS"
+              : "Data per Kecamatan";
         document.getElementById("thKeyLabel").textContent =
-          view === "ppl" ? "PPL (Email)" : "Kode SLS";
+          view === "ppl"
+            ? "PPL (Email)"
+            : view === "sls"
+              ? "Kode SLS"
+              : "Kecamatan";
         // Ubah label kolom kedua sesuai mode
         document.querySelector("th:nth-child(2)").innerHTML =
           view === "ppl"
@@ -1459,7 +1474,7 @@
       function renderTable() {
         const agg = {};
         filtered.forEach((r) => {
-          let key, loc;
+          let key;
           if (tableView === "ppl") {
             key = r.username;
             // Kumpulkan semua SLS unik milik PPL ini dalam filtered
@@ -1475,7 +1490,7 @@
                 REVOKED: 0,
               };
             agg[key].loc.add(r.fullCode);
-          } else {
+          } else if (tableView === "sls") {
             key = r.fullCode;
             if (!agg[key])
               agg[key] = {
@@ -1489,6 +1504,20 @@
                 REJECTED: 0,
                 REVOKED: 0,
               };
+          } else {
+            key = r.kecCode;
+            if (!agg[key])
+              agg[key] = {
+                loc: new Set(),
+                target: 0,
+                APPROVED: 0,
+                OPEN: 0,
+                DRAFT: 0,
+                SUBMITTED: 0,
+                REJECTED: 0,
+                REVOKED: 0,
+              };
+            agg[key].loc.add(r.username);
           }
           agg[key].target += r.target;
           agg[key].APPROVED += r.APPROVED;
@@ -1512,7 +1541,21 @@
 
           return {
             key: k,
-            loc: tableView === "ppl" ? [...v.loc].sort().join(", ") : v.loc,
+            loc:
+              tableView === "ppl"
+                ? [...v.loc].sort().join(", ")
+                : tableView === "kec"
+                  ? `${v.loc.size} PPL`
+                  : v.loc,
+            locTitle:
+              tableView === "kec"
+                ? [...v.loc]
+                    .map((u) => u.split("@")[0])
+                    .sort()
+                    .join(", ")
+                : tableView === "ppl"
+                  ? [...v.loc].sort().join(", ")
+                  : v.loc,
             username: tableView === "ppl" ? k : v.username,
             ...v,
             progVal,
@@ -1573,11 +1616,11 @@
               : "bg-gray-50 hover:bg-blue-50 transition-colors";
           tr.innerHTML = `
       <td class="px-4 py-2.5 font-semibold text-gray-800 whitespace-nowrap max-w-[180px]">
-        <div class="truncate" title="${item.key}">${tableView === "ppl" ? item.key.split("@")[0] : item.key}</div>
+        <div class="truncate" title="${item.key}">${tableView === "ppl" ? item.key.split("@")[0] : tableView === "kec" ? `Kec-${item.key}` : item.key}</div>
         ${tableView === "ppl" ? `<div class="text-[10px] text-gray-400 truncate" title="${item.key}">${item.key}</div>` : ""}
       </td>
       <td class="px-4 py-2.5 text-gray-500 text-[11px] whitespace-nowrap max-w-[200px]">
-        <div class="truncate" title="${item.loc}">${item.loc}</div>
+        <div class="truncate" title="${tableView === "kec" ? item.locTitle : item.loc}">${tableView === "kec" ? item.loc : item.loc}</div>
       </td>
       <td class="px-4 py-2.5 text-right font-bold text-gray-700">${fmt(item.target)}</td>
       <td class="px-4 py-2.5 text-right font-black text-bps-blue">${fmt(item.progVal)}</td>
