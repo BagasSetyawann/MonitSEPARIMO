@@ -670,6 +670,38 @@
       let chartInst = null;
       let lastDataHash = null; // untuk deteksi perubahan data
 
+      const KECAMATAN_CODES = {
+        "010": "SAUSU",
+        "011": "TORUE",
+        "012": "BALINGGI",
+        "020": "PARIGI",
+        "021": "PARIGI SELATAN",
+        "022": "PARIGI BARAT",
+        "023": "PARIGI UTARA",
+        "024": "PARIGI TENGAH",
+        "030": "AMPIBABO",
+        "031": "KASIMBAR",
+        "032": "TORIBULU",
+        "033": "SINIU",
+        "040": "TINOMBO",
+        "041": "TINOMBO SELATAN",
+        "042": "SIDOAN",
+        "050": "TOMINI",
+        "051": "MEPANGA",
+        "052": "PALASA",
+        "060": "MOUTONG",
+        "061": "BOLANO LAMBUNU",
+        "062": "TAOPA",
+        "063": "BOLANO",
+        "064": "ONGKA MALINO",
+      };
+
+      function getKecamatanLabel(code) {
+        return KECAMATAN_CODES[code]
+          ? `${code} ${KECAMATAN_CODES[code]}`
+          : `Kec-${code}`;
+      }
+
       // LINK SPREADSHEET TERTANAM (HARDCODED)
       const HARDCODED_URL =
         "https://docs.google.com/spreadsheets/d/e/2PACX-1vSk5tIl0qRgX_m7FuPrg3S0I2piafa2xQKueukDLd2eizjrC4Eq6voDWJqHqcPr1P6D9Je_0LiPFshh/pub?output=csv";
@@ -1020,7 +1052,7 @@
               return `
       <button class="kec-btn px-4 py-2.5 text-xs font-semibold text-gray-600 rounded-t-lg hover:bg-gray-50 flex flex-col items-center gap-0.5 ${activeKec === k ? "active" : ""}"
         onclick="selectKec('${k}')">
-        <span>Kec-${k}</span>
+        <span>${getKecamatanLabel(k)}</span>
         <span class="text-[10px] ${activeKec === k ? "text-bps-blue" : "text-gray-400"}">${pPct}%</span>
       </button>`;
             })
@@ -1314,7 +1346,7 @@
 
         let entries = Object.entries(agg)
           .map(([k, v]) => ({
-            label: chartMode === "ppl" ? k.split("@")[0] : "Kec-" + k,
+            label: chartMode === "ppl" ? k.split("@")[0] : getKecamatanLabel(k),
             ...v,
           }))
           .sort((a, b) => b.target - a.target);
@@ -1616,7 +1648,7 @@
               : "bg-gray-50 hover:bg-blue-50 transition-colors";
           tr.innerHTML = `
       <td class="px-4 py-2.5 font-semibold text-gray-800 whitespace-nowrap max-w-[180px]">
-        <div class="truncate" title="${item.key}">${tableView === "ppl" ? item.key.split("@")[0] : tableView === "kec" ? `Kec-${item.key}` : item.key}</div>
+        <div class="truncate" title="${item.key}">${tableView === "ppl" ? item.key.split("@")[0] : tableView === "kec" ? getKecamatanLabel(item.key) : item.key}</div>
         ${tableView === "ppl" ? `<div class="text-[10px] text-gray-400 truncate" title="${item.key}">${item.key}</div>` : ""}
       </td>
       <td class="px-4 py-2.5 text-gray-500 text-[11px] whitespace-nowrap max-w-[200px]">
@@ -1684,7 +1716,8 @@
               v.REJECTED +
               v.REVOKED;
             return {
-              label: chartMode === "ppl" ? k.split("@")[0] : "Kec-" + k,
+              label:
+                chartMode === "ppl" ? k.split("@")[0] : getKecamatanLabel(k),
               ...v,
               total,
             };
@@ -1780,7 +1813,7 @@
                 SUBMITTED: 0,
                 REJECTED: 0,
               };
-            agg[key].loc.add("Kec-" + r.kecCode);
+            agg[key].loc.add(getKecamatanLabel(r.kecCode));
           } else {
             key = r.fullCode;
             if (!agg[key])
