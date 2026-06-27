@@ -828,7 +828,7 @@
 
             allData = newData;
             lastDataHash = newHash;
-            lastUpdate = new Date();
+            lastUpdate = getLatestUpdateTime(newData) || new Date();
             setSyncStatus("ok");
 
             if (fromSetup) {
@@ -912,7 +912,10 @@
       }
 
       function formatTime(d) {
-        return d.toLocaleTimeString("id-ID", {
+        return d.toLocaleString("id-ID", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
           hour: "2-digit",
           minute: "2-digit",
         });
@@ -1009,11 +1012,64 @@
             kecDesa,
             fullCode: code,
             target,
+            updatedAt: parseUpdateTimestamp(row),
             ...st,
           };
         } catch (e) {
           return null;
         }
+      }
+
+      function parseUpdateTimestamp(row) {
+        const keys = [
+          "updatedAt",
+          "updated_at",
+          "lastModified",
+          "last_modified",
+          "lastUpdate",
+          "modifiedAt",
+          "modified_at",
+          "timestamp",
+          "timeStamp",
+          "waktu",
+          "tanggal",
+        ];
+        for (const key of keys) {
+          if (Object.prototype.hasOwnProperty.call(row, key)) {
+            const raw = row[key];
+            if (raw === undefined || raw === null) continue;
+            const parsed = parseDateString(String(raw));
+            if (parsed) return parsed;
+          }
+        }
+        return null;
+      }
+
+      function parseDateString(value) {
+        const normalized = value
+          .trim()
+          .replace(/^"|"$/g, "")
+          .replace(/\./g, "-")
+          .replace(/\//g, "-")
+          .replace(/\s+/, " ")
+          .replace(
+            /(\d{1,2})[ ]?(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)/i,
+            (m) => m,
+          )
+          .trim();
+        const date = new Date(normalized);
+        if (!isNaN(date)) return date;
+        const timestamp = Date.parse(normalized);
+        return isNaN(timestamp) ? null : new Date(timestamp);
+      }
+
+      function getLatestUpdateTime(data) {
+        return data.reduce((latest, row) => {
+          if (row.updatedAt instanceof Date && !isNaN(row.updatedAt)) {
+            return !latest || row.updatedAt > latest ? row.updatedAt : latest;
+          }
+          return latest;
+        }, null);
       }
 
       // ============================================================
