@@ -323,24 +323,13 @@
         <div
           class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 mb-3"
         >
-          <!-- Horizontal Scroll Pills -->
-          <div
-            id="kecTabs"
-            class="flex gap-2 overflow-x-auto scrollbar-hide py-1 px-1"
-          >
+          <div id="kecTabs" class="flex flex-wrap gap-2 py-1 px-1">
             <!-- Injected by JS -->
           </div>
         </div>
 
         <!-- Additional Filters -->
         <div class="flex flex-col sm:flex-row gap-2 items-center">
-          <select
-            id="fPPL"
-            onchange="applyFilters()"
-            class="w-full sm:w-auto border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-xs text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-50 cursor-pointer"
-          >
-            <option value="">Semua PPL</option>
-          </select>
           <select
             id="fStatus"
             onchange="applyFilters()"
@@ -859,7 +848,6 @@
             }
 
             buildKecTabs();
-            buildPPLFilter();
             applyFilters();
             showDashboard();
             startAutoRefresh(
@@ -1131,7 +1119,7 @@
                 s + r.OPEN + r.DRAFT + r.SUBMITTED + r.APPROVED + r.REJECTED,
               0,
             );
-            const pct = pDen > 0 ? Math.round((pVal / pDen) * 100) : 0;
+            const pct = pDen > 0 ? ((pVal / pDen) * 100).toFixed(2) : "0.00";
             const isActive = activeKec === k;
 
             return `<button class="whitespace-nowrap px-4 py-2 text-[11px] sm:text-xs font-semibold rounded-full transition-all border flex items-center gap-2 ${isActive ? "bg-brand-500 text-white border-brand-500 shadow-md shadow-brand-500/20" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}" onclick="selectKec('${k}')">
@@ -1145,32 +1133,13 @@
       function selectKec(kec) {
         activeKec = kec;
         buildKecTabs();
-        buildPPLFilter();
         applyFilters();
-      }
-
-      function buildPPLFilter() {
-        const pool = activeKec
-          ? allData.filter((r) => r.kecCode === activeKec)
-          : allData;
-        const ppls = [...new Set(pool.map((r) => r.username))].sort();
-        const sel = document.getElementById("fPPL");
-        const cur = sel.value;
-        sel.innerHTML =
-          '<option value="">Semua PPL</option>' +
-          ppls
-            .map(
-              (p) =>
-                `<option value="${p}" ${p === cur ? "selected" : ""}>${p.split("@")[0]}</option>`,
-            )
-            .join("");
       }
 
       // ============================================================
       //  FILTER & APPLY
       // ============================================================
       function applyFilters() {
-        const fPPL = document.getElementById("fPPL").value;
         const fStatus = document.getElementById("fStatus").value;
         const search = (
           document.getElementById("searchInput")?.value || ""
@@ -1178,7 +1147,6 @@
 
         filtered = allData.filter((r) => {
           if (activeKec && r.kecCode !== activeKec) return false;
-          if (fPPL && r.username !== fPPL) return false;
           if (fStatus && r[fStatus] === 0) return false;
           if (search) {
             const hay =
@@ -1201,11 +1169,9 @@
 
       function resetFilters() {
         activeKec = "";
-        document.getElementById("fPPL").value = "";
         document.getElementById("fStatus").value = "";
         document.getElementById("searchInput").value = "";
         buildKecTabs();
-        buildPPLFilter();
         applyFilters();
       }
 
