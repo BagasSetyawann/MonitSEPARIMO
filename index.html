@@ -1636,9 +1636,12 @@
             "Nama PPL": r.name || r.key.split("@")[0],
             "Email PPL": r.key,
             Kecamatan: r.kecamatan,
-            "Jumlah SLS": r.detailLoc ? r.detailLoc.split(",").filter(Boolean).length : 0,
+            "Jumlah SLS": r.detailLoc
+              ? r.detailLoc.split(",").filter(Boolean).length
+              : 0,
             SLS: r.detailLoc,
             Target: r.target,
+            "Progres (%)": Number(r.pct.toFixed(1)),
             Approved: r.APP,
             Submitted: r.SUB,
             Draft: r.DRF,
@@ -1649,9 +1652,12 @@
           exportRows = rows.map((r) => ({
             Kecamatan: getKecamatanLabel(r.key),
             "Kode Kecamatan": r.key,
-            "Jumlah PPL": r.detailLoc ? r.detailLoc.split(",").filter(Boolean).length : 0,
+            "Jumlah PPL": r.detailLoc
+              ? r.detailLoc.split(",").filter(Boolean).length
+              : 0,
             PPL: r.detailLoc,
             Target: r.target,
+            "Progres (%)": Number(r.pct.toFixed(1)),
             Approved: r.APP,
             Submitted: r.SUB,
             Draft: r.DRF,
@@ -1664,6 +1670,7 @@
             Kecamatan: r.kecamatan,
             PPL: r.detailLoc,
             Target: r.target,
+            "Progres (%)": Number(r.pct.toFixed(1)),
             Approved: r.APP,
             Submitted: r.SUB,
             Draft: r.DRF,
