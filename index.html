@@ -1484,7 +1484,7 @@
         renderTable();
       }
 
-      function renderTable() {
+      function buildTableRows() {
         const agg = {};
         filtered.forEach((r) => {
           let key;
@@ -1502,6 +1502,7 @@
               SUB: 0,
               REJ: 0,
               name: r.namePPL,
+              kecamatan: getKecamatanLabel(r.kecCode),
             };
           if (tableView === "ppl") agg[key].loc.add(r.fullCode);
           else if (tableView === "kec") agg[key].loc.add(r.username);
@@ -1519,12 +1520,14 @@
           const progVal = v.SUB + v.REJ + v.APP;
           const progDen = v.OPN + v.DRF + v.SUB + v.APP + v.REJ;
           const pct = progDen > 0 ? (progVal / progDen) * 100 : 0;
+          const locList = [...v.loc].sort();
           return {
             key: k,
             loc:
               tableView === "kec"
-                ? `${v.loc.size} PPL`
-                : [...v.loc].sort().join(", "),
+                ? `${locList.length} PPL`
+                : locList.join(", "),
+            detailLoc: locList.join(", "),
             progVal,
             pct,
             ...v,
@@ -1577,6 +1580,12 @@
           return sortDir === "asc" ? va - vb : vb - va;
         });
 
+        return rows;
+      }
+
+      function renderTable() {
+        const rows = buildTableRows();
+
         const tbody = document.getElementById("tableBody");
         tbody.innerHTML = "";
         rows.forEach((item) => {
@@ -1619,22 +1628,63 @@
 
       function exportExcel() {
         if (!filtered.length) return alert("Data kosong.");
-        const ws = XLSX.utils.json_to_sheet(
-          filtered.map((r) => ({
-            Kecamatan: getKecamatanLabel(r.kecCode),
-            SLS: r.fullCode,
-            "Email PPL": r.username,
+        const rows = buildTableRows();
+
+        let exportRows = [];
+        if (tableView === "ppl") {
+          exportRows = rows.map((r) => ({
+            "Nama PPL": r.name || r.key.split("@")[0],
+            "Email PPL": r.key,
+            Kecamatan: r.kecamatan,
+            "Jumlah SLS": r.detailLoc ? r.detailLoc.split(",").filter(Boolean).length : 0,
+            SLS: r.detailLoc,
             Target: r.target,
-            Approved: r.APPROVED,
-            Submitted: r.SUBMITTED,
-            Draft: r.DRAFT,
-            Rejected: r.REJECTED,
-            Open: r.OPEN,
-          })),
-        );
+            Approved: r.APP,
+            Submitted: r.SUB,
+            Draft: r.DRF,
+            Rejected: r.REJ,
+            Open: r.OPN,
+          }));
+        } else if (tableView === "kec") {
+          exportRows = rows.map((r) => ({
+            Kecamatan: getKecamatanLabel(r.key),
+            "Kode Kecamatan": r.key,
+            "Jumlah PPL": r.detailLoc ? r.detailLoc.split(",").filter(Boolean).length : 0,
+            PPL: r.detailLoc,
+            Target: r.target,
+            Approved: r.APP,
+            Submitted: r.SUB,
+            Draft: r.DRF,
+            Rejected: r.REJ,
+            Open: r.OPN,
+          }));
+        } else {
+          exportRows = rows.map((r) => ({
+            SLS: r.key,
+            Kecamatan: r.kecamatan,
+            PPL: r.detailLoc,
+            Target: r.target,
+            Approved: r.APP,
+            Submitted: r.SUB,
+            Draft: r.DRF,
+            Rejected: r.REJ,
+            Open: r.OPN,
+          }));
+        }
+
+        const ws = XLSX.utils.json_to_sheet(exportRows);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Rekap");
-        XLSX.writeFile(wb, `Monitoring_SE2026_${new Date().getTime()}.xlsx`);
+        const sheetName =
+          tableView === "ppl"
+            ? "Per_PPL"
+            : tableView === "kec"
+              ? "Per_Kecamatan"
+              : "Per_SLS";
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        XLSX.writeFile(
+          wb,
+          `Monitoring_SE2026_${sheetName}_${new Date().getTime()}.xlsx`,
+        );
       }
 
       document.addEventListener("DOMContentLoaded", () => {
