@@ -10,8 +10,14 @@
         theme: {
           extend: {
             colors: {
-              bps: { blue: "#005a8c", dark: "#003a5c", light: "#e6f0f9" },
-              se26: { orange: "#f39c12", gold: "#f1c40f" },
+              brand: {
+                50: "#fff7ed",
+                100: "#ffedd5",
+                500: "#f97316",
+                600: "#ea580c",
+                700: "#c2410c",
+                900: "#7c2d12",
+              },
             },
             fontFamily: { sans: ["Inter", "sans-serif"] },
           },
@@ -33,22 +39,37 @@
     <style>
       body {
         font-family: "Inter", sans-serif;
-        background: #f1f5f9;
+        background: #f8fafc;
       }
+      /* Clean Scrollbar */
       ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 4px;
+        height: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
       }
       ::-webkit-scrollbar-thumb {
         background: #cbd5e1;
-        border-radius: 3px;
+        border-radius: 4px;
       }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
       .card-hover {
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
       }
       .card-hover:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.12);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px -8px rgba(234, 88, 12, 0.15);
       }
       .spin {
         animation: spin 1s linear infinite;
@@ -62,41 +83,35 @@
         }
       }
       .table-wrap {
-        max-height: 560px;
+        max-height: 500px;
         overflow-y: auto;
       }
       thead th {
         position: sticky;
         top: 0;
         z-index: 10;
-        background: #f8fafc;
+        background: #ffffff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
       }
       .sortable {
         cursor: pointer;
         user-select: none;
         white-space: nowrap;
+        transition: color 0.2s;
       }
       .sortable:hover {
-        color: #005a8c;
+        color: #ea580c;
       }
       .sort-icon {
         opacity: 0.3;
         font-size: 10px;
-        margin-left: 3px;
+        margin-left: 4px;
+        transition: all 0.2s;
       }
       .sort-icon.active {
         opacity: 1;
-        color: #005a8c;
-      }
-      .kec-btn {
-        transition: all 0.15s;
-        border-bottom: 2px solid transparent;
-      }
-      .kec-btn.active {
-        border-bottom-color: #005a8c;
-        color: #005a8c;
-        background: #e6f0f9;
-        font-weight: 700;
+        color: #ea580c;
+        transform: scale(1.2);
       }
       .pulse-dot {
         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -111,12 +126,12 @@
         }
       }
       .fade-in {
-        animation: fadeIn 0.35s ease;
+        animation: fadeIn 0.4s ease-out;
       }
       @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(6px);
+          transform: translateY(10px);
         }
         to {
           opacity: 1;
@@ -124,57 +139,72 @@
         }
       }
       .progress-bar {
-        transition: width 0.6s ease;
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Mobile optimizations */
+      @media (max-width: 640px) {
+        .table-wrap {
+          max-height: 400px;
+        }
       }
     </style>
   </head>
-  <body class="text-gray-800 flex flex-col min-h-screen">
+  <body class="text-gray-700 flex flex-col min-h-screen">
     <!-- ========== HEADER ========== -->
     <header
-      class="bg-gradient-to-r from-bps-dark via-bps-blue to-blue-700 text-white shadow-lg sticky top-0 z-50"
+      class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-[66px]">
+        <div class="flex items-center justify-between h-[70px]">
           <div class="flex items-center gap-3">
-            <div class="bg-white/10 border border-white/20 rounded-xl p-2">
-              <i class="fa-solid fa-chart-column text-se26-gold text-2xl"></i>
+            <div
+              class="bg-brand-50 text-brand-600 rounded-xl p-2.5 flex items-center justify-center"
+            >
+              <i class="fa-solid fa-chart-pie text-xl"></i>
             </div>
             <div>
-              <h1 class="font-extrabold text-xl tracking-wide">
-                SENSUS EKONOMI <span class="text-se26-gold">2026</span>
+              <h1
+                class="font-extrabold text-lg sm:text-xl text-gray-800 tracking-tight leading-none"
+              >
+                SE<span class="text-brand-500">2026</span>
               </h1>
               <p
-                class="text-[10px] text-blue-200 font-semibold tracking-widest"
+                class="text-[10px] sm:text-xs text-gray-400 font-medium tracking-wide mt-0.5 hidden sm:block"
               >
-                MONITORING PROGRESS LAPANGAN BPS KABUPATEN PARIGI MOUTONG
+                MONITORING FASIH KAB. PARIGI MOUTONG
               </p>
             </div>
           </div>
-          <div class="flex items-center gap-2 text-sm">
+
+          <div class="flex items-center gap-2 sm:gap-3">
             <!-- Status sinkronisasi -->
             <div
               id="syncStatus"
-              class="hidden items-center gap-1.5 bg-white/10 border border-white/20 px-3 py-1.5 rounded-lg text-xs font-medium"
+              class="hidden items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-100"
             >
               <span
                 id="syncDot"
                 class="w-2 h-2 rounded-full bg-green-400 pulse-dot inline-block"
               ></span>
-              <span id="syncText">Terhubung</span>
+              <span id="syncText" class="hidden sm:inline-block text-gray-500"
+                >Terhubung</span
+              >
             </div>
             <button
               onclick="triggerRefresh()"
               id="btnRefresh"
               title="Refresh data sekarang"
-              class="hidden bg-white/10 hover:bg-white/20 border border-white/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5"
+              class="hidden hover:bg-gray-50 text-gray-500 hover:text-brand-600 px-3 py-1.5 rounded-full text-sm transition flex items-center gap-1.5"
             >
-              <i class="fa-solid fa-rotate" id="refreshIcon"></i> Refresh
+              <i class="fa-solid fa-rotate" id="refreshIcon"></i>
             </button>
             <button
               onclick="toggleSetup()"
-              class="bg-white/10 hover:bg-white/20 border border-white/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5"
+              class="bg-brand-50 hover:bg-brand-100 text-brand-600 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition flex items-center gap-1.5"
             >
-              <i class="fa-solid fa-gear"></i> Pengaturan
+              <i class="fa-solid fa-sliders"></i>
+              <span class="hidden sm:inline">Pengaturan</span>
             </button>
           </div>
         </div>
@@ -184,56 +214,49 @@
     <!-- ========== SETUP PANEL ========== -->
     <div
       id="setupPanel"
-      class="hidden bg-white border-b-4 border-se26-orange shadow-md"
+      class="hidden bg-white border-b border-gray-100 shadow-sm relative z-40"
     >
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-        <div class="flex items-start gap-4">
-          <div
-            class="hidden sm:flex bg-orange-100 p-3 rounded-full text-se26-orange shrink-0 mt-1"
-          >
-            <i class="fa-solid fa-link text-lg"></i>
-          </div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex flex-col sm:flex-row gap-4">
           <div class="flex-1">
-            <h3 class="text-sm font-bold text-gray-800 mb-1">
-              Pengaturan Sumber Data & Auto-Refresh
+            <h3 class="text-sm font-bold text-gray-800 mb-2">
+              Sumber Data & Auto-Refresh
             </h3>
-            <p class="text-xs text-gray-500 mb-1">
-              Link default sudah ditanamkan. Anda dapat mengubah interval
-              auto-refresh di bawah ini.
+            <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-xl">
+              Data auto-refresh setiap
+              <b id="intervalLabel" class="text-brand-600">5 menit</b>. Pastikan
+              link adalah Google Sheet yang dipublikasikan ke format CSV.
             </p>
-            <p
-              class="text-[11px] text-gray-400 mb-3 bg-gray-50 border border-gray-200 rounded p-2"
-            >
-              Data akan auto-refresh setiap <b id="intervalLabel">5 menit</b>.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-2">
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <input
                 type="text"
                 id="sheetUrl"
-                placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv"
-                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-bps-blue focus:ring-1 focus:ring-bps-blue bg-gray-50"
+                placeholder="https://docs.google.com/spreadsheets/.../pub?output=csv"
+                class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-50 transition"
               />
-              <select
-                id="intervalSelect"
-                onchange="updateInterval()"
-                class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-bps-blue bg-gray-50"
-              >
-                <option value="60">Refresh 1 menit</option>
-                <option value="300" selected>Refresh 5 menit</option>
-                <option value="600">Refresh 10 menit</option>
-                <option value="1800">Refresh 30 menit</option>
-                <option value="0">Manual saja</option>
-              </select>
-              <button
-                onclick="connectSheet()"
-                class="bg-bps-blue hover:bg-bps-dark text-white px-5 py-2 rounded-lg text-sm font-semibold shadow transition whitespace-nowrap flex items-center gap-2 justify-center"
-              >
-                <i class="fa-solid fa-plug"></i> Simpan
-              </button>
+              <div class="flex gap-2">
+                <select
+                  id="intervalSelect"
+                  onchange="updateInterval()"
+                  class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-50 bg-white"
+                >
+                  <option value="60">1 menit</option>
+                  <option value="300" selected>5 menit</option>
+                  <option value="600">10 menit</option>
+                  <option value="1800">30 menit</option>
+                  <option value="0">Manual</option>
+                </select>
+                <button
+                  onclick="connectSheet()"
+                  class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition whitespace-nowrap flex items-center gap-2 justify-center"
+                >
+                  <i class="fa-solid fa-check"></i> Simpan
+                </button>
+              </div>
             </div>
             <div
               id="setupStatus"
-              class="hidden mt-3 text-sm px-3 py-2 rounded-lg border"
+              class="hidden mt-3 text-sm px-4 py-3 rounded-xl border"
             ></div>
           </div>
         </div>
@@ -243,349 +266,375 @@
     <!-- ========== EMPTY STATE ========== -->
     <div
       id="emptyState"
-      class="flex-grow flex flex-col items-center justify-center py-24 text-center"
+      class="flex-grow flex flex-col items-center justify-center py-20 px-4 text-center"
     >
-      <div
-        class="bg-bps-light w-24 h-24 rounded-full flex items-center justify-center mb-5 mx-auto"
-      >
+      <div class="relative mb-6">
         <div
-          class="loader mr-3 spin border-4 border-bps-blue border-t-transparent rounded-full w-10 h-10"
+          class="absolute inset-0 bg-brand-100 rounded-full blur-xl opacity-60"
         ></div>
+        <div
+          class="relative bg-white w-20 h-20 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mx-auto"
+        >
+          <div
+            class="spin border-4 border-brand-100 border-t-brand-500 rounded-full w-8 h-8"
+          ></div>
+        </div>
       </div>
-      <h2 class="text-xl font-bold text-gray-700 mb-2">
-        Menarik Data dari Spreadsheet...
-      </h2>
-      <p class="text-sm text-gray-400 max-w-sm mb-6">
-        Mohon tunggu sebentar, sistem sedang memproses data monitoring FASIH
-        SE2026.
+      <h2 class="text-lg font-bold text-gray-800 mb-2">Memuat Data...</h2>
+      <p class="text-sm text-gray-500 max-w-xs">
+        Menyinkronkan data monitoring FASIH SE2026 terbaru dari spreadsheet.
       </p>
     </div>
 
     <!-- ========== MAIN DASHBOARD ========== -->
     <main
       id="dashboard"
-      class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex-grow w-full fade-in"
+      class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full fade-in"
     >
-      <!-- INFO BAR -->
+      <!-- HEADER INFO & QUICK ACTION -->
       <div
-        class="flex flex-wrap items-center justify-between gap-2 mb-4 text-xs text-gray-500"
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6"
       >
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2 text-xs">
           <span
             id="infoRows"
-            class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 font-medium"
+            class="bg-white text-gray-600 shadow-sm border border-gray-100 rounded-full px-4 py-2 font-medium flex items-center gap-2"
           ></span>
           <span
             id="infoLastUpdate"
-            class="bg-white border border-gray-200 rounded-lg px-3 py-1.5"
+            class="bg-white text-gray-500 shadow-sm border border-gray-100 rounded-full px-4 py-2 flex items-center gap-2"
           ></span>
         </div>
-        <button
-          onclick="triggerRefresh()"
-          class="bg-bps-blue hover:bg-bps-dark text-white px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition"
-        >
-          <i class="fa-solid fa-rotate" id="refreshIcon2"></i> Perbarui Data
-        </button>
       </div>
 
-      <!-- FILTER KECAMATAN (Tab Style) -->
-      <div
-        class="bg-white rounded-xl shadow-sm border border-gray-200 mb-5 overflow-hidden"
-      >
-        <div class="px-4 pt-3 pb-0 border-b border-gray-200">
-          <div class="flex items-center gap-2 mb-2">
-            <i class="fa-solid fa-location-dot text-bps-blue text-sm"></i>
-            <span class="text-sm font-bold text-gray-700"
-              >Filter Kecamatan</span
-            >
-            <span
-              id="kecFilterInfo"
-              class="text-[11px] text-gray-400 ml-auto"
-            ></span>
-          </div>
+      <!-- FILTER KECAMATAN (PILLS) -->
+      <div class="mb-6">
+        <div class="flex items-center gap-2 mb-3 px-1">
+          <i class="fa-solid fa-filter text-gray-400 text-sm"></i>
+          <span class="text-sm font-bold text-gray-700"
+            >Filter Wilayah & PPL</span
+          >
+          <span
+            id="kecFilterInfo"
+            class="text-[11px] text-brand-500 bg-brand-50 px-2 py-0.5 rounded-full ml-auto font-medium hidden sm:inline-block"
+          ></span>
+        </div>
+
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 mb-3"
+        >
+          <!-- Horizontal Scroll Pills -->
           <div
             id="kecTabs"
-            class="flex gap-1 overflow-x-auto pb-0 scrollbar-hide flex-wrap"
+            class="flex gap-2 overflow-x-auto scrollbar-hide py-1 px-1"
           >
             <!-- Injected by JS -->
           </div>
         </div>
-        <!-- Sub-filter -->
-        <div
-          class="px-4 py-3 bg-gray-50 flex flex-wrap gap-2 items-center text-xs"
-        >
-          <label class="text-gray-500 font-semibold shrink-0"
-            >Filter tambahan:</label
-          >
+
+        <!-- Additional Filters -->
+        <div class="flex flex-col sm:flex-row gap-2 items-center">
           <select
             id="fPPL"
             onchange="applyFilters()"
-            class="border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-xs focus:ring-1 focus:ring-bps-blue"
+            class="w-full sm:w-auto border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-xs text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-50 cursor-pointer"
           >
             <option value="">Semua PPL</option>
           </select>
           <select
             id="fStatus"
             onchange="applyFilters()"
-            class="border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-xs focus:ring-1 focus:ring-bps-blue"
+            class="w-full sm:w-auto border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-xs text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-50 cursor-pointer"
           >
             <option value="">Semua Status</option>
-            <option value="OPEN">OPEN (belum dikerjakan)</option>
+            <option value="OPEN">Ada OPEN</option>
             <option value="DRAFT">Ada DRAFT</option>
             <option value="SUBMITTED">Ada SUBMITTED</option>
             <option value="APPROVED">Ada APPROVED</option>
             <option value="REJECTED">Ada REJECTED</option>
-            <option value="REVOKED">Ada REVOKED</option>
           </select>
           <button
             onclick="resetFilters()"
-            class="text-red-500 hover:text-red-700 font-semibold px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition flex items-center gap-1"
+            class="w-full sm:w-auto text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2"
           >
-            <i class="fa-solid fa-rotate-right text-xs"></i> Reset
+            <i class="fa-solid fa-rotate-left"></i> Reset
           </button>
-          <span id="filteredInfo" class="ml-auto text-gray-400"></span>
+          <span
+            id="filteredInfo"
+            class="sm:ml-auto text-xs text-gray-400 px-2"
+          ></span>
         </div>
       </div>
 
       <!-- KPI CARDS -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <!-- Target -->
         <div
-          class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-bps-blue card-hover flex items-center justify-between"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover"
         >
-          <div>
+          <div class="flex justify-between items-start mb-2">
             <p
-              class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5"
+              class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider"
             >
               Total Target
             </p>
-            <h3 class="text-2xl font-black text-gray-800" id="kTarget">—</h3>
-            <p class="text-[10px] text-gray-400">Dokumen usaha</p>
+            <div
+              class="bg-gray-50 w-8 h-8 rounded-full flex items-center justify-center text-gray-400"
+            >
+              <i class="fa-solid fa-cubes text-sm"></i>
+            </div>
           </div>
-          <div
-            class="bg-blue-50 w-11 h-11 rounded-full flex items-center justify-center text-bps-blue text-lg shrink-0"
+          <h3
+            class="text-2xl sm:text-3xl font-black text-gray-800 leading-none"
+            id="kTarget"
           >
-            <i class="fa-solid fa-cubes"></i>
-          </div>
+            —
+          </h3>
         </div>
 
+        <!-- Progress Lapangan -->
         <div
-          class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-bps-blue card-hover relative overflow-hidden"
+          class="bg-brand-500 rounded-2xl shadow-sm shadow-brand-500/20 p-4 sm:p-5 card-hover relative overflow-hidden text-white"
         >
-          <div class="z-10 relative">
-            <p
-              class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5"
-              title="(Sub+Rej+App) / (Open+Draft+Sub+App+Rej)"
-            >
-              Progress Lapangan
-            </p>
-            <div class="flex items-baseline gap-1.5">
-              <h3 class="text-2xl font-black text-bps-blue" id="kProgress">
+          <div
+            class="absolute right-[-10px] top-1/2 -translate-y-1/2 opacity-20"
+          >
+            <i class="fa-solid fa-chart-line text-7xl"></i>
+          </div>
+          <div class="relative z-10">
+            <div class="flex justify-between items-start mb-2">
+              <p
+                class="text-[10px] sm:text-xs font-bold text-brand-100 uppercase tracking-wider"
+                title="Disubmit + Diapprove + Direject"
+              >
+                Progress Lapangan
+              </p>
+            </div>
+            <div class="flex items-end gap-2 mb-2">
+              <h3
+                class="text-2xl sm:text-3xl font-black leading-none"
+                id="kProgress"
+              >
                 —
               </h3>
               <span
-                class="text-xs font-bold text-bps-blue bg-blue-50 border border-blue-200 px-1.5 rounded-full"
+                class="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full mb-1"
                 id="kProgressPct"
                 >0%</span
               >
             </div>
-            <div class="w-full bg-gray-200 h-1.5 rounded-full mt-2">
+            <div class="w-full bg-black/10 h-1.5 rounded-full">
               <div
-                class="bg-bps-blue h-1.5 rounded-full progress-bar"
+                class="bg-white h-1.5 rounded-full progress-bar"
                 id="barProgress"
                 style="width: 0%"
               ></div>
             </div>
           </div>
-          <div
-            class="absolute right-[-10px] bottom-[-10px] text-blue-50 opacity-50"
-          >
-            <i class="fa-solid fa-person-walking-arrow-right text-8xl"></i>
-          </div>
         </div>
 
+        <!-- Approved -->
         <div
-          class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-green-500 card-hover flex items-center justify-between"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover"
         >
-          <div>
+          <div class="flex justify-between items-start mb-2">
             <p
-              class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5"
+              class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider"
             >
               Approved PML
             </p>
-            <div class="flex items-baseline gap-1.5">
-              <h3 class="text-2xl font-black text-green-500" id="kApproved">
-                —
-              </h3>
+            <div
+              class="bg-green-50 w-8 h-8 rounded-full flex items-center justify-center text-green-500"
+            >
+              <i class="fa-solid fa-check-double text-sm"></i>
             </div>
-            <p class="text-[10px] text-gray-400">Dokumen valid</p>
           </div>
-          <div
-            class="bg-green-50 w-11 h-11 rounded-full flex items-center justify-center text-green-500 text-lg shrink-0"
+          <h3
+            class="text-2xl sm:text-3xl font-black text-green-500 leading-none"
+            id="kApproved"
           >
-            <i class="fa-solid fa-check-double"></i>
-          </div>
+            —
+          </h3>
         </div>
 
+        <!-- Open -->
         <div
-          class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-red-400 card-hover flex items-center justify-between"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover"
         >
-          <div>
+          <div class="flex justify-between items-start mb-2">
             <p
-              class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5"
+              class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider"
             >
-              OPEN
+              Belum Dikerjakan
             </p>
-            <div class="flex items-baseline gap-1.5">
-              <h3 class="text-2xl font-black text-red-500" id="kOpen">—</h3>
+            <div
+              class="bg-gray-50 w-8 h-8 rounded-full flex items-center justify-center text-gray-400"
+            >
+              <i class="fa-regular fa-folder-open text-sm"></i>
             </div>
-            <p class="text-[10px] text-gray-400">Belum dikerjakan</p>
           </div>
-          <div
-            class="bg-red-50 w-11 h-11 rounded-full flex items-center justify-center text-red-400 text-lg shrink-0"
+          <h3
+            class="text-2xl sm:text-3xl font-black text-gray-400 leading-none"
+            id="kOpen"
           >
-            <i class="fa-solid fa-triangle-exclamation"></i>
-          </div>
+            —
+          </h3>
         </div>
       </div>
 
-      <!-- CHART + STATUS -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+      <!-- CHARTS SECTION -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+        <!-- Main Bar Chart -->
         <div
-          class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 lg:col-span-2 flex flex-col"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 lg:col-span-2 flex flex-col"
         >
           <div
-            class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100"
+            class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4"
           >
             <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2">
-              <i class="fa-solid fa-chart-column text-bps-blue"></i>
+              <span class="w-2 h-6 bg-brand-500 rounded-full"></span>
               <span id="chartLabel">Progress per Kecamatan</span>
             </h3>
-            <div class="flex gap-1 text-[11px]">
+            <div class="flex bg-gray-50 p-1 rounded-lg">
               <button
                 onclick="setChartMode('kec')"
                 id="cBtnKec"
-                class="px-2.5 py-1 rounded font-semibold bg-bps-blue text-white"
+                class="px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold bg-white text-gray-800 shadow-sm transition"
               >
-                Kecamatan
+                Wilayah
               </button>
               <button
                 onclick="setChartMode('ppl')"
                 id="cBtnPpl"
-                class="px-2.5 py-1 rounded font-semibold text-gray-500 hover:bg-gray-100"
+                class="px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold text-gray-500 hover:text-gray-800 transition"
               >
-                PPL
+                PPL Top 25
               </button>
             </div>
           </div>
-          <div class="relative flex-grow min-h-[300px]">
+          <div class="relative flex-grow min-h-[250px] w-full">
             <canvas id="mainChart"></canvas>
           </div>
         </div>
 
+        <!-- Doughnut Chart & Status Breakdown -->
         <div
-          class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 flex flex-col"
         >
           <h3
-            class="font-bold text-gray-700 text-sm mb-4 pb-2 border-b border-gray-100 flex items-center gap-2"
+            class="font-bold text-gray-700 text-sm mb-4 flex items-center gap-2"
           >
-            <i class="fa-solid fa-chart-pie text-bps-blue"></i> Visualisasi
+            <span class="w-2 h-6 bg-brand-500 rounded-full"></span> Proporsi
             Status
           </h3>
-          <div class="relative w-full min-h-[160px] mb-4">
+          <div class="relative w-full h-[180px] mb-4 flex-shrink-0">
             <canvas id="pieChart"></canvas>
           </div>
           <div
             id="statusPanel"
-            class="space-y-2 mt-auto overflow-y-auto max-h-[160px] pr-1"
+            class="space-y-3 mt-2 overflow-y-auto max-h-[200px] pr-2 scrollbar-hide"
           ></div>
         </div>
       </div>
 
-      <!-- TABLE -->
+      <!-- TABLE SECTION -->
       <div
-        class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8"
+        class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 flex flex-col"
       >
+        <!-- Table Header/Controls -->
         <div
-          class="px-4 py-3 border-b border-gray-100 bg-gray-50 flex flex-wrap justify-between items-center gap-2"
+          class="p-4 sm:p-5 border-b border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4"
         >
-          <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2">
-            <i class="fa-solid fa-list-check text-bps-blue"></i>
-            <span id="tableTitle">Data per PPL</span>
+          <h3
+            class="font-bold text-gray-700 text-sm flex items-center gap-2 shrink-0"
+          >
+            <span class="w-2 h-6 bg-brand-500 rounded-full"></span>
+            <span id="tableTitle">Rincian Data PPL</span>
           </h3>
-          <div class="flex items-center gap-2">
-            <!-- Export Button -->
-            <button
-              onclick="exportExcel()"
-              class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
-            >
-              <i class="fa-solid fa-file-excel"></i> Export
-            </button>
+
+          <div
+            class="flex flex-wrap items-center gap-2 w-full lg:w-auto lg:justify-end"
+          >
             <!-- Search -->
-            <div class="relative">
+            <div class="relative flex-grow sm:flex-grow-0">
               <i
-                class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
+                class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
               ></i>
               <input
                 type="text"
                 id="searchInput"
                 oninput="applyFilters()"
-                placeholder="Cari PPL / kode..."
-                class="border border-gray-200 rounded-lg pl-7 pr-3 py-1.5 text-xs focus:outline-none focus:border-bps-blue focus:ring-1 focus:ring-bps-blue w-32 md:w-40 bg-white"
+                placeholder="Cari nama, kode..."
+                class="w-full sm:w-48 border border-gray-200 rounded-xl pl-8 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-50 bg-gray-50 focus:bg-white transition"
               />
             </div>
+
             <!-- View Toggle -->
-            <div class="flex gap-1 text-[11px]">
+            <div class="flex bg-gray-50 p-1 rounded-xl">
               <button
                 onclick="switchTableView('ppl')"
                 id="tBtnPPL"
-                class="px-2.5 py-1.5 rounded font-semibold bg-bps-blue text-white"
+                class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
               >
-                By PPL
+                PPL
               </button>
               <button
                 onclick="switchTableView('sls')"
                 id="tBtnSLS"
-                class="px-2.5 py-1.5 rounded font-semibold text-gray-500 hover:bg-gray-100"
+                class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition"
               >
-                By SLS
+                SLS
               </button>
               <button
                 onclick="switchTableView('kec')"
                 id="tBtnKec"
-                class="px-2.5 py-1.5 rounded font-semibold text-gray-500 hover:bg-gray-100"
+                class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition"
               >
-                By Kecamatan
+                Kec
               </button>
             </div>
+
+            <!-- Export -->
+            <button
+              onclick="exportExcel()"
+              class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ml-auto sm:ml-0"
+            >
+              <i class="fa-solid fa-download"></i>
+              <span class="hidden sm:inline">Export</span>
+            </button>
           </div>
         </div>
+
+        <!-- The Table -->
         <div class="table-wrap overflow-x-auto">
-          <table class="min-w-full text-xs divide-y divide-gray-100">
+          <table class="min-w-full text-xs text-left">
             <thead>
-              <tr class="text-gray-500">
+              <tr
+                class="text-gray-400 border-b border-gray-100 uppercase tracking-wider text-[10px]"
+              >
                 <th
-                  class="px-4 py-2.5 text-left font-bold sortable"
+                  class="px-5 py-3 font-bold sortable"
                   onclick="sortBy('key')"
                   id="thKey"
                 >
-                  <span id="thKeyLabel">PPL</span>
+                  <span id="thKeyLabel">Nama / ID</span>
                   <i class="fa-solid fa-sort sort-icon" id="siKey"></i>
                 </th>
                 <th
-                  class="px-4 py-2.5 text-left font-bold sortable"
+                  class="px-5 py-3 font-bold sortable"
                   onclick="sortBy('loc')"
                 >
                   Lokasi <i class="fa-solid fa-sort sort-icon" id="siLoc"></i>
                 </th>
                 <th
-                  class="px-4 py-2.5 text-right font-bold sortable"
+                  class="px-5 py-3 text-right font-bold sortable"
                   onclick="sortBy('target')"
                 >
                   Target
                   <i class="fa-solid fa-sort sort-icon" id="siTarget"></i>
                 </th>
                 <th
-                  class="px-4 py-2.5 text-right font-bold text-bps-blue sortable"
+                  class="px-5 py-3 text-right font-bold text-brand-600 sortable"
                   onclick="sortBy('progVal')"
                   title="(Sub+Rej+App)"
                 >
@@ -593,54 +642,55 @@
                   <i class="fa-solid fa-sort sort-icon" id="siProgVal"></i>
                 </th>
                 <th
-                  class="px-4 py-2.5 text-right font-bold sortable"
+                  class="px-5 py-3 text-right font-bold sortable w-24"
                   onclick="sortBy('pct')"
                 >
-                  % Prog <i class="fa-solid fa-sort sort-icon" id="siPct"></i>
+                  % Selesai
+                  <i class="fa-solid fa-sort sort-icon" id="siPct"></i>
                 </th>
                 <th
-                  class="px-4 py-2.5 text-right font-bold text-green-600 sortable"
+                  class="px-5 py-3 text-right font-bold text-green-600 sortable"
                   onclick="sortBy('APPROVED')"
                 >
-                  Approved
+                  Apprv
                   <i class="fa-solid fa-sort sort-icon" id="siAPPROVED"></i>
                 </th>
                 <th
-                  class="px-4 py-2.5 text-right font-bold text-yellow-600 sortable"
+                  class="px-5 py-3 text-right font-bold text-brand-500 sortable"
+                  onclick="sortBy('SUBMITTED')"
+                >
+                  Submt
+                  <i class="fa-solid fa-sort sort-icon" id="siSUBMITTED"></i>
+                </th>
+                <th
+                  class="px-5 py-3 text-right font-bold text-yellow-500 sortable"
                   onclick="sortBy('DRAFT')"
                 >
                   Draft <i class="fa-solid fa-sort sort-icon" id="siDRAFT"></i>
                 </th>
                 <th
-                  class="px-4 py-2.5 text-right font-bold text-amber-500 sortable"
-                  onclick="sortBy('SUBMITTED')"
-                >
-                  Submitted
-                  <i class="fa-solid fa-sort sort-icon" id="siSUBMITTED"></i>
-                </th>
-                <th
-                  class="px-4 py-2.5 text-right font-bold text-red-400 sortable"
+                  class="px-5 py-3 text-right font-bold text-red-400 sortable"
                   onclick="sortBy('REJECTED')"
                 >
-                  Rejected
+                  Rjct
                   <i class="fa-solid fa-sort sort-icon" id="siREJECTED"></i>
                 </th>
                 <th
-                  class="px-4 py-2.5 text-right font-bold text-red-600 sortable"
+                  class="px-5 py-3 text-right font-bold text-gray-400 sortable"
                   onclick="sortBy('OPEN')"
                 >
-                  OPEN <i class="fa-solid fa-sort sort-icon" id="siOPEN"></i>
+                  Open <i class="fa-solid fa-sort sort-icon" id="siOPEN"></i>
                 </th>
               </tr>
             </thead>
             <tbody
               id="tableBody"
-              class="bg-white divide-y divide-gray-50"
+              class="divide-y divide-gray-50 bg-white"
             ></tbody>
           </table>
         </div>
         <div
-          class="px-4 py-2 text-[11px] text-gray-400 border-t border-gray-100 flex justify-between"
+          class="px-5 py-3 text-[10px] text-gray-400 border-t border-gray-100 flex justify-between bg-gray-50/50"
           id="tableFooter"
         >
           <span></span><span></span>
@@ -648,27 +698,26 @@
       </div>
     </main>
 
-    <footer class="bg-gray-800 text-gray-400 py-3 text-center text-xs mt-auto">
-      &copy; 2026 Badan Pusat Statistik · Monitoring FASIH SE2026 · Auto-sync
-      Google Spreadsheet
+    <footer class="text-gray-400 py-6 text-center text-xs mt-auto">
+      &copy; 2026 Badan Pusat Statistik Kabupaten Parigi Moutong
     </footer>
 
     <script>
       // ============================================================
       //  STATE
       // ============================================================
-      let allData = []; // semua record yang sudah di-normalize
-      let filtered = []; // setelah filter
-      let activeKec = ""; // '' = semua kecamatan
+      let allData = [];
+      let filtered = [];
+      let activeKec = "";
       let chartMode = "kec";
       let tableView = "ppl";
       let sortCol = "OPEN";
-      let sortDir = "desc"; // 'asc' | 'desc'
+      let sortDir = "desc";
       let autoTimer = null;
       let lastUpdate = null;
       let connectedUrl = "";
       let chartInst = null;
-      let lastDataHash = null; // untuk deteksi perubahan data
+      let lastDataHash = null;
 
       const KECAMATAN_CODES = {
         "010": "SAUSU",
@@ -702,7 +751,6 @@
           : `Kec-${code}`;
       }
 
-      // LINK SPREADSHEET TERTANAM (HARDCODED)
       const HARDCODED_URL =
         "https://docs.google.com/spreadsheets/d/e/2PACX-1vSk5tIl0qRgX_m7FuPrg3S0I2piafa2xQKueukDLd2eizjrC4Eq6voDWJqHqcPr1P6D9Je_0LiPFshh/pub?output=csv";
 
@@ -727,17 +775,10 @@
 
       function connectSheet() {
         const url = document.getElementById("sheetUrl").value.trim();
-        if (!url) {
+        if (!url || !url.includes("docs.google.com")) {
           setSetupStatus(
             "error",
-            "Masukkan URL Google Spreadsheet terlebih dahulu.",
-          );
-          return;
-        }
-        if (!url.includes("docs.google.com")) {
-          setSetupStatus(
-            "error",
-            "URL tidak valid. Pastikan link dari Google Spreadsheet (Publikasikan ke web).",
+            "URL tidak valid. Pastikan link Google Sheet CSV valid.",
           );
           return;
         }
@@ -747,7 +788,7 @@
           "fasih_interval",
           document.getElementById("intervalSelect").value,
         );
-        setSetupStatus("loading", "Menghubungkan ke spreadsheet...");
+        setSetupStatus("loading", "Menghubungkan...");
         fetchData(true);
       }
 
@@ -755,17 +796,17 @@
         const el = document.getElementById("setupStatus");
         el.classList.remove("hidden");
         const styles = {
-          loading: "bg-blue-50 border-blue-200 text-blue-700",
-          success: "bg-green-50 border-green-200 text-green-700",
-          error: "bg-red-50 border-red-200 text-red-600",
+          loading: "bg-blue-50 border-blue-100 text-blue-600",
+          success: "bg-green-50 border-green-100 text-green-600",
+          error: "bg-red-50 border-red-100 text-red-600",
         };
-        el.className = `mt-3 text-xs px-3 py-2 rounded-lg border ${styles[type]}`;
+        el.className = `mt-3 text-xs px-4 py-3 rounded-xl border ${styles[type]}`;
         const icons = {
           loading: "fa-circle-notch fa-spin",
-          success: "fa-circle-check",
-          error: "fa-circle-exclamation",
+          success: "fa-check",
+          error: "fa-triangle-exclamation",
         };
-        el.innerHTML = `<i class="fa-solid ${icons[type]} mr-1"></i>${msg}`;
+        el.innerHTML = `<i class="fa-solid ${icons[type]} mr-2"></i>${msg}`;
       }
 
       // ============================================================
@@ -774,8 +815,6 @@
       function fetchData(fromSetup = false) {
         if (!connectedUrl) return;
         setSyncStatus("syncing");
-
-        // Tambah cache-buster agar Google selalu serve data terbaru
         const url =
           connectedUrl +
           (connectedUrl.includes("?") ? "&" : "?") +
@@ -791,39 +830,15 @@
             if (!rows || rows.length === 0) {
               setSyncStatus("error");
               if (fromSetup)
-                setSetupStatus(
-                  "error",
-                  "Data kosong atau link tidak mengembalikan CSV yang valid.",
-                );
+                setSetupStatus("error", "Data kosong/tidak valid.");
               return;
             }
-            // Validasi kolom
-            const cols = Object.keys(rows[0]);
-            const needed = [
-              "userId",
-              "regionCode",
-              "totalRegion",
-              "statusBreakdown",
-            ];
-            const miss = needed.filter((c) => !cols.includes(c));
-            if (miss.length) {
-              setSyncStatus("error");
-              if (fromSetup)
-                setSetupStatus(
-                  "error",
-                  `Kolom tidak ditemukan: ${miss.join(", ")}. Pastikan format CSV sesuai.`,
-                );
-              return;
-            }
-
             const newData = rows.map(parseRow).filter(Boolean);
             const newHash = generateDataHash(newData);
 
-            // Hanya update jika ada perubahan data
-            const dataChanged = lastDataHash !== newHash;
-            if (!dataChanged && allData.length > 0) {
+            if (lastDataHash === newHash && allData.length > 0) {
               setSyncStatus("ok");
-              return; // Tidak ada perubahan, skip update
+              return;
             }
 
             allData = newData;
@@ -834,12 +849,12 @@
             if (fromSetup) {
               setSetupStatus(
                 "success",
-                `Berhasil terhubung! ${allData.length.toLocaleString("id-ID")} SLS dari ${new Set(allData.map((r) => r.userId)).size} PPL.`,
+                `Terhubung! ${allData.length} baris data ditemukan.`,
               );
               setTimeout(
                 () =>
                   document.getElementById("setupPanel").classList.add("hidden"),
-                1800,
+                1500,
               );
             }
 
@@ -847,43 +862,30 @@
             buildPPLFilter();
             applyFilters();
             showDashboard();
-
-            // Simpan URL auto-refresh
-            const sec = parseInt(
-              document.getElementById("intervalSelect").value,
+            startAutoRefresh(
+              parseInt(document.getElementById("intervalSelect").value),
             );
-            startAutoRefresh(sec);
           },
           error: (err) => {
             setSyncStatus("error");
             if (fromSetup)
-              setSetupStatus(
-                "error",
-                "Gagal mengambil data: " +
-                  err.message +
-                  ". Pastikan link sudah dipublikasikan.",
-              );
+              setSetupStatus("error", "Gagal mengambil data: " + err.message);
           },
         });
       }
 
       function triggerRefresh() {
         const icon = document.getElementById("refreshIcon");
-        const icon2 = document.getElementById("refreshIcon2");
         if (icon) icon.classList.add("spin");
-        if (icon2) icon2.classList.add("spin");
         fetchData();
         setTimeout(() => {
           if (icon) icon.classList.remove("spin");
-          if (icon2) icon2.classList.remove("spin");
-        }, 1500);
+        }, 1000);
       }
 
       function startAutoRefresh(sec) {
         if (autoTimer) clearInterval(autoTimer);
-        if (sec > 0) {
-          autoTimer = setInterval(() => fetchData(), sec * 1000);
-        }
+        if (sec > 0) autoTimer = setInterval(() => fetchData(), sec * 1000);
       }
 
       function setSyncStatus(state) {
@@ -895,61 +897,44 @@
         bar.classList.add("flex");
         btn.classList.remove("hidden");
         btn.classList.add("flex");
+
         if (state === "ok") {
           dot.className =
             "w-2 h-2 rounded-full bg-green-400 pulse-dot inline-block";
-          text.textContent = lastUpdate
-            ? "Update " + formatTime(lastUpdate)
-            : "Terhubung";
+          text.textContent = lastUpdate ? formatTime(lastUpdate) : "Terhubung";
         } else if (state === "syncing") {
           dot.className =
-            "w-2 h-2 rounded-full bg-yellow-400 pulse-dot inline-block";
-          text.textContent = "Menyinkronkan...";
+            "w-2 h-2 rounded-full bg-brand-400 pulse-dot inline-block";
+          text.textContent = "Sync...";
         } else {
           dot.className = "w-2 h-2 rounded-full bg-red-400 inline-block";
-          text.textContent = "Gagal terhubung";
+          text.textContent = "Gagal";
         }
       }
 
       function formatTime(d) {
-        return d.toLocaleString("id-ID", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
+        return d.toLocaleTimeString("id-ID", {
           hour: "2-digit",
           minute: "2-digit",
         });
       }
 
       function generateDataHash(data) {
-        // Generate simple hash dari data untuk deteksi perubahan
-        const str = JSON.stringify(
-          data.map((r) => ({
-            fullCode: r.fullCode,
-            username: r.username,
-            target: r.target,
-            APPROVED: r.APPROVED,
-            SUBMITTED: r.SUBMITTED,
-            DRAFT: r.DRAFT,
-            OPEN: r.OPEN,
-            REJECTED: r.REJECTED,
-            REVOKED: r.REVOKED,
-          })),
+        return (
+          data.length.toString() +
+          data
+            .reduce((a, b) => a + (b.target || 0) + (b.OPEN || 0), 0)
+            .toString()
         );
-        return str
-          .split("")
-          .reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0)
-          .toString(36);
       }
 
       function showDashboard() {
         document.getElementById("emptyState").classList.add("hidden");
         document.getElementById("dashboard").classList.remove("hidden");
-        const pplCount = new Set(allData.map((r) => r.userId)).size;
         document.getElementById("infoRows").innerHTML =
-          `<i class="fa-solid fa-database text-bps-blue mr-1"></i>${allData.length.toLocaleString("id-ID")} SLS · ${pplCount} PPL`;
+          `<i class="fa-solid fa-database text-brand-500"></i> ${allData.length} SLS &middot; ${new Set(allData.map((r) => r.userId)).size} PPL`;
         document.getElementById("infoLastUpdate").innerHTML =
-          `<i class="fa-solid fa-clock text-gray-400 mr-1"></i>Update: ${lastUpdate ? formatTime(lastUpdate) : "—"}`;
+          `<i class="fa-solid fa-clock-rotate-left text-gray-400"></i> ${lastUpdate ? formatTime(lastUpdate) : "—"}`;
       }
 
       // ============================================================
@@ -982,11 +967,11 @@
             const v = parseInt(p.slice(ci + 1)) || 0;
             if (k === "OPEN") r.OPEN += v;
             else if (k === "DRAFT") r.DRAFT += v;
-            else if (k.startsWith("SUBMITTED BY")) r.SUBMITTED += v;
-            else if (k.startsWith("APPROVED BY")) r.APPROVED += v;
-            else if (k.startsWith("REJECTED BY")) r.REJECTED += v;
-            else if (k.startsWith("REVOKED BY")) r.REVOKED += v;
-            else if (k.startsWith("EDITED BY")) r.EDITED += v;
+            else if (k.startsWith("SUBMITTED")) r.SUBMITTED += v;
+            else if (k.startsWith("APPROVED")) r.APPROVED += v;
+            else if (k.startsWith("REJECTED")) r.REJECTED += v;
+            else if (k.startsWith("REVOKED")) r.REVOKED += v;
+            else if (k.startsWith("EDITED")) r.EDITED += v;
           });
         return r;
       }
@@ -995,13 +980,11 @@
         try {
           const code = cleanCode(row.regionCode);
           if (code.length < 10) return null;
-          const kecCode = code.slice(4, 7);
-          const desaCode = code.slice(7, 10);
-          const slsCode = code.slice(10);
-          const kecDesa = kecCode + desaCode;
+          const kecCode = code.slice(4, 7),
+            desaCode = code.slice(7, 10),
+            slsCode = code.slice(10);
           const username = (row.username || row.email || "").trim();
           const st = parseStatus(row.statusBreakdown);
-          const target = parseInt(row.totalRegion) || 0;
           return {
             userId: row.userId || "",
             username,
@@ -1009,9 +992,9 @@
             kecCode,
             desaCode,
             slsCode,
-            kecDesa,
+            kecDesa: kecCode + desaCode,
             fullCode: code,
-            target,
+            target: parseInt(row.totalRegion) || 0,
             updatedAt: parseUpdateTimestamp(row),
             ...st,
           };
@@ -1021,111 +1004,60 @@
       }
 
       function parseUpdateTimestamp(row) {
-        const keys = [
-          "updatedAt",
-          "updated_at",
-          "lastModified",
-          "last_modified",
-          "lastUpdate",
-          "modifiedAt",
-          "modified_at",
-          "timestamp",
-          "timeStamp",
-          "waktu",
-          "tanggal",
-        ];
+        const keys = ["updatedAt", "updated_at", "timestamp", "waktu"];
         for (const key of keys) {
-          if (Object.prototype.hasOwnProperty.call(row, key)) {
-            const raw = row[key];
-            if (raw === undefined || raw === null) continue;
-            const parsed = parseDateString(String(raw));
-            if (parsed) return parsed;
+          if (row[key]) {
+            const d = new Date(
+              row[key].replace(/\./g, "-").replace(/\//g, "-"),
+            );
+            if (!isNaN(d)) return d;
           }
         }
         return null;
       }
 
-      function parseDateString(value) {
-        const normalized = value
-          .trim()
-          .replace(/^"|"$/g, "")
-          .replace(/\./g, "-")
-          .replace(/\//g, "-")
-          .replace(/\s+/, " ")
-          .replace(
-            /(\d{1,2})[ ]?(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)/i,
-            (m) => m,
-          )
-          .trim();
-        const date = new Date(normalized);
-        if (!isNaN(date)) return date;
-        const timestamp = Date.parse(normalized);
-        return isNaN(timestamp) ? null : new Date(timestamp);
-      }
-
       function getLatestUpdateTime(data) {
-        return data.reduce((latest, row) => {
-          if (row.updatedAt instanceof Date && !isNaN(row.updatedAt)) {
-            return !latest || row.updatedAt > latest ? row.updatedAt : latest;
-          }
-          return latest;
-        }, null);
+        return data.reduce(
+          (latest, row) => (row.updatedAt > latest ? row.updatedAt : latest),
+          null,
+        );
       }
 
       // ============================================================
-      //  KECAMATAN TABS
+      //  KECAMATAN PILLS
       // ============================================================
       function buildKecTabs() {
         const kecList = [...new Set(allData.map((r) => r.kecCode))].sort();
         const container = document.getElementById("kecTabs");
 
-        container.innerHTML =
-          `
-    <button class="kec-btn px-4 py-2.5 text-xs font-semibold text-gray-600 rounded-t-lg hover:bg-gray-50 ${activeKec === "" ? "active" : ""}"
-      onclick="selectKec('')">
-      Semua (${kecList.length} Kec)
-    </button>
-  ` +
-          kecList
-            .map((k) => {
-              const pool = allData.filter((r) => r.kecCode === k);
-              let sub = 0,
-                rej = 0,
-                app = 0,
-                op = 0,
-                dr = 0;
-              pool.forEach((r) => {
-                sub += r.SUBMITTED || 0;
-                rej += r.REJECTED || 0;
-                app += r.APPROVED || 0;
-                op += r.OPEN || 0;
-                dr += r.DRAFT || 0;
-              });
-              const pVal = sub + rej + app;
-              const pDen = op + dr + sub + app + rej;
-              const pPct = pDen > 0 ? ((pVal / pDen) * 100).toFixed(1) : 0;
+        let html = `<button class="whitespace-nowrap px-4 py-2 text-[11px] sm:text-xs font-semibold rounded-full transition-all border ${activeKec === "" ? "bg-brand-500 text-white border-brand-500 shadow-md shadow-brand-500/20" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}" onclick="selectKec('')">Semua Wilayah</button>`;
 
-              return `
-      <button class="kec-btn px-4 py-2.5 text-xs font-semibold text-gray-600 rounded-t-lg hover:bg-gray-50 flex flex-col items-center gap-0.5 ${activeKec === k ? "active" : ""}"
-        onclick="selectKec('${k}')">
-        <span>${getKecamatanLabel(k)}</span>
-        <span class="text-[10px] ${activeKec === k ? "text-bps-blue" : "text-gray-400"}">${pPct}%</span>
-      </button>`;
-            })
-            .join("");
+        html += kecList
+          .map((k) => {
+            const pool = allData.filter((r) => r.kecCode === k);
+            const pVal = pool.reduce(
+              (s, r) => s + r.SUBMITTED + r.REJECTED + r.APPROVED,
+              0,
+            );
+            const pDen = pool.reduce(
+              (s, r) =>
+                s + r.OPEN + r.DRAFT + r.SUBMITTED + r.APPROVED + r.REJECTED,
+              0,
+            );
+            const pct = pDen > 0 ? Math.round((pVal / pDen) * 100) : 0;
+            const isActive = activeKec === k;
+
+            return `<button class="whitespace-nowrap px-4 py-2 text-[11px] sm:text-xs font-semibold rounded-full transition-all border flex items-center gap-2 ${isActive ? "bg-brand-500 text-white border-brand-500 shadow-md shadow-brand-500/20" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}" onclick="selectKec('${k}')">
+            ${getKecamatanLabel(k)} <span class="text-[9px] ${isActive ? "bg-black/20 text-white" : "bg-gray-100 text-gray-400"} px-1.5 py-0.5 rounded-full">${pct}%</span>
+          </button>`;
+          })
+          .join("");
+        container.innerHTML = html;
       }
 
       function selectKec(kec) {
         activeKec = kec;
-        // Update active state pada tombol
-        document.querySelectorAll(".kec-btn").forEach((btn) => {
-          const match = btn.textContent.includes(kec === "" ? "Semua" : kec);
-          btn.classList.toggle(
-            "active",
-            match && (kec === "" ? !btn.textContent.includes("Kec-") : true),
-          );
-        });
-        // Rebuild PPL filter hanya untuk kecamatan ini
+        buildKecTabs();
         buildPPLFilter();
         applyFilters();
       }
@@ -1160,29 +1092,20 @@
         filtered = allData.filter((r) => {
           if (activeKec && r.kecCode !== activeKec) return false;
           if (fPPL && r.username !== fPPL) return false;
-          if (fStatus) {
-            if (fStatus === "OPEN" && r.OPEN === 0) return false;
-            if (fStatus === "DRAFT" && r.DRAFT === 0) return false;
-            if (fStatus === "SUBMITTED" && r.SUBMITTED === 0) return false;
-            if (fStatus === "APPROVED" && r.APPROVED === 0) return false;
-            if (fStatus === "REJECTED" && r.REJECTED === 0) return false;
-            if (fStatus === "REVOKED" && r.REVOKED === 0) return false;
-          }
+          if (fStatus && r[fStatus] === 0) return false;
           if (search) {
-            const hay = [r.username, r.fullCode, r.kecCode, r.kecDesa]
-              .join(" ")
-              .toLowerCase();
+            const hay =
+              `${r.username} ${r.fullCode} ${r.kecCode} ${r.kecDesa}`.toLowerCase();
             if (!hay.includes(search)) return false;
           }
           return true;
         });
 
-        const kecInfo = activeKec
-          ? `Kecamatan ${activeKec} · ${new Set(filtered.map((r) => r.userId)).size} PPL`
-          : `${new Set(allData.map((r) => r.kecCode)).size} Kecamatan · ${new Set(filtered.map((r) => r.userId)).size} PPL`;
-        document.getElementById("kecFilterInfo").textContent = kecInfo;
+        document.getElementById("kecFilterInfo").textContent = activeKec
+          ? `Kec ${activeKec}`
+          : "Semua";
         document.getElementById("filteredInfo").textContent =
-          `${filtered.length.toLocaleString("id-ID")} dari ${allData.length.toLocaleString("id-ID")} SLS`;
+          `${filtered.length} SLS ditampilkan`;
 
         updateKPIs();
         drawChart();
@@ -1193,125 +1116,87 @@
         activeKec = "";
         document.getElementById("fPPL").value = "";
         document.getElementById("fStatus").value = "";
-        if (document.getElementById("searchInput"))
-          document.getElementById("searchInput").value = "";
+        document.getElementById("searchInput").value = "";
         buildKecTabs();
         buildPPLFilter();
         applyFilters();
       }
 
       // ============================================================
-      //  KPI
+      //  KPI & CHARTS
       // ============================================================
-      function s(key) {
-        return filtered.reduce((a, r) => a + (r[key] || 0), 0);
-      }
-      function fmt(n) {
-        return (n || 0).toLocaleString("id-ID");
-      }
-      function pct(a, b) {
-        return b > 0 ? ((a / b) * 100).toFixed(1) + "%" : "0%";
-      }
-      function setText(id, v) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = v;
-      }
-
       function updateKPIs() {
-        const total = s("target"),
-          open = s("OPEN"),
-          app = s("APPROVED"),
-          sub = s("SUBMITTED"),
-          draft = s("DRAFT"),
-          rej = s("REJECTED"),
-          rev = s("REVOKED"),
-          edited = s("EDITED");
-
-        // Progress Lapangan Calculation
+        const sum = (key) => filtered.reduce((a, r) => a + (r[key] || 0), 0);
+        const total = sum("target"),
+          open = sum("OPEN"),
+          app = sum("APPROVED"),
+          sub = sum("SUBMITTED"),
+          draft = sum("DRAFT"),
+          rej = sum("REJECTED");
         const numProg = sub + rej + app;
         const denProg = open + draft + sub + app + rej;
         const pctProg = denProg > 0 ? (numProg / denProg) * 100 : 0;
-        const pctApp = total > 0 ? (app / total) * 100 : 0;
 
-        setText("kTarget", fmt(total));
+        document.getElementById("kTarget").textContent =
+          total.toLocaleString("id-ID");
+        document.getElementById("kProgress").textContent =
+          numProg.toLocaleString("id-ID");
+        document.getElementById("kProgressPct").textContent =
+          pctProg.toFixed(1) + "%";
+        document.getElementById("barProgress").style.width =
+          Math.min(100, pctProg) + "%";
+        document.getElementById("kApproved").textContent =
+          app.toLocaleString("id-ID");
+        document.getElementById("kOpen").textContent =
+          open.toLocaleString("id-ID");
 
-        // Update Progress Lapangan Card
-        const kProg = document.getElementById("kProgress");
-        if (kProg) {
-          kProg.textContent = fmt(numProg);
-          setText("kProgressPct", pctProg.toFixed(1) + "%");
-          const barProg = document.getElementById("barProgress");
-          if (barProg)
-            barProg.style.width = Math.min(100, pctProg).toFixed(1) + "%";
-        }
-
-        setText("kApproved", fmt(app));
-        setText("kOpen", fmt(open));
-
-        const panelData = [
-          { label: "Approved", val: app, color: "green", pct: pctApp },
+        const breakdown = [
+          {
+            label: "Approved",
+            val: app,
+            color: "bg-green-500",
+            text: "text-green-600",
+          },
           {
             label: "Submitted",
             val: sub,
-            color: "amber",
-            pct: total > 0 ? (sub / total) * 100 : 0,
+            color: "bg-brand-500",
+            text: "text-brand-600",
           },
           {
             label: "Draft",
             val: draft,
-            color: "yellow",
-            pct: total > 0 ? (draft / total) * 100 : 0,
+            color: "bg-yellow-400",
+            text: "text-yellow-600",
           },
           {
             label: "Rejected",
             val: rej,
-            color: "red",
-            pct: total > 0 ? (rej / total) * 100 : 0,
+            color: "bg-red-400",
+            text: "text-red-500",
           },
           {
-            label: "OPEN",
+            label: "Open",
             val: open,
-            color: "red2",
-            pct: total > 0 ? (open / total) * 100 : 0,
-            alert: true,
+            color: "bg-gray-200",
+            text: "text-gray-500",
           },
         ];
 
-        const cBar = {
-          green: "bg-green-500",
-          amber: "bg-amber-400",
-          yellow: "bg-yellow-400",
-          red: "bg-red-400",
-          gray: "bg-gray-400",
-          purple: "bg-purple-400",
-          red2: "bg-red-500",
-        };
-        const cText = {
-          green: "text-green-600",
-          amber: "text-amber-500",
-          yellow: "text-yellow-600",
-          red: "text-red-500",
-          gray: "text-gray-500",
-          purple: "text-purple-600",
-          red2: "text-red-600",
-        };
-
-        document.getElementById("statusPanel").innerHTML = panelData
-          .map(
-            (it) => `
-    <div class="${it.alert ? "bg-red-50 rounded-lg p-2 border border-red-100" : ""}">
-      <div class="flex justify-between items-start mb-0.5">
-        <div>
-          <span class="text-xs font-semibold text-gray-700 block">${it.label}</span>
-        </div>
-        <span class="text-xs font-black ${cText[it.color]} ml-2 shrink-0">${fmt(it.val)}</span>
-      </div>
-      <div class="w-full bg-gray-100 rounded-full h-1.5">
-        <div class="${cBar[it.color]} h-1.5 rounded-full progress-bar" style="width:${Math.min(100, it.pct).toFixed(1)}%"></div>
-      </div>
-    </div>
-  `,
-          )
+        document.getElementById("statusPanel").innerHTML = breakdown
+          .map((it) => {
+            const pct = total > 0 ? (it.val / total) * 100 : 0;
+            return `
+            <div class="mb-2">
+              <div class="flex justify-between text-xs mb-1">
+                <span class="font-medium text-gray-600">${it.label}</span>
+                <span class="font-bold ${it.text}">${it.val.toLocaleString("id-ID")}</span>
+              </div>
+              <div class="w-full bg-gray-100 rounded-full h-1.5">
+                <div class="${it.color} h-1.5 rounded-full progress-bar" style="width:${Math.min(100, pct)}%"></div>
+              </div>
+            </div>`;
+          })
           .join("");
 
         drawPieChart(app, sub, draft, rej, open);
@@ -1322,11 +1207,9 @@
         const ctx = document.getElementById("pieChart");
         if (!ctx) return;
         if (pieInst) pieInst.destroy();
+        if (app + sub + draft + rej + open === 0) return;
 
-        if (app === 0 && sub === 0 && draft === 0 && rej === 0 && open === 0)
-          return;
-
-        pieInst = new Chart(ctx.getContext("2d"), {
+        pieInst = new Chart(ctx, {
           type: "doughnut",
           data: {
             labels: ["Approved", "Submitted", "Draft", "Rejected", "OPEN"],
@@ -1335,34 +1218,28 @@
                 data: [app, sub, draft, rej, open],
                 backgroundColor: [
                   "#22c55e",
-                  "#f59e0b",
-                  "#fbbf24",
+                  "#f97316",
+                  "#facc15",
                   "#f87171",
                   "#e2e8f0",
                 ],
                 borderWidth: 0,
+                hoverOffset: 4,
               },
             ],
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: "70%",
+            cutout: "75%",
             plugins: {
               legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (c) => ` ${c.label}: ${c.raw.toLocaleString("id-ID")}`,
-                },
-              },
+              tooltip: { padding: 10, cornerRadius: 8 },
             },
           },
         });
       }
 
-      // ============================================================
-      //  CHART
-      // ============================================================
       function setChartMode(mode) {
         chartMode = mode;
         ["kec", "ppl"].forEach((m) => {
@@ -1370,87 +1247,85 @@
             "cBtn" + m.charAt(0).toUpperCase() + m.slice(1),
           );
           if (btn)
-            btn.className = `px-2.5 py-1 rounded font-semibold ${m === mode ? "bg-bps-blue text-white" : "text-gray-500 hover:bg-gray-100"}`;
+            btn.className = `px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold transition ${m === mode ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-800"}`;
         });
         document.getElementById("chartLabel").textContent =
-          mode === "kec"
-            ? "Progress per Kecamatan"
-            : "Progress per PPL (Top 25)";
+          mode === "kec" ? "Progress per Kecamatan" : "Progress PPL (Top 25)";
         drawChart();
       }
 
       function drawChart() {
         const agg = {};
-        const gKey = chartMode === "kec" ? "kecCode" : "username";
-
         filtered.forEach((r) => {
-          const k = r[gKey] || "?";
+          const k = chartMode === "kec" ? r.kecCode : r.username;
           if (!agg[k])
-            agg[k] = {
-              target: 0,
-              APPROVED: 0,
-              SUBMITTED: 0,
-              DRAFT: 0,
-              OPEN: 0,
-            };
+            agg[k] = { target: 0, APP: 0, SUB: 0, DRF: 0, OPN: 0, REJ: 0 };
           agg[k].target += r.target;
-          agg[k].APPROVED += r.APPROVED;
-          agg[k].SUBMITTED += r.SUBMITTED;
-          agg[k].DRAFT += r.DRAFT;
-          agg[k].OPEN += r.OPEN;
+          agg[k].APP += r.APPROVED;
+          agg[k].SUB += r.SUBMITTED;
+          agg[k].DRF += r.DRAFT;
+          agg[k].OPN += r.OPEN;
+          agg[k].REJ += r.REJECTED;
         });
 
         let entries = Object.entries(agg)
-          .map(([k, v]) => ({
-            label: chartMode === "ppl" ? k.split("@")[0] : getKecamatanLabel(k),
-            ...v,
-          }))
+          .map(([k, v]) => {
+            const tot = v.APP + v.SUB + v.DRF + v.OPN + v.REJ;
+            return {
+              label:
+                chartMode === "ppl" ? k.split("@")[0] : getKecamatanLabel(k),
+              ...v,
+              tot,
+            };
+          })
           .sort((a, b) => b.target - a.target);
 
         if (chartMode === "ppl") entries = entries.slice(0, 25);
 
-        const labels = entries.map((e) => e.label);
         const ctx = document.getElementById("mainChart").getContext("2d");
         if (chartInst) chartInst.destroy();
 
         chartInst = new Chart(ctx, {
           type: "bar",
           data: {
-            labels,
+            labels: entries.map((e) => e.label),
             datasets: [
               {
-                label: "Approved",
-                data: entries.map((e) => e.APPROVED),
+                label: "Apprv",
+                data: entries.map((e) => (e.tot ? (e.APP / e.tot) * 100 : 0)),
                 backgroundColor: "#22c55e",
-                borderRadius: 3,
-                stack: "s",
+                borderRadius: 2,
               },
               {
-                label: "Submitted",
-                data: entries.map((e) => e.SUBMITTED),
-                backgroundColor: "#f59e0b",
-                borderRadius: 3,
-                stack: "s",
+                label: "Submt",
+                data: entries.map((e) => (e.tot ? (e.SUB / e.tot) * 100 : 0)),
+                backgroundColor: "#f97316",
+                borderRadius: 2,
               },
               {
                 label: "Draft",
-                data: entries.map((e) => e.DRAFT),
-                backgroundColor: "#fbbf24",
-                borderRadius: 3,
-                stack: "s",
+                data: entries.map((e) => (e.tot ? (e.DRF / e.tot) * 100 : 0)),
+                backgroundColor: "#facc15",
+                borderRadius: 2,
               },
               {
-                label: "OPEN",
-                data: entries.map((e) => e.OPEN),
+                label: "Rejct",
+                data: entries.map((e) => (e.tot ? (e.REJ / e.tot) * 100 : 0)),
+                backgroundColor: "#f87171",
+                borderRadius: 2,
+              },
+              {
+                label: "Open",
+                data: entries.map((e) => (e.tot ? (e.OPN / e.tot) * 100 : 0)),
                 backgroundColor: "#e2e8f0",
-                borderRadius: 3,
-                stack: "s",
+                borderRadius: 2,
               },
             ],
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
             scales: {
               x: {
                 stacked: true,
@@ -1459,25 +1334,27 @@
               },
               y: {
                 stacked: true,
-                beginAtZero: true,
-                ticks: { font: { size: 10 } },
+                max: 100,
+                ticks: { callback: (v) => v + "%", font: { size: 10 } },
+                border: { dash: [4, 4] },
               },
             },
             plugins: {
               legend: {
                 position: "top",
+                align: "end",
                 labels: {
                   usePointStyle: true,
-                  boxWidth: 8,
-                  font: { size: 11 },
+                  boxWidth: 6,
+                  font: { size: 10 },
                 },
               },
               tooltip: {
-                mode: "index",
                 callbacks: {
-                  label: (c) =>
-                    `${c.dataset.label}: ${c.parsed.y.toLocaleString("id-ID")}`,
+                  label: (c) => ` ${c.dataset.label}: ${c.raw.toFixed(1)}%`,
                 },
+                padding: 10,
+                cornerRadius: 8,
               },
             },
           },
@@ -1485,32 +1362,21 @@
       }
 
       // ============================================================
-      //  TABLE + SORT
+      //  TABLE
       // ============================================================
       function switchTableView(view) {
         tableView = view;
         ["ppl", "sls", "kec"].forEach((v) => {
           const btn = document.getElementById("tBtn" + v.toUpperCase());
           if (btn)
-            btn.className = `px-2.5 py-1.5 rounded font-semibold ${v === view ? "bg-bps-blue text-white" : "text-gray-500 hover:bg-gray-100"}`;
+            btn.className = `px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold transition ${v === view ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-800"}`;
         });
-        document.getElementById("tableTitle").textContent =
-          view === "ppl"
-            ? "Data per PPL"
-            : view === "sls"
-              ? "Data per SLS"
-              : "Data per Kecamatan";
         document.getElementById("thKeyLabel").textContent =
           view === "ppl"
-            ? "PPL (Email)"
+            ? "Nama PPL"
             : view === "sls"
               ? "Kode SLS"
               : "Kecamatan";
-        // Ubah label kolom kedua sesuai mode
-        document.querySelector("th:nth-child(2)").innerHTML =
-          view === "ppl"
-            ? `SLS <i class="fa-solid fa-sort sort-icon" id="siLoc"></i>`
-            : `PPL <i class="fa-solid fa-sort sort-icon" id="siLoc"></i>`;
         renderTable();
       }
 
@@ -1520,42 +1386,14 @@
           sortCol = col;
           sortDir = "desc";
         }
-        // Update icon
-        const cols = [
-          "key",
-          "loc",
-          "target",
-          "progVal",
-          "pct",
-          "APPROVED",
-          "DRAFT",
-          "SUBMITTED",
-          "REJECTED",
-          "OPEN",
-        ];
-        const iconIds = {
-          key: "siKey",
-          loc: "siLoc",
-          target: "siTarget",
-          progVal: "siProgVal",
-          pct: "siPct",
-          APPROVED: "siAPPROVED",
-          DRAFT: "siDRAFT",
-          SUBMITTED: "siSUBMITTED",
-          REJECTED: "siREJECTED",
-          OPEN: "siOPEN",
-        };
-        cols.forEach((c) => {
-          const el = document.getElementById(iconIds[c]);
-          if (!el) return;
-          if (c === col) {
-            el.classList.remove("fa-sort");
-            el.classList.add("active");
-            el.className = `fa-solid ${sortDir === "asc" ? "fa-sort-up" : "fa-sort-down"} sort-icon active`;
-          } else {
-            el.className = "fa-solid fa-sort sort-icon";
-          }
+        document.querySelectorAll(".sort-icon").forEach((el) => {
+          el.className = "fa-solid fa-sort sort-icon";
         });
+        const activeIcon = document.getElementById(
+          "si" + (col.charAt(0).toUpperCase() + col.slice(1)),
+        );
+        if (activeIcon)
+          activeIcon.className = `fa-solid ${sortDir === "asc" ? "fa-sort-up" : "fa-sort-down"} sort-icon active`;
         renderTable();
       }
 
@@ -1563,95 +1401,49 @@
         const agg = {};
         filtered.forEach((r) => {
           let key;
-          if (tableView === "ppl") {
-            key = r.username;
-            // Kumpulkan semua SLS unik milik PPL ini dalam filtered
-            if (!agg[key])
-              agg[key] = {
-                loc: new Set(),
-                target: 0,
-                APPROVED: 0,
-                OPEN: 0,
-                DRAFT: 0,
-                SUBMITTED: 0,
-                REJECTED: 0,
-                REVOKED: 0,
-              };
-            agg[key].loc.add(r.fullCode);
-          } else if (tableView === "sls") {
-            key = r.fullCode;
-            if (!agg[key])
-              agg[key] = {
-                loc: r.namePPL,
-                username: r.username,
-                target: 0,
-                APPROVED: 0,
-                OPEN: 0,
-                DRAFT: 0,
-                SUBMITTED: 0,
-                REJECTED: 0,
-                REVOKED: 0,
-              };
-          } else {
-            key = r.kecCode;
-            if (!agg[key])
-              agg[key] = {
-                loc: new Set(),
-                target: 0,
-                APPROVED: 0,
-                OPEN: 0,
-                DRAFT: 0,
-                SUBMITTED: 0,
-                REJECTED: 0,
-                REVOKED: 0,
-              };
-            agg[key].loc.add(r.username);
-          }
+          if (tableView === "ppl") key = r.username;
+          else if (tableView === "sls") key = r.fullCode;
+          else key = r.kecCode;
+
+          if (!agg[key])
+            agg[key] = {
+              loc: new Set(),
+              target: 0,
+              APP: 0,
+              OPN: 0,
+              DRF: 0,
+              SUB: 0,
+              REJ: 0,
+              name: r.namePPL,
+            };
+          if (tableView === "ppl") agg[key].loc.add(r.fullCode);
+          else if (tableView === "kec") agg[key].loc.add(r.username);
+          else agg[key].loc.add(r.namePPL);
+
           agg[key].target += r.target;
-          agg[key].APPROVED += r.APPROVED;
-          agg[key].OPEN += r.OPEN;
-          agg[key].DRAFT += r.DRAFT;
-          agg[key].SUBMITTED += r.SUBMITTED;
-          agg[key].REJECTED += r.REJECTED;
-          agg[key].REVOKED += r.REVOKED;
+          agg[key].APP += r.APPROVED;
+          agg[key].OPN += r.OPEN;
+          agg[key].DRF += r.DRAFT;
+          agg[key].SUB += r.SUBMITTED;
+          agg[key].REJ += r.REJECTED;
         });
 
         let rows = Object.entries(agg).map(([k, v]) => {
-          const progVal =
-            (v.SUBMITTED || 0) + (v.REJECTED || 0) + (v.APPROVED || 0);
-          const progDen =
-            (v.OPEN || 0) +
-            (v.DRAFT || 0) +
-            (v.SUBMITTED || 0) +
-            (v.APPROVED || 0) +
-            (v.REJECTED || 0);
+          const progVal = v.SUB + v.REJ + v.APP;
+          const progDen = v.OPN + v.DRF + v.SUB + v.APP + v.REJ;
           const pct = progDen > 0 ? (progVal / progDen) * 100 : 0;
-
           return {
             key: k,
             loc:
-              tableView === "ppl"
-                ? [...v.loc].sort().join(", ")
-                : tableView === "kec"
-                  ? `${v.loc.size} PPL`
-                  : v.loc,
-            locTitle:
               tableView === "kec"
-                ? [...v.loc]
-                    .map((u) => u.split("@")[0])
-                    .sort()
-                    .join(", ")
-                : tableView === "ppl"
-                  ? [...v.loc].sort().join(", ")
-                  : v.loc,
-            username: tableView === "ppl" ? k : v.username,
-            ...v,
+                ? `${v.loc.size} PPL`
+                : [...v.loc].sort().join(", "),
             progVal,
             pct,
+            ...v,
           };
         });
 
-        // Search
         const search = (
           document.getElementById("searchInput")?.value || ""
         ).toLowerCase();
@@ -1662,24 +1454,35 @@
               r.loc.toLowerCase().includes(search),
           );
 
-        // Sort
         rows.sort((a, b) => {
           let va =
-            sortCol === "pct"
-              ? a.pct
-              : sortCol === "key"
-                ? a.key
-                : sortCol === "loc"
-                  ? a.loc
-                  : a[sortCol] || 0;
+            a[sortCol] !== undefined
+              ? a[sortCol]
+              : a[
+                  sortCol === "APPROVED"
+                    ? "APP"
+                    : sortCol === "SUBMITTED"
+                      ? "SUB"
+                      : sortCol === "REJECTED"
+                        ? "REJ"
+                        : sortCol === "DRAFT"
+                          ? "DRF"
+                          : sortCol
+                ];
           let vb =
-            sortCol === "pct"
-              ? b.pct
-              : sortCol === "key"
-                ? b.key
-                : sortCol === "loc"
-                  ? b.loc
-                  : b[sortCol] || 0;
+            b[sortCol] !== undefined
+              ? b[sortCol]
+              : b[
+                  sortCol === "APPROVED"
+                    ? "APP"
+                    : sortCol === "SUBMITTED"
+                      ? "SUB"
+                      : sortCol === "REJECTED"
+                        ? "REJ"
+                        : sortCol === "DRAFT"
+                          ? "DRF"
+                          : sortCol
+                ];
           if (typeof va === "string")
             return sortDir === "asc"
               ? va.localeCompare(vb)
@@ -1689,266 +1492,72 @@
 
         const tbody = document.getElementById("tableBody");
         tbody.innerHTML = "";
-        rows.forEach((item, idx) => {
-          const pctVal = item.pct;
+        rows.forEach((item) => {
           const pctColor =
-            pctVal >= 80
+            item.pct >= 90
               ? "text-green-600"
-              : pctVal >= 50
-                ? "text-amber-500"
-                : "text-red-500";
+              : item.pct >= 50
+                ? "text-brand-600"
+                : "text-gray-500";
           const tr = document.createElement("tr");
-          tr.className =
-            idx % 2 === 0
-              ? "hover:bg-blue-50 transition-colors"
-              : "bg-gray-50 hover:bg-blue-50 transition-colors";
+          tr.className = "hover:bg-brand-50/40 transition-colors";
           tr.innerHTML = `
-      <td class="px-4 py-2.5 font-semibold text-gray-800 whitespace-nowrap max-w-[180px]">
-        <div class="truncate" title="${item.key}">${tableView === "ppl" ? item.key.split("@")[0] : tableView === "kec" ? getKecamatanLabel(item.key) : item.key}</div>
-        ${tableView === "ppl" ? `<div class="text-[10px] text-gray-400 truncate" title="${item.key}">${item.key}</div>` : ""}
-      </td>
-      <td class="px-4 py-2.5 text-gray-500 text-[11px] whitespace-nowrap max-w-[200px]">
-        <div class="truncate" title="${tableView === "kec" ? item.locTitle : item.loc}">${tableView === "kec" ? item.loc : item.loc}</div>
-      </td>
-      <td class="px-4 py-2.5 text-right font-bold text-gray-700">${fmt(item.target)}</td>
-      <td class="px-4 py-2.5 text-right font-black text-bps-blue">${fmt(item.progVal)}</td>
-      <td class="px-4 py-2.5 text-right">
-        <div class="flex items-center justify-end gap-1.5">
-          <span class="text-[11px] font-bold ${pctColor} w-10 text-right">${pctVal.toFixed(1)}%</span>
-          <div class="w-16 bg-gray-200 rounded-full h-1.5">
-            <div class="bg-bps-blue h-1.5 rounded-full" style="width:${Math.min(100, pctVal).toFixed(1)}%"></div>
-          </div>
-        </div>
-      </td>
-      <td class="px-4 py-2.5 text-right font-bold text-green-600">${fmt(item.APPROVED)}</td>
-      <td class="px-4 py-2.5 text-right text-yellow-600 font-semibold">${fmt(item.DRAFT)}</td>
-      <td class="px-4 py-2.5 text-right text-amber-500 font-semibold">${fmt(item.SUBMITTED)}</td>
-      <td class="px-4 py-2.5 text-right text-red-400 font-semibold">${fmt(item.REJECTED)}</td>
-      <td class="px-4 py-2.5 text-right text-red-600 font-black">${fmt(item.OPEN)}</td>
-    `;
+            <td class="px-5 py-3 font-semibold text-gray-800 whitespace-nowrap max-w-[160px] sm:max-w-[200px]">
+              <div class="truncate" title="${item.key}">${tableView === "ppl" ? item.name : tableView === "kec" ? getKecamatanLabel(item.key) : item.key}</div>
+              ${tableView === "ppl" ? `<div class="text-[10px] text-gray-400 font-normal truncate">${item.key}</div>` : ""}
+            </td>
+            <td class="px-5 py-3 text-gray-500 text-[11px] whitespace-nowrap max-w-[150px]"><div class="truncate" title="${item.loc}">${item.loc}</div></td>
+            <td class="px-5 py-3 text-right text-gray-600">${item.target.toLocaleString()}</td>
+            <td class="px-5 py-3 text-right font-bold text-brand-600">${item.progVal.toLocaleString()}</td>
+            <td class="px-5 py-3 text-right">
+              <div class="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-1.5">
+                <span class="text-[11px] font-bold ${pctColor}">${item.pct.toFixed(1)}%</span>
+                <div class="w-12 sm:w-16 bg-gray-100 rounded-full h-1.5 hidden sm:block">
+                  <div class="bg-brand-500 h-1.5 rounded-full" style="width:${Math.min(100, item.pct)}%"></div>
+                </div>
+              </div>
+            </td>
+            <td class="px-5 py-3 text-right font-semibold text-green-600">${item.APP.toLocaleString()}</td>
+            <td class="px-5 py-3 text-right font-medium text-brand-500">${item.SUB.toLocaleString()}</td>
+            <td class="px-5 py-3 text-right font-medium text-yellow-500">${item.DRF.toLocaleString()}</td>
+            <td class="px-5 py-3 text-right font-medium text-red-400">${item.REJ.toLocaleString()}</td>
+            <td class="px-5 py-3 text-right font-medium text-gray-400">${item.OPN.toLocaleString()}</td>
+          `;
           tbody.appendChild(tr);
         });
 
-        const footer = document.getElementById("tableFooter");
-        footer.children[0].textContent = `${rows.length} baris ditampilkan`;
-        footer.children[1].textContent = `Sort: ${sortCol} (${sortDir === "asc" ? "↑ naik" : "↓ turun"})`;
+        document.getElementById("tableFooter").children[0].textContent =
+          `${rows.length} baris ditampilkan`;
       }
 
-      // ============================================================
-      //  INISIALISASI
-      // ============================================================
-      //  CHART - PERSENTASE (STACKED)
-      // ============================================================
-      function drawChart() {
-        const agg = {};
-        filtered.forEach((r) => {
-          const k = chartMode === "kec" ? r.kecCode : r.username;
-          if (!agg[k])
-            agg[k] = {
-              target: 0,
-              APPROVED: 0,
-              SUBMITTED: 0,
-              DRAFT: 0,
-              OPEN: 0,
-              REJECTED: 0,
-              REVOKED: 0,
-            };
-          agg[k].target += r.target;
-          agg[k].APPROVED += r.APPROVED;
-          agg[k].SUBMITTED += r.SUBMITTED;
-          agg[k].DRAFT += r.DRAFT;
-          agg[k].OPEN += r.OPEN;
-          agg[k].REJECTED += r.REJECTED;
-          agg[k].REVOKED += r.REVOKED;
-        });
-
-        const entries = Object.entries(agg)
-          .map(([k, v]) => {
-            const total =
-              v.APPROVED +
-              v.SUBMITTED +
-              v.DRAFT +
-              v.OPEN +
-              v.REJECTED +
-              v.REVOKED;
-            return {
-              label:
-                chartMode === "ppl" ? k.split("@")[0] : getKecamatanLabel(k),
-              ...v,
-              total,
-            };
-          })
-          .sort((a, b) => b.target - a.target)
-          .slice(0, 25);
-
-        const ctx = document.getElementById("mainChart").getContext("2d");
-        if (chartInst) chartInst.destroy();
-        chartInst = new Chart(ctx, {
-          type: "bar",
-          data: {
-            labels: entries.map((e) => e.label),
-            datasets: [
-              {
-                label: "Approved",
-                data: entries.map((e) =>
-                  e.total > 0 ? (e.APPROVED / e.total) * 100 : 0,
-                ),
-                backgroundColor: "#22c55e",
-              },
-              {
-                label: "Submitted",
-                data: entries.map((e) =>
-                  e.total > 0 ? (e.SUBMITTED / e.total) * 100 : 0,
-                ),
-                backgroundColor: "#f59e0b",
-              },
-              {
-                label: "Draft",
-                data: entries.map((e) =>
-                  e.total > 0 ? (e.DRAFT / e.total) * 100 : 0,
-                ),
-                backgroundColor: "#fbbf24",
-              },
-              {
-                label: "Rejected",
-                data: entries.map((e) =>
-                  e.total > 0 ? (e.REJECTED / e.total) * 100 : 0,
-                ),
-                backgroundColor: "#ef4444",
-              },
-              {
-                label: "OPEN",
-                data: entries.map((e) =>
-                  e.total > 0 ? (e.OPEN / e.total) * 100 : 0,
-                ),
-                backgroundColor: "#e2e8f0",
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: { stacked: true },
-              y: {
-                stacked: true,
-                max: 100,
-                ticks: { callback: (v) => v + "%" },
-              },
-            },
-            plugins: {
-              tooltip: {
-                callbacks: {
-                  label: (c) => ` ${c.dataset.label}: ${c.raw.toFixed(1)}%`,
-                },
-              },
-            },
-          },
-        });
-      }
-      // ============================================================
-      //  EXPORT EXCEL
-      // ============================================================
       function exportExcel() {
-        if (filtered.length === 0)
-          return alert("Tidak ada data untuk diexport");
-
-        const agg = {};
-        filtered.forEach((r) => {
-          let key, loc;
-          if (tableView === "ppl") {
-            key = r.username;
-            if (!agg[key])
-              agg[key] = {
-                name: r.namePPL,
-                loc: new Set(),
-                target: 0,
-                APPROVED: 0,
-                OPEN: 0,
-                DRAFT: 0,
-                SUBMITTED: 0,
-                REJECTED: 0,
-              };
-            agg[key].loc.add(getKecamatanLabel(r.kecCode));
-          } else {
-            key = r.fullCode;
-            if (!agg[key])
-              agg[key] = {
-                name: r.namePPL,
-                loc: r.namePPL,
-                username: r.username,
-                target: 0,
-                APPROVED: 0,
-                OPEN: 0,
-                DRAFT: 0,
-                SUBMITTED: 0,
-                REJECTED: 0,
-              };
-          }
-          agg[key].target += r.target;
-          agg[key].APPROVED += r.APPROVED;
-          agg[key].OPEN += r.OPEN;
-          agg[key].DRAFT += r.DRAFT;
-          agg[key].SUBMITTED += r.SUBMITTED;
-          agg[key].REJECTED += r.REJECTED;
-        });
-
-        let dataRows = Object.entries(agg).map(([k, v]) => {
-          const num =
-            (v.SUBMITTED || 0) + (v.REJECTED || 0) + (v.APPROVED || 0);
-          const den =
-            (v.OPEN || 0) +
-            (v.DRAFT || 0) +
-            (v.SUBMITTED || 0) +
-            (v.APPROVED || 0) +
-            (v.REJECTED || 0);
-          const pct = den > 0 ? (num / den) * 100 : 0;
-
-          return {
-            [tableView === "ppl" ? "Username PPL" : "Kode SLS"]: k,
-            [tableView === "ppl" ? "Nama PPL" : "PPL Bertugas"]: v.name,
-            Lokasi: tableView === "ppl" ? [...v.loc].sort().join(", ") : v.loc,
-            Target: v.target,
-            "Progress (Selesai)": num,
-            "% Progress": pct.toFixed(2) + "%",
-            Approved: v.APPROVED,
-            Draft: v.DRAFT,
-            Submitted: v.SUBMITTED,
-            Rejected: v.REJECTED,
-            OPEN: v.OPEN,
-          };
-        });
-
-        // Urutkan sesuai persentase tertinggi
-        dataRows.sort(
-          (a, b) => parseFloat(b["% Progress"]) - parseFloat(a["% Progress"]),
+        if (!filtered.length) return alert("Data kosong.");
+        const ws = XLSX.utils.json_to_sheet(
+          filtered.map((r) => ({
+            Kecamatan: getKecamatanLabel(r.kecCode),
+            SLS: r.fullCode,
+            "Email PPL": r.username,
+            Target: r.target,
+            Approved: r.APPROVED,
+            Submitted: r.SUBMITTED,
+            Draft: r.DRAFT,
+            Rejected: r.REJECTED,
+            Open: r.OPEN,
+          })),
         );
-
-        const ws = XLSX.utils.json_to_sheet(dataRows);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Rekap Progress");
-        XLSX.writeFile(
-          wb,
-          `Rekap_FASIH_${tableView.toUpperCase()}_${new Date().toISOString().slice(0, 10)}.xlsx`,
-        );
+        XLSX.utils.book_append_sheet(wb, ws, "Rekap");
+        XLSX.writeFile(wb, `Monitoring_SE2026_${new Date().getTime()}.xlsx`);
       }
 
-      // ============================================================
-      //  INISIALISASI
-      // ============================================================
       document.addEventListener("DOMContentLoaded", () => {
-        // SET HARCODED LINK
         document.getElementById("sheetUrl").value = HARDCODED_URL;
         connectedUrl = HARDCODED_URL;
-
-        // Cek jika user pernah custom interval (refresh time)
         const savedInt = localStorage.getItem("fasih_interval");
         if (savedInt) {
           document.getElementById("intervalSelect").value = savedInt;
           updateInterval();
         }
-
-        // Tarik data langsung
         fetchData(true);
       });
     </script>
