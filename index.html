@@ -843,7 +843,7 @@
 
             allData = newData;
             lastDataHash = newHash;
-            lastUpdate = getLatestUpdateTime(newData) || new Date();
+            lastUpdate = getLatestUpdateTime(newData);
             setSyncStatus("ok");
 
             if (fromSetup) {
@@ -901,7 +901,9 @@
         if (state === "ok") {
           dot.className =
             "w-2 h-2 rounded-full bg-green-400 pulse-dot inline-block";
-          text.textContent = lastUpdate ? formatTime(lastUpdate) : "Terhubung";
+          text.textContent = lastUpdate
+            ? `Terakhir ${formatDateTime(lastUpdate)}`
+            : "Terhubung";
         } else if (state === "syncing") {
           dot.className =
             "w-2 h-2 rounded-full bg-brand-400 pulse-dot inline-block";
@@ -914,6 +916,17 @@
 
       function formatTime(d) {
         return d.toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function formatDateTime(d) {
+        if (!d || Number.isNaN(d.getTime())) return "—";
+        return d.toLocaleString("id-ID", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
           hour: "2-digit",
           minute: "2-digit",
         });
@@ -934,7 +947,7 @@
         document.getElementById("infoRows").innerHTML =
           `<i class="fa-solid fa-database text-brand-500"></i> ${allData.length} SLS &middot; ${new Set(allData.map((r) => r.userId)).size} PPL`;
         document.getElementById("infoLastUpdate").innerHTML =
-          `<i class="fa-solid fa-clock-rotate-left text-gray-400"></i> ${lastUpdate ? formatTime(lastUpdate) : "—"}`;
+          `<i class="fa-solid fa-clock-rotate-left text-gray-400"></i> ${lastUpdate ? formatDateTime(lastUpdate) : "—"}`;
       }
 
       // ============================================================
@@ -1003,26 +1016,100 @@
         }
       }
 
+      function parseDateValue(value) {
+        if (value instanceof Date) {
+          return Number.isNaN(value.getTime()) ? null : value;
+        }
+        if (value === null || value === undefined || value === "") return null;
+
+        const raw = String(value).trim();
+        if (!raw) return null;
+
+        // 1. Cek apakah berupa serial number Excel/Sheets (contoh: 45321.45)
+        const numeric = Number(raw);
+        if (
+          !Number.isNaN(numeric) &&
+          raw.length > 4 &&
+          !raw.includes("-") &&
+          !raw.includes("/")
+        ) {
+          return new Date((numeric - 25569) * 86400000);
+        }
+
+        // 2. Cek format native Date (seperti YYYY-MM-DD)
+        const parsed = new Date(raw);
+        if (
+          !Number.isNaN(parsed.getTime()) &&
+          raw.match(/^\d{4}-\d{2}-\d{2}/)
+        ) {
+          return parsed;
+        }
+
+        // 3. Cek format DD/MM/YYYY HH:MM:SS atau MM/DD/YYYY HH:MM:SS
+        const ddmmyyyy = raw.match(
+          /^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})(?:\s+(\d{1,2})[:.](\d{2})(?:[:.](\d{2}))?)?$/,
+        );
+        if (ddmmyyyy) {
+          let [, p1, p2, y, hh = "00", mm = "00", ss = "00"] = ddmmyyyy;
+          let d = Number(p1);
+          let m = Number(p2);
+
+          // Jika angka bulan > 12, berarti formatnya US (MM/DD/YYYY), maka posisinya ditukar
+          if (m > 12) {
+            d = Number(p2);
+            m = Number(p1);
+          }
+
+          return new Date(
+            Number(y),
+            m - 1,
+            d,
+            Number(hh),
+            Number(mm),
+            Number(ss),
+          );
+        }
+
+        // 4. Fallback terakhir
+        const d = new Date(raw.replace(/\./g, "-").replace(/\//g, "-"));
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
+
       function parseUpdateTimestamp(row) {
-        const keys = ["updatedAt", "updated_at", "timestamp", "waktu"];
-        for (const key of keys) {
-          if (row[key]) {
-            const d = new Date(
-              row[key].replace(/\./g, "-").replace(/\//g, "-"),
-            );
-            if (!isNaN(d)) return d;
+        if (!row || typeof row !== "object") return null;
+
+        // Memastikan kolom "updatedAt" dibaca paling pertama
+        const candidateKeys = [
+          "updatedAt",
+          "updated_at",
+          "updated-at",
+          "updated at",
+          "UpdatedAt",
+          "lastUpdated",
+          "last_update",
+          "lastUpdate",
+          "lastUpdatedAt",
+          "timestamp",
+          "Waktu",
+        ];
+
+        for (const key of candidateKeys) {
+          if (row[key] !== undefined && row[key] !== "") {
+            const parsed = parseDateValue(row[key]);
+            if (parsed) return parsed;
           }
         }
         return null;
       }
 
       function getLatestUpdateTime(data) {
-        return data.reduce(
-          (latest, row) => (row.updatedAt > latest ? row.updatedAt : latest),
-          null,
-        );
+        return data.reduce((latest, row) => {
+          // Cukup memanggil properti updatedAt yang sudah diekstrak di parseRow
+          const rowTime = row.updatedAt;
+          if (!rowTime) return latest;
+          return latest && rowTime < latest ? latest : rowTime;
+        }, null);
       }
-
       // ============================================================
       //  KECAMATAN PILLS
       // ============================================================
