@@ -1355,7 +1355,7 @@
                 s + r.OPEN + r.DRAFT + r.SUBMITTED + r.APPROVED + r.REJECTED,
               0,
             );
-            const pct = pDen > 0 ? ((pVal / pDen) * 100).toFixed(0) : "0";
+            const pct = pDen > 0 ? ((pVal / pDen) * 100).toFixed(2) : "0.00";
             const isActive = progActiveKec === k;
             return `<button class="whitespace-nowrap px-4 py-2 text-[11px] sm:text-xs font-semibold rounded-full transition-all border flex items-center gap-2 ${isActive ? "bg-brand-500 text-white border-brand-500 shadow-md" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}" onclick="selectKecProgress('${k}')">
             ${getKecLabel(k)} <span class="text-[9px] ${isActive ? "bg-black/20 text-white" : "bg-gray-100 text-gray-400"} px-1.5 py-0.5 rounded-full">${pct}%</span>
@@ -1428,7 +1428,7 @@
         document.getElementById("kProgress").textContent =
           numProg.toLocaleString("id-ID");
         document.getElementById("kProgressPct").textContent =
-          pctProg.toFixed(1) + "%";
+          pctProg.toFixed(2) + "%";
         document.getElementById("barProgress").style.width =
           Math.min(100, pctProg) + "%";
         document.getElementById("kApproved").textContent =
@@ -1703,7 +1703,7 @@
             <td class="px-5 py-3 text-gray-500 text-[11px]"><div class="truncate max-w-[150px]" title="${item.loc}">${item.loc}</div></td>
             <td class="px-5 py-3 text-right text-gray-600">${item.target}</td>
             <td class="px-5 py-3 text-right font-bold text-brand-600">${item.progVal}</td>
-            <td class="px-5 py-3 text-right font-bold ${item.pct >= 90 ? "text-green-600" : item.pct >= 50 ? "text-brand-600" : "text-gray-500"}">${item.pct.toFixed(1)}%</td>
+            <td class="px-5 py-3 text-right font-bold ${item.pct >= 90 ? "text-green-600" : item.pct >= 50 ? "text-brand-600" : "text-gray-500"}">${item.pct.toFixed(2)}%</td>
             <td class="px-5 py-3 text-right font-semibold text-green-600">${item.APP}</td>
             <td class="px-5 py-3 text-right font-medium text-brand-500">${item.SUB}</td>
             <td class="px-5 py-3 text-right font-medium text-yellow-500">${item.DRF}</td>
