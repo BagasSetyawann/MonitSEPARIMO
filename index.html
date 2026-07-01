@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Monitoring FASIH SE2026</title>
+    <title>Monitoring Terpadu FASIH & Anomali SE2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -13,10 +13,16 @@
               brand: {
                 50: "#fff7ed",
                 100: "#ffedd5",
+                400: "#fb923c",
                 500: "#f97316",
                 600: "#ea580c",
                 700: "#c2410c",
                 900: "#7c2d12",
+              },
+              danger: {
+                50: "#fef2f2",
+                500: "#ef4444",
+                600: "#dc2626",
               },
             },
             fontFamily: { sans: ["Inter", "sans-serif"] },
@@ -43,19 +49,20 @@
       }
       /* Clean Scrollbar */
       ::-webkit-scrollbar {
-        width: 4px;
-        height: 4px;
+        width: 6px;
+        height: 6px;
       }
       ::-webkit-scrollbar-track {
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
         background: #cbd5e1;
-        border-radius: 4px;
+        border-radius: 10px;
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #94a3b8;
       }
+
       .scrollbar-hide::-webkit-scrollbar {
         display: none;
       }
@@ -82,6 +89,7 @@
           transform: rotate(360deg);
         }
       }
+
       .table-wrap {
         max-height: 500px;
         overflow-y: auto;
@@ -90,7 +98,7 @@
         position: sticky;
         top: 0;
         z-index: 10;
-        background: #ffffff;
+        background: #f8fafc;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
       }
       .sortable {
@@ -113,6 +121,7 @@
         color: #ea580c;
         transform: scale(1.2);
       }
+
       .pulse-dot {
         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
       }
@@ -125,6 +134,7 @@
           opacity: 0.4;
         }
       }
+
       .fade-in {
         animation: fadeIn 0.4s ease-out;
       }
@@ -138,11 +148,26 @@
           transform: translateY(0);
         }
       }
+
       .progress-bar {
         transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      /* Mobile optimizations */
+      .nav-tab-active {
+        color: #ea580c;
+        border-bottom: 3px solid #ea580c;
+        font-weight: 700;
+      }
+      .nav-tab-inactive {
+        color: #64748b;
+        border-bottom: 3px solid transparent;
+        font-weight: 500;
+      }
+      .nav-tab-inactive:hover {
+        color: #334155;
+        border-bottom: 3px solid #cbd5e1;
+      }
+
       @media (max-width: 640px) {
         .table-wrap {
           max-height: 400px;
@@ -172,13 +197,12 @@
               <p
                 class="text-[10px] sm:text-xs text-gray-400 font-medium tracking-wide mt-0.5 hidden sm:block"
               >
-                MONITORING FASIH KAB. PARIGI MOUTONG
+                KABUPATEN PARIGI MOUTONG
               </p>
             </div>
           </div>
 
           <div class="flex items-center gap-2 sm:gap-3">
-            <!-- Status sinkronisasi -->
             <div
               id="syncStatus"
               class="hidden items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-100"
@@ -208,6 +232,28 @@
             </button>
           </div>
         </div>
+
+        <!-- MAIN NAVIGATION TABS -->
+        <div class="flex gap-6 mt-1">
+          <button
+            onclick="switchMainTab('progress')"
+            id="mainTabProgress"
+            class="nav-tab-active pb-3 text-sm transition-colors flex items-center gap-2"
+          >
+            <i class="fa-solid fa-bars-progress"></i> Dashboard Progress
+          </button>
+          <button
+            onclick="switchMainTab('anomali')"
+            id="mainTabAnomali"
+            class="nav-tab-inactive pb-3 text-sm transition-colors flex items-center gap-2 relative"
+          >
+            <i class="fa-solid fa-triangle-exclamation"></i> Monitoring Anomali
+            <span
+              id="badgeAnomali"
+              class="hidden absolute -top-1 -right-4 bg-danger-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+            ></span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -217,48 +263,84 @@
       class="hidden bg-white border-b border-gray-100 shadow-sm relative z-40"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="flex flex-col sm:flex-row gap-4">
-          <div class="flex-1">
-            <h3 class="text-sm font-bold text-gray-800 mb-2">
-              Sumber Data & Auto-Refresh
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Setup Progress -->
+          <div>
+            <h3
+              class="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2"
+            >
+              <i class="fa-solid fa-database text-brand-500"></i> Sumber Data
+              Progress FASIH
             </h3>
-            <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-xl">
-              Data auto-refresh setiap
-              <b id="intervalLabel" class="text-brand-600">5 menit</b>. Pastikan
-              link adalah Google Sheet yang dipublikasikan ke format CSV.
+            <p class="text-xs text-gray-500 mb-3">
+              Tautan ditarik otomatis dari konfigurasi hardcode.
             </p>
-            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <input
+              type="text"
+              id="sheetUrlProgress"
+              class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-50 transition mb-3"
+              readonly
+            />
+
+            <div class="flex gap-2 items-center">
+              <span class="text-xs text-gray-500 font-medium"
+                >Auto-refresh:</span
+              >
+              <select
+                id="intervalSelect"
+                onchange="updateInterval()"
+                class="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none bg-white"
+              >
+                <option value="60">1 menit</option>
+                <option value="300" selected>5 menit</option>
+                <option value="600">10 menit</option>
+                <option value="1800">30 menit</option>
+                <option value="0">Manual</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Setup Anomali -->
+          <div>
+            <h3
+              class="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2"
+            >
+              <i class="fa-solid fa-bug text-danger-500"></i> Sumber Data
+              Anomali
+            </h3>
+            <p class="text-xs text-gray-500 mb-3">
+              Tautan ditarik otomatis dari konfigurasi hardcode.
+            </p>
+            <div class="space-y-2">
               <input
                 type="text"
-                id="sheetUrl"
-                placeholder="https://docs.google.com/spreadsheets/.../pub?output=csv"
-                class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-50 transition"
+                id="sheetUrlAnomaliKeluarga"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-danger-400 focus:ring-2 focus:ring-danger-50 transition bg-gray-50"
+                readonly
               />
-              <div class="flex gap-2">
-                <select
-                  id="intervalSelect"
-                  onchange="updateInterval()"
-                  class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-50 bg-white"
-                >
-                  <option value="60">1 menit</option>
-                  <option value="300" selected>5 menit</option>
-                  <option value="600">10 menit</option>
-                  <option value="1800">30 menit</option>
-                  <option value="0">Manual</option>
-                </select>
-                <button
-                  onclick="connectSheet()"
-                  class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition whitespace-nowrap flex items-center gap-2 justify-center"
-                >
-                  <i class="fa-solid fa-check"></i> Simpan
-                </button>
-              </div>
+              <input
+                type="text"
+                id="sheetUrlAnomaliUsaha"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-danger-400 focus:ring-2 focus:ring-danger-50 transition bg-gray-50"
+                readonly
+              />
             </div>
-            <div
-              id="setupStatus"
-              class="hidden mt-3 text-sm px-4 py-3 rounded-xl border"
-            ></div>
           </div>
+        </div>
+
+        <div
+          class="mt-6 flex flex-col sm:flex-row justify-between items-center border-t border-gray-100 pt-4 gap-4"
+        >
+          <div
+            id="setupStatus"
+            class="hidden text-sm px-4 py-2 rounded-xl border w-full sm:w-auto"
+          ></div>
+          <button
+            onclick="connectAllSheets()"
+            class="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition flex items-center gap-2 justify-center"
+          >
+            <i class="fa-solid fa-rotate"></i> Refresh Manual
+          </button>
         </div>
       </div>
     </div>
@@ -282,16 +364,16 @@
       </div>
       <h2 class="text-lg font-bold text-gray-800 mb-2">Memuat Data...</h2>
       <p class="text-sm text-gray-500 max-w-xs">
-        Menyinkronkan data monitoring FASIH SE2026 terbaru dari spreadsheet.
+        Menyinkronkan data dari Google Spreadsheets.
       </p>
     </div>
 
-    <!-- ========== MAIN DASHBOARD ========== -->
+    <!-- ========== VIEW: DASHBOARD PROGRESS ========== -->
     <main
-      id="dashboard"
+      id="view-progress"
       class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full fade-in"
     >
-      <!-- HEADER INFO & QUICK ACTION -->
+      <!-- Info Row -->
       <div
         class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6"
       >
@@ -307,7 +389,7 @@
         </div>
       </div>
 
-      <!-- FILTER KECAMATAN (PILLS) -->
+      <!-- Filters -->
       <div class="mb-6">
         <div class="flex items-center gap-2 mb-3 px-1">
           <i class="fa-solid fa-filter text-gray-400 text-sm"></i>
@@ -319,20 +401,15 @@
             class="text-[11px] text-brand-500 bg-brand-50 px-2 py-0.5 rounded-full ml-auto font-medium hidden sm:inline-block"
           ></span>
         </div>
-
         <div
           class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 mb-3"
         >
-          <div id="kecTabs" class="flex flex-wrap gap-2 py-1 px-1">
-            <!-- Injected by JS -->
-          </div>
+          <div id="kecTabs" class="flex flex-wrap gap-2 py-1 px-1"></div>
         </div>
-
-        <!-- Additional Filters -->
         <div class="flex flex-col sm:flex-row gap-2 items-center">
           <select
             id="fStatus"
-            onchange="applyFilters()"
+            onchange="applyFiltersProgress()"
             class="w-full sm:w-auto border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-xs text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-50 cursor-pointer"
           >
             <option value="">Semua Status</option>
@@ -343,7 +420,7 @@
             <option value="REJECTED">Ada REJECTED</option>
           </select>
           <button
-            onclick="resetFilters()"
+            onclick="resetFiltersProgress()"
             class="w-full sm:w-auto text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2"
           >
             <i class="fa-solid fa-rotate-left"></i> Reset
@@ -355,9 +432,8 @@
         </div>
       </div>
 
-      <!-- KPI CARDS -->
+      <!-- KPIs Progress -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-        <!-- Target -->
         <div
           class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover"
         >
@@ -380,8 +456,6 @@
             —
           </h3>
         </div>
-
-        <!-- Progress Lapangan -->
         <div
           class="bg-brand-500 rounded-2xl shadow-sm shadow-brand-500/20 p-4 sm:p-5 card-hover relative overflow-hidden text-white"
         >
@@ -421,8 +495,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Approved -->
         <div
           class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover"
         >
@@ -445,8 +517,6 @@
             —
           </h3>
         </div>
-
-        <!-- Open -->
         <div
           class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover"
         >
@@ -471,9 +541,8 @@
         </div>
       </div>
 
-      <!-- CHARTS SECTION -->
+      <!-- Charts Progress -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-        <!-- Main Bar Chart -->
         <div
           class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 lg:col-span-2 flex flex-col"
         >
@@ -481,8 +550,8 @@
             class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4"
           >
             <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2">
-              <span class="w-2 h-6 bg-brand-500 rounded-full"></span>
-              <span id="chartLabel">Progress per Kecamatan</span>
+              <span class="w-2 h-6 bg-brand-500 rounded-full"></span
+              ><span id="chartLabel">Progress per Kecamatan</span>
             </h3>
             <div class="flex bg-gray-50 p-1 rounded-lg">
               <button
@@ -505,8 +574,6 @@
             <canvas id="mainChart"></canvas>
           </div>
         </div>
-
-        <!-- Doughnut Chart & Status Breakdown -->
         <div
           class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 flex flex-col"
         >
@@ -526,25 +593,22 @@
         </div>
       </div>
 
-      <!-- TABLE SECTION -->
+      <!-- Table Progress -->
       <div
         class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 flex flex-col"
       >
-        <!-- Table Header/Controls -->
         <div
           class="p-4 sm:p-5 border-b border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4"
         >
           <h3
             class="font-bold text-gray-700 text-sm flex items-center gap-2 shrink-0"
           >
-            <span class="w-2 h-6 bg-brand-500 rounded-full"></span>
-            <span id="tableTitle">Rincian Data PPL</span>
+            <span class="w-2 h-6 bg-brand-500 rounded-full"></span
+            ><span id="tableTitle">Rincian Data PPL</span>
           </h3>
-
           <div
             class="flex flex-wrap items-center gap-2 w-full lg:w-auto lg:justify-end"
           >
-            <!-- Search -->
             <div class="relative flex-grow sm:flex-grow-0">
               <i
                 class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
@@ -552,13 +616,11 @@
               <input
                 type="text"
                 id="searchInput"
-                oninput="applyFilters()"
+                oninput="applyFiltersProgress()"
                 placeholder="Cari nama, kode..."
                 class="w-full sm:w-48 border border-gray-200 rounded-xl pl-8 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-50 bg-gray-50 focus:bg-white transition"
               />
             </div>
-
-            <!-- View Toggle -->
             <div class="flex bg-gray-50 p-1 rounded-xl">
               <button
                 onclick="switchTableView('ppl')"
@@ -582,19 +644,15 @@
                 Kec
               </button>
             </div>
-
-            <!-- Export -->
             <button
-              onclick="exportExcel()"
+              onclick="exportExcelProgress()"
               class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ml-auto sm:ml-0"
             >
-              <i class="fa-solid fa-download"></i>
-              <span class="hidden sm:inline">Export</span>
+              <i class="fa-solid fa-download"></i
+              ><span class="hidden sm:inline">Export</span>
             </button>
           </div>
         </div>
-
-        <!-- The Table -->
         <div class="table-wrap overflow-x-auto">
           <table class="min-w-full text-xs text-left">
             <thead>
@@ -603,86 +661,242 @@
               >
                 <th
                   class="px-5 py-3 font-bold sortable"
-                  onclick="sortBy('key')"
-                  id="thKey"
+                  onclick="sortByProgress('key')"
                 >
-                  <span id="thKeyLabel">Nama / ID</span>
-                  <i class="fa-solid fa-sort sort-icon" id="siKey"></i>
+                  <span id="thKeyLabel">Nama / ID</span
+                  ><i class="fa-solid fa-sort sort-icon" id="siKey"></i>
                 </th>
                 <th
                   class="px-5 py-3 font-bold sortable"
-                  onclick="sortBy('loc')"
+                  onclick="sortByProgress('loc')"
                 >
-                  Lokasi <i class="fa-solid fa-sort sort-icon" id="siLoc"></i>
+                  Lokasi<i class="fa-solid fa-sort sort-icon" id="siLoc"></i>
                 </th>
                 <th
                   class="px-5 py-3 text-right font-bold sortable"
-                  onclick="sortBy('target')"
+                  onclick="sortByProgress('target')"
                 >
-                  Target
-                  <i class="fa-solid fa-sort sort-icon" id="siTarget"></i>
+                  Target<i class="fa-solid fa-sort sort-icon" id="siTarget"></i>
                 </th>
                 <th
                   class="px-5 py-3 text-right font-bold text-brand-600 sortable"
-                  onclick="sortBy('progVal')"
-                  title="(Sub+Rej+App)"
+                  onclick="sortByProgress('progVal')"
                 >
-                  Progress
-                  <i class="fa-solid fa-sort sort-icon" id="siProgVal"></i>
+                  Progress<i
+                    class="fa-solid fa-sort sort-icon"
+                    id="siProgVal"
+                  ></i>
                 </th>
                 <th
                   class="px-5 py-3 text-right font-bold sortable w-24"
-                  onclick="sortBy('pct')"
+                  onclick="sortByProgress('pct')"
                 >
-                  % Selesai
-                  <i class="fa-solid fa-sort sort-icon" id="siPct"></i>
+                  % Selesai<i class="fa-solid fa-sort sort-icon" id="siPct"></i>
                 </th>
                 <th
                   class="px-5 py-3 text-right font-bold text-green-600 sortable"
-                  onclick="sortBy('APPROVED')"
+                  onclick="sortByProgress('APPROVED')"
                 >
-                  Apprv
-                  <i class="fa-solid fa-sort sort-icon" id="siAPPROVED"></i>
+                  Apprv<i
+                    class="fa-solid fa-sort sort-icon"
+                    id="siAPPROVED"
+                  ></i>
                 </th>
                 <th
                   class="px-5 py-3 text-right font-bold text-brand-500 sortable"
-                  onclick="sortBy('SUBMITTED')"
+                  onclick="sortByProgress('SUBMITTED')"
                 >
-                  Submt
-                  <i class="fa-solid fa-sort sort-icon" id="siSUBMITTED"></i>
+                  Submt<i
+                    class="fa-solid fa-sort sort-icon"
+                    id="siSUBMITTED"
+                  ></i>
                 </th>
                 <th
                   class="px-5 py-3 text-right font-bold text-yellow-500 sortable"
-                  onclick="sortBy('DRAFT')"
+                  onclick="sortByProgress('DRAFT')"
                 >
-                  Draft <i class="fa-solid fa-sort sort-icon" id="siDRAFT"></i>
+                  Draft<i class="fa-solid fa-sort sort-icon" id="siDRAFT"></i>
                 </th>
                 <th
                   class="px-5 py-3 text-right font-bold text-red-400 sortable"
-                  onclick="sortBy('REJECTED')"
+                  onclick="sortByProgress('REJECTED')"
                 >
-                  Rjct
-                  <i class="fa-solid fa-sort sort-icon" id="siREJECTED"></i>
+                  Rjct<i class="fa-solid fa-sort sort-icon" id="siREJECTED"></i>
                 </th>
                 <th
                   class="px-5 py-3 text-right font-bold text-gray-400 sortable"
-                  onclick="sortBy('OPEN')"
+                  onclick="sortByProgress('OPEN')"
                 >
-                  Open <i class="fa-solid fa-sort sort-icon" id="siOPEN"></i>
+                  Open<i class="fa-solid fa-sort sort-icon" id="siOPEN"></i>
                 </th>
               </tr>
             </thead>
             <tbody
-              id="tableBody"
+              id="tableBodyProgress"
               class="divide-y divide-gray-50 bg-white"
             ></tbody>
           </table>
         </div>
         <div
           class="px-5 py-3 text-[10px] text-gray-400 border-t border-gray-100 flex justify-between bg-gray-50/50"
-          id="tableFooter"
+          id="tableFooterProgress"
         >
           <span></span><span></span>
+        </div>
+      </div>
+    </main>
+
+    <!-- ========== VIEW: MONITORING ANOMALI ========== -->
+    <main
+      id="view-anomali"
+      class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full fade-in"
+    >
+      <!-- Sub-Tabs Anomali -->
+      <div class="flex justify-center mb-6">
+        <div class="bg-gray-100 p-1 rounded-full inline-flex">
+          <button
+            onclick="switchSubTabAnomali('keluarga')"
+            id="subTabKeluarga"
+            class="px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition"
+          >
+            <i class="fa-solid fa-users mr-2 text-brand-500"></i> Anomali
+            Keluarga
+          </button>
+          <button
+            onclick="switchSubTabAnomali('usaha')"
+            id="subTabUsaha"
+            class="px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition"
+          >
+            <i class="fa-solid fa-store mr-2 text-brand-500"></i> Anomali Usaha
+          </button>
+        </div>
+      </div>
+
+      <!-- KPIs Anomali -->
+      <div class="grid grid-cols-1 gap-4 mb-6">
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4"
+        >
+          <div
+            class="bg-danger-50 w-12 h-12 rounded-full flex items-center justify-center text-danger-500 text-xl"
+          >
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-gray-400 uppercase">
+              Total Anomali
+            </p>
+            <h3
+              class="text-2xl font-black text-gray-800 leading-none mt-1"
+              id="kAnomaliTotal"
+            >
+              0
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Anomali -->
+      <div
+        class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6"
+      >
+        <h3
+          class="font-bold text-gray-700 text-sm mb-3 flex items-center gap-2"
+        >
+          <i class="fa-solid fa-filter text-gray-400"></i> Filter Anomali
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <select
+            id="filterAKec"
+            onchange="applyFiltersAnomali('kec')"
+            class="border border-gray-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-50 bg-white"
+          >
+            <option value="">Semua Kecamatan</option>
+          </select>
+          <select
+            id="filterADesa"
+            onchange="applyFiltersAnomali('desa')"
+            class="border border-gray-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-50 bg-white"
+          >
+            <option value="">Semua Desa</option>
+          </select>
+          <select
+            id="filterASls"
+            onchange="applyFiltersAnomali('sls')"
+            class="border border-gray-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-50 bg-white"
+          >
+            <option value="">Semua SLS</option>
+          </select>
+          <select
+            id="filterAPetugas"
+            onchange="applyFiltersAnomali('petugas')"
+            class="border border-gray-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-50 bg-white"
+          >
+            <option value="">Semua Petugas</option>
+          </select>
+          <select
+            id="filterAJenis"
+            onchange="applyFiltersAnomali('jenis')"
+            class="border border-gray-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-50 bg-white"
+          >
+            <option value="">Semua Jenis Anomali</option>
+          </select>
+        </div>
+        <div class="mt-3 flex justify-between items-center">
+          <button
+            onclick="resetFiltersAnomali()"
+            class="text-gray-500 hover:text-brand-600 text-xs font-semibold flex items-center gap-1 transition"
+          >
+            <i class="fa-solid fa-rotate-left"></i> Reset Filter
+          </button>
+          <span id="infoAnomaliFiltered" class="text-xs text-gray-400"
+            >Menampilkan 0 baris</span
+          >
+        </div>
+      </div>
+
+      <!-- Table Anomali -->
+      <div
+        class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8"
+      >
+        <div
+          class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50"
+        >
+          <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2">
+            <span class="w-2 h-6 bg-danger-500 rounded-full"></span> Detail
+            Tabel Anomali
+          </h3>
+          <button
+            onclick="exportExcelAnomali()"
+            class="bg-gray-800 hover:bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2"
+          >
+            <i class="fa-solid fa-download"></i> Export
+          </button>
+        </div>
+        <div class="table-wrap overflow-x-auto">
+          <table class="min-w-full text-xs text-left">
+            <thead>
+              <tr
+                class="text-gray-500 border-b border-gray-200 bg-gray-50 uppercase tracking-wider text-[10px]"
+              >
+                <th class="px-4 py-3 font-bold">Wilayah (Kec/Desa/SLS)</th>
+                <th class="px-4 py-3 font-bold">Petugas</th>
+                <th class="px-4 py-3 font-bold" id="thSubjekAnomali">
+                  Nama KRT
+                </th>
+                <th class="px-4 py-3 font-bold max-w-[200px]">
+                  Jenis Anomali / Keterangan
+                </th>
+                <th class="px-4 py-3 font-bold text-center w-28">Aksi</th>
+              </tr>
+            </thead>
+            <tbody
+              id="tableBodyAnomali"
+              class="divide-y divide-gray-100 bg-white"
+            >
+              <!-- Content Injected via JS -->
+            </tbody>
+          </table>
         </div>
       </div>
     </main>
@@ -693,22 +907,49 @@
 
     <script>
       // ============================================================
-      //  STATE
+      //  HARDCODE URL SPREADSHEET (GANTI URL CSV DI SINI)
       // ============================================================
-      let allData = [];
-      let filtered = [];
-      let activeKec = "";
-      let chartMode = "kec";
-      let tableView = "ppl";
-      let sortCol = "OPEN";
-      let sortDir = "desc";
+      const HARDCODED_URL_PROGRESS =
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vSk5tIl0qRgX_m7FuPrg3S0I2piafa2xQKueukDLd2eizjrC4Eq6voDWJqHqcPr1P6D9Je_0LiPFshh/pub?output=csv";
+
+      // Kosongkan atau ganti dengan Link Google Sheets CSV milik Anda
+      const HARDCODED_URL_ANO_KEL =
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGR4pOZWbVhGfRBiLV-6DlaDayIlCGWgdOZyQ67JyrhjKPtONLhuTgCx8XrE91DZlAS0xKs5Qfh20B/pub?output=csv";
+      const HARDCODED_URL_ANO_USA =
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vT14YnYV6GJ0AC7yKmdb7yRDcwAY2f01CSbUzH7ptdgFpqbURsTbVYTLC58a-fLHEeVB57tQAIpPjQ8/pub?output=csv";
+
+      // ============================================================
+      //  STATE VARIABLES
+      // ============================================================
+      // State Progress
+      let progDataAll = [];
+      let progDataFiltered = [];
+      let progActiveKec = "";
+      let progChartMode = "kec";
+      let progTableView = "ppl";
+      let progSortCol = "OPEN";
+      let progSortDir = "desc";
+      let chartInst = null;
+      let pieInst = null;
+
+      // State Anomali
+      let anoDataKeluarga = [];
+      let anoDataUsaha = [];
+      let anoActiveTab = "keluarga"; // 'keluarga' or 'usaha'
+      let anoCurrentData = [];
+      let anoFiltered = [];
+
+      // Global State
       let autoTimer = null;
       let lastUpdate = null;
-      let connectedUrl = "";
-      let chartInst = null;
-      let lastDataHash = null;
+      let urls = {
+        progress: HARDCODED_URL_PROGRESS,
+        anoKel: HARDCODED_URL_ANO_KEL,
+        anoUsaha: HARDCODED_URL_ANO_USA,
+      };
 
-      const KECAMATAN_CODES = {
+      // Referensi Kecamatan BPS (Parigi Moutong)
+      const KEC_CODES = {
         "010": "SAUSU",
         "011": "TORUE",
         "012": "BALINGGI",
@@ -734,138 +975,276 @@
         "064": "ONGKA MALINO",
       };
 
-      function getKecamatanLabel(code) {
-        return KECAMATAN_CODES[code]
-          ? `${code} ${KECAMATAN_CODES[code]}`
-          : `Kec-${code}`;
+      function getKecLabel(code) {
+        return KEC_CODES[code] ? `${code} ${KEC_CODES[code]}` : `Kec-${code}`;
       }
 
-      const HARDCODED_URL =
-        "https://docs.google.com/spreadsheets/d/e/2PACX-1vSk5tIl0qRgX_m7FuPrg3S0I2piafa2xQKueukDLd2eizjrC4Eq6voDWJqHqcPr1P6D9Je_0LiPFshh/pub?output=csv";
+      // ============================================================
+      //  UI NAVIGATION & SETUP
+      // ============================================================
+      function switchMainTab(tabId) {
+        const btnProg = document.getElementById("mainTabProgress");
+        const btnAno = document.getElementById("mainTabAnomali");
 
-      // ============================================================
-      //  SETUP & KONEKSI
-      // ============================================================
+        if (tabId === "progress") {
+          btnProg.className =
+            "nav-tab-active pb-3 text-sm transition-colors flex items-center gap-2";
+          btnAno.className =
+            "nav-tab-inactive pb-3 text-sm transition-colors flex items-center gap-2 relative";
+          document.getElementById("view-progress").classList.remove("hidden");
+          document.getElementById("view-anomali").classList.add("hidden");
+          if (progDataAll.length > 0) drawChartProgress();
+        } else {
+          btnProg.className =
+            "nav-tab-inactive pb-3 text-sm transition-colors flex items-center gap-2";
+          btnAno.className =
+            "nav-tab-active pb-3 text-sm transition-colors flex items-center gap-2 relative";
+          document.getElementById("view-progress").classList.add("hidden");
+          document.getElementById("view-anomali").classList.remove("hidden");
+          renderTableAnomali();
+        }
+      }
+
       function toggleSetup() {
-        const panel = document.getElementById("setupPanel");
-        panel.classList.toggle("hidden");
+        document.getElementById("setupPanel").classList.toggle("hidden");
+      }
+
+      function parseUpdatedAtValue(value) {
+        if (value === null || value === undefined) return null;
+        if (value instanceof Date) {
+          return Number.isNaN(value.getTime()) ? null : value;
+        }
+
+        const str = String(value).trim();
+        if (!str || str === "-" || str.toLowerCase() === "nan") return null;
+
+        const parsed = Date.parse(str.replace(/\s+/, " "));
+        if (!Number.isNaN(parsed)) return new Date(parsed);
+        return null;
+      }
+
+      function getLatestUpdatedAt(rows) {
+        const keys = [
+          "updatedAt",
+          "UpdatedAt",
+          "updated_at",
+          "Updated_At",
+          "lastUpdated",
+          "LastUpdated",
+          "last_updated",
+          "Last Updated",
+          "Update Time",
+          "updated time",
+          "timestamp",
+          "Timestamp",
+          "createdAt",
+          "CreatedAt",
+        ];
+
+        let latest = null;
+        rows.forEach((row) => {
+          keys.forEach((key) => {
+            const parsed = parseUpdatedAtValue(row[key]);
+            if (parsed && (!latest || parsed > latest)) {
+              latest = parsed;
+            }
+          });
+        });
+
+        return latest;
+      }
+
+      function updateLastUpdateDisplay() {
+        const infoEl = document.getElementById("infoLastUpdate");
+        if (infoEl && lastUpdate) {
+          infoEl.innerHTML = `<i class="fa-solid fa-clock text-gray-400"></i> Terakhir diperbarui ${lastUpdate.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}`;
+        }
       }
 
       function updateInterval() {
         const sec = parseInt(document.getElementById("intervalSelect").value);
-        document.getElementById("intervalLabel").textContent =
-          sec === 0
-            ? "manual"
-            : sec < 60
-              ? `${sec} detik`
-              : `${sec / 60} menit`;
-        if (connectedUrl) startAutoRefresh(sec);
+        if (urls.progress) startAutoRefresh(sec);
       }
 
-      function connectSheet() {
-        const url = document.getElementById("sheetUrl").value.trim();
-        if (!url || !url.includes("docs.google.com")) {
-          setSetupStatus(
-            "error",
-            "URL tidak valid. Pastikan link Google Sheet CSV valid.",
+      function connectAllSheets() {
+        const statusEl = document.getElementById("setupStatus");
+        statusEl.classList.remove("hidden");
+        statusEl.className =
+          "text-sm px-4 py-2 rounded-xl border bg-blue-50 border-blue-100 text-blue-600 w-full sm:w-auto";
+        statusEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Menyinkronkan data...`;
+
+        fetchDataAll(true);
+      }
+
+      // Fetch Khusus Data CSV Raw dari Export Sistem BPS (Membersihkan Metadata BPS)
+      function fetchBPSCSV(url) {
+        return fetch(url + (url.includes("?") ? "&" : "?") + "_t=" + Date.now())
+          .then((res) => res.text())
+          .then((text) => {
+            const lines = text.split("\n");
+            let startIdx = 0;
+
+            // Cari baris yang mengandung header asli BPS
+            for (let i = 0; i < lines.length; i++) {
+              if (
+                lines[i].includes("Kode Kec") ||
+                lines[i].includes("kode_kec") ||
+                lines[i].includes("Nama KRT") ||
+                lines[i].includes("Nama Usaha")
+              ) {
+                startIdx = i;
+                break;
+              }
+            }
+
+            // Buang metadata di atas header, dan baris format (1),(2)... jika ada
+            const validCsv = lines
+              .slice(startIdx)
+              .filter((l) => !l.startsWith("(1),(2)"))
+              .join("\n");
+
+            return new Promise((resolve) => {
+              Papa.parse(validCsv, {
+                header: true,
+                skipEmptyLines: true,
+                complete: resolve,
+                error: () => resolve({ data: null }),
+              });
+            });
+          })
+          .catch(() => ({ data: null }));
+      }
+
+      function fetchStandardCSV(url) {
+        return new Promise((resolve) => {
+          Papa.parse(
+            url + (url.includes("?") ? "&" : "?") + "_t=" + Date.now(),
+            {
+              download: true,
+              header: true,
+              skipEmptyLines: true,
+              complete: resolve,
+              error: () => resolve({ data: null }),
+            },
           );
-          return;
-        }
-        connectedUrl = url;
-        localStorage.setItem("fasih_sheet_url", url);
-        localStorage.setItem(
-          "fasih_interval",
-          document.getElementById("intervalSelect").value,
-        );
-        setSetupStatus("loading", "Menghubungkan...");
-        fetchData(true);
-      }
-
-      function setSetupStatus(type, msg) {
-        const el = document.getElementById("setupStatus");
-        el.classList.remove("hidden");
-        const styles = {
-          loading: "bg-blue-50 border-blue-100 text-blue-600",
-          success: "bg-green-50 border-green-100 text-green-600",
-          error: "bg-red-50 border-red-100 text-red-600",
-        };
-        el.className = `mt-3 text-xs px-4 py-3 rounded-xl border ${styles[type]}`;
-        const icons = {
-          loading: "fa-circle-notch fa-spin",
-          success: "fa-check",
-          error: "fa-triangle-exclamation",
-        };
-        el.innerHTML = `<i class="fa-solid ${icons[type]} mr-2"></i>${msg}`;
-      }
-
-      // ============================================================
-      //  FETCH & PARSE DATA
-      // ============================================================
-      function fetchData(fromSetup = false) {
-        if (!connectedUrl) return;
-        setSyncStatus("syncing");
-        const url =
-          connectedUrl +
-          (connectedUrl.includes("?") ? "&" : "?") +
-          "_t=" +
-          Date.now();
-
-        Papa.parse(url, {
-          download: true,
-          header: true,
-          skipEmptyLines: true,
-          complete: (result) => {
-            const rows = result.data;
-            if (!rows || rows.length === 0) {
-              setSyncStatus("error");
-              if (fromSetup)
-                setSetupStatus("error", "Data kosong/tidak valid.");
-              return;
-            }
-            const newData = rows.map(parseRow).filter(Boolean);
-            const newHash = generateDataHash(newData);
-
-            if (lastDataHash === newHash && allData.length > 0) {
-              setSyncStatus("ok");
-              return;
-            }
-
-            allData = newData;
-            lastDataHash = newHash;
-            lastUpdate = getLatestUpdateTime(newData);
-            setSyncStatus("ok");
-
-            if (fromSetup) {
-              setSetupStatus(
-                "success",
-                `Terhubung! ${allData.length} baris data ditemukan.`,
-              );
-              setTimeout(
-                () =>
-                  document.getElementById("setupPanel").classList.add("hidden"),
-                1500,
-              );
-            }
-
-            buildKecTabs();
-            applyFilters();
-            showDashboard();
-            startAutoRefresh(
-              parseInt(document.getElementById("intervalSelect").value),
-            );
-          },
-          error: (err) => {
-            setSyncStatus("error");
-            if (fromSetup)
-              setSetupStatus("error", "Gagal mengambil data: " + err.message);
-          },
         });
+      }
+
+      async function fetchDataAll(fromSetup = false) {
+        setSyncUI("syncing");
+        const promises = [];
+        let latestDataTimestamp = null;
+
+        // 1. Fetch Progress (Standard)
+        if (urls.progress) {
+          promises.push(
+            fetchStandardCSV(urls.progress).then((res) => {
+              if (res.data) {
+                progDataAll = res.data.map(parseRowProgress).filter(Boolean);
+                const ts = getLatestUpdatedAt(res.data);
+                if (ts && (!latestDataTimestamp || ts > latestDataTimestamp)) {
+                  latestDataTimestamp = ts;
+                }
+              }
+            }),
+          );
+        }
+
+        // 2. Fetch Anomali Keluarga (Smart Cleanup BPS)
+        if (urls.anoKel && urls.anoKel.includes("docs.google")) {
+          promises.push(
+            fetchBPSCSV(urls.anoKel).then((res) => {
+              if (res.data) {
+                anoDataKeluarga = res.data
+                  .map((r) => parseRowAnomali(r, "keluarga"))
+                  .filter(Boolean);
+                const ts = getLatestUpdatedAt(res.data);
+                if (ts && (!latestDataTimestamp || ts > latestDataTimestamp)) {
+                  latestDataTimestamp = ts;
+                }
+              }
+            }),
+          );
+        } else {
+          Papa.parse(DUMMY_ANO_KEL, {
+            header: true,
+            complete: (res) => {
+              anoDataKeluarga = res.data
+                .map((r) => parseRowAnomali(r, "keluarga"))
+                .filter(Boolean);
+              const ts = getLatestUpdatedAt(res.data);
+              if (ts && (!latestDataTimestamp || ts > latestDataTimestamp)) {
+                latestDataTimestamp = ts;
+              }
+            },
+          });
+        }
+
+        // 3. Fetch Anomali Usaha (Smart Cleanup BPS)
+        if (urls.anoUsaha && urls.anoUsaha.includes("docs.google")) {
+          promises.push(
+            fetchBPSCSV(urls.anoUsaha).then((res) => {
+              if (res.data) {
+                anoDataUsaha = res.data
+                  .map((r) => parseRowAnomali(r, "usaha"))
+                  .filter(Boolean);
+                const ts = getLatestUpdatedAt(res.data);
+                if (ts && (!latestDataTimestamp || ts > latestDataTimestamp)) {
+                  latestDataTimestamp = ts;
+                }
+              }
+            }),
+          );
+        } else {
+          Papa.parse(DUMMY_ANO_USA, {
+            header: true,
+            complete: (res) => {
+              anoDataUsaha = res.data
+                .map((r) => parseRowAnomali(r, "usaha"))
+                .filter(Boolean);
+              const ts = getLatestUpdatedAt(res.data);
+              if (ts && (!latestDataTimestamp || ts > latestDataTimestamp)) {
+                latestDataTimestamp = ts;
+              }
+            },
+          });
+        }
+
+        await Promise.allSettled(promises);
+
+        lastUpdate = latestDataTimestamp || new Date();
+        updateLastUpdateDisplay();
+        setSyncUI("ok");
+
+        if (fromSetup) {
+          const statusEl = document.getElementById("setupStatus");
+          statusEl.className =
+            "text-sm px-4 py-2 rounded-xl border bg-green-50 border-green-100 text-green-600 w-full sm:w-auto";
+          statusEl.innerHTML = `<i class="fa-solid fa-check mr-2"></i>Berhasil ditarik!`;
+          setTimeout(
+            () => document.getElementById("setupPanel").classList.add("hidden"),
+            1500,
+          );
+        }
+
+        // Init UI
+        document.getElementById("emptyState").classList.add("hidden");
+        document.getElementById("view-progress").classList.remove("hidden"); // Default Tab
+
+        buildKecTabsProgress();
+        applyFiltersProgress();
+        updateBadgeAnomali();
+        switchSubTabAnomali(anoActiveTab);
+
+        // Auto refresh
+        const sec = parseInt(document.getElementById("intervalSelect").value);
+        startAutoRefresh(sec);
       }
 
       function triggerRefresh() {
         const icon = document.getElementById("refreshIcon");
         if (icon) icon.classList.add("spin");
-        fetchData();
+        fetchDataAll();
         setTimeout(() => {
           if (icon) icon.classList.remove("spin");
         }, 1000);
@@ -873,10 +1252,10 @@
 
       function startAutoRefresh(sec) {
         if (autoTimer) clearInterval(autoTimer);
-        if (sec > 0) autoTimer = setInterval(() => fetchData(), sec * 1000);
+        if (sec > 0) autoTimer = setInterval(() => fetchDataAll(), sec * 1000);
       }
 
-      function setSyncStatus(state) {
+      function setSyncUI(state) {
         const dot = document.getElementById("syncDot");
         const text = document.getElementById("syncText");
         const bar = document.getElementById("syncStatus");
@@ -889,9 +1268,7 @@
         if (state === "ok") {
           dot.className =
             "w-2 h-2 rounded-full bg-green-400 pulse-dot inline-block";
-          text.textContent = lastUpdate
-            ? `Terakhir ${formatDateTime(lastUpdate)}`
-            : "Terhubung";
+          text.textContent = `Terakhir ${lastUpdate.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`;
         } else if (state === "syncing") {
           dot.className =
             "w-2 h-2 rounded-full bg-brand-400 pulse-dot inline-block";
@@ -902,61 +1279,11 @@
         }
       }
 
-      function formatTime(d) {
-        return d.toLocaleTimeString("id-ID", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      }
-
-      function formatDateTime(d) {
-        if (!d || Number.isNaN(d.getTime())) return "—";
-        return d.toLocaleString("id-ID", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      }
-
-      function generateDataHash(data) {
-        return (
-          data.length.toString() +
-          data
-            .reduce((a, b) => a + (b.target || 0) + (b.OPEN || 0), 0)
-            .toString()
-        );
-      }
-
-      function showDashboard() {
-        document.getElementById("emptyState").classList.add("hidden");
-        document.getElementById("dashboard").classList.remove("hidden");
-        document.getElementById("infoRows").innerHTML =
-          `<i class="fa-solid fa-database text-brand-500"></i> ${allData.length} SLS &middot; ${new Set(allData.map((r) => r.userId)).size} PPL`;
-        document.getElementById("infoLastUpdate").innerHTML =
-          `<i class="fa-solid fa-clock-rotate-left text-gray-400"></i> ${lastUpdate ? formatDateTime(lastUpdate) : "—"}`;
-      }
-
       // ============================================================
-      //  PARSE ROW
+      //  PROGRESS LOGIC (Tab 1)
       // ============================================================
-      function cleanCode(raw) {
-        return String(raw || "")
-          .replace(/[="]/g, "")
-          .trim();
-      }
-
-      function parseStatus(str) {
-        const r = {
-          OPEN: 0,
-          DRAFT: 0,
-          SUBMITTED: 0,
-          APPROVED: 0,
-          REJECTED: 0,
-          REVOKED: 0,
-          EDITED: 0,
-        };
+      function parseStatusProgress(str) {
+        const r = { OPEN: 0, DRAFT: 0, SUBMITTED: 0, APPROVED: 0, REJECTED: 0 };
         if (!str) return r;
         str
           .split("|")
@@ -966,26 +1293,36 @@
             if (ci === -1) return;
             const k = p.slice(0, ci).trim().toUpperCase();
             const v = parseInt(p.slice(ci + 1)) || 0;
-            if (k === "OPEN") r.OPEN += v;
-            else if (k === "DRAFT") r.DRAFT += v;
-            else if (k.startsWith("SUBMITTED")) r.SUBMITTED += v;
-            else if (k.startsWith("APPROVED")) r.APPROVED += v;
-            else if (k.startsWith("REJECTED")) r.REJECTED += v;
-            else if (k.startsWith("REVOKED")) r.REVOKED += v;
-            else if (k.startsWith("EDITED")) r.EDITED += v;
+            if (
+              r[k] !== undefined ||
+              k.startsWith("SUB") ||
+              k.startsWith("APP") ||
+              k.startsWith("REJ")
+            ) {
+              let baseK = k.startsWith("SUB")
+                ? "SUBMITTED"
+                : k.startsWith("APP")
+                  ? "APPROVED"
+                  : k.startsWith("REJ")
+                    ? "REJECTED"
+                    : k;
+              if (r[baseK] !== undefined) r[baseK] += v;
+            }
           });
         return r;
       }
 
-      function parseRow(row) {
+      function parseRowProgress(row) {
         try {
-          const code = cleanCode(row.regionCode);
+          const code = String(row.regionCode || "")
+            .replace(/[="]/g, "")
+            .trim();
           if (code.length < 10) return null;
           const kecCode = code.slice(4, 7),
             desaCode = code.slice(7, 10),
             slsCode = code.slice(10);
           const username = (row.username || row.email || "").trim();
-          const st = parseStatus(row.statusBreakdown);
+          const st = parseStatusProgress(row.statusBreakdown);
           return {
             userId: row.userId || "",
             username,
@@ -993,10 +1330,8 @@
             kecCode,
             desaCode,
             slsCode,
-            kecDesa: kecCode + desaCode,
             fullCode: code,
             target: parseInt(row.totalRegion) || 0,
-            updatedAt: parseUpdateTimestamp(row),
             ...st,
           };
         } catch (e) {
@@ -1004,112 +1339,13 @@
         }
       }
 
-      function parseDateValue(value) {
-        if (value instanceof Date) {
-          return Number.isNaN(value.getTime()) ? null : value;
-        }
-        if (value === null || value === undefined || value === "") return null;
-
-        const raw = String(value).trim();
-        if (!raw) return null;
-
-        // 1. Cek apakah berupa serial number Excel/Sheets (contoh: 45321.45)
-        const numeric = Number(raw);
-        if (
-          !Number.isNaN(numeric) &&
-          raw.length > 4 &&
-          !raw.includes("-") &&
-          !raw.includes("/")
-        ) {
-          return new Date((numeric - 25569) * 86400000);
-        }
-
-        // 2. Cek format native Date (seperti YYYY-MM-DD)
-        const parsed = new Date(raw);
-        if (
-          !Number.isNaN(parsed.getTime()) &&
-          raw.match(/^\d{4}-\d{2}-\d{2}/)
-        ) {
-          return parsed;
-        }
-
-        // 3. Cek format DD/MM/YYYY HH:MM:SS atau MM/DD/YYYY HH:MM:SS
-        const ddmmyyyy = raw.match(
-          /^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})(?:\s+(\d{1,2})[:.](\d{2})(?:[:.](\d{2}))?)?$/,
-        );
-        if (ddmmyyyy) {
-          let [, p1, p2, y, hh = "00", mm = "00", ss = "00"] = ddmmyyyy;
-          let d = Number(p1);
-          let m = Number(p2);
-
-          // Jika angka bulan > 12, berarti formatnya US (MM/DD/YYYY), maka posisinya ditukar
-          if (m > 12) {
-            d = Number(p2);
-            m = Number(p1);
-          }
-
-          return new Date(
-            Number(y),
-            m - 1,
-            d,
-            Number(hh),
-            Number(mm),
-            Number(ss),
-          );
-        }
-
-        // 4. Fallback terakhir
-        const d = new Date(raw.replace(/\./g, "-").replace(/\//g, "-"));
-        return Number.isNaN(d.getTime()) ? null : d;
-      }
-
-      function parseUpdateTimestamp(row) {
-        if (!row || typeof row !== "object") return null;
-
-        // Memastikan kolom "updatedAt" dibaca paling pertama
-        const candidateKeys = [
-          "updatedAt",
-          "updated_at",
-          "updated-at",
-          "updated at",
-          "UpdatedAt",
-          "lastUpdated",
-          "last_update",
-          "lastUpdate",
-          "lastUpdatedAt",
-          "timestamp",
-          "Waktu",
-        ];
-
-        for (const key of candidateKeys) {
-          if (row[key] !== undefined && row[key] !== "") {
-            const parsed = parseDateValue(row[key]);
-            if (parsed) return parsed;
-          }
-        }
-        return null;
-      }
-
-      function getLatestUpdateTime(data) {
-        return data.reduce((latest, row) => {
-          // Cukup memanggil properti updatedAt yang sudah diekstrak di parseRow
-          const rowTime = row.updatedAt;
-          if (!rowTime) return latest;
-          return latest && rowTime < latest ? latest : rowTime;
-        }, null);
-      }
-      // ============================================================
-      //  KECAMATAN PILLS
-      // ============================================================
-      function buildKecTabs() {
-        const kecList = [...new Set(allData.map((r) => r.kecCode))].sort();
-        const container = document.getElementById("kecTabs");
-
-        let html = `<button class="whitespace-nowrap px-4 py-2 text-[11px] sm:text-xs font-semibold rounded-full transition-all border ${activeKec === "" ? "bg-brand-500 text-white border-brand-500 shadow-md shadow-brand-500/20" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}" onclick="selectKec('')">Semua Wilayah</button>`;
+      function buildKecTabsProgress() {
+        const kecList = [...new Set(progDataAll.map((r) => r.kecCode))].sort();
+        let html = `<button class="whitespace-nowrap px-4 py-2 text-[11px] sm:text-xs font-semibold rounded-full transition-all border ${progActiveKec === "" ? "bg-brand-500 text-white border-brand-500 shadow-md" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}" onclick="selectKecProgress('')">Semua Wilayah</button>`;
 
         html += kecList
           .map((k) => {
-            const pool = allData.filter((r) => r.kecCode === k);
+            const pool = progDataAll.filter((r) => r.kecCode === k);
             const pVal = pool.reduce(
               (s, r) => s + r.SUBMITTED + r.REJECTED + r.APPROVED,
               0,
@@ -1119,75 +1355,72 @@
                 s + r.OPEN + r.DRAFT + r.SUBMITTED + r.APPROVED + r.REJECTED,
               0,
             );
-            const pct = pDen > 0 ? ((pVal / pDen) * 100).toFixed(2) : "0.00";
-            const isActive = activeKec === k;
-
-            return `<button class="whitespace-nowrap px-4 py-2 text-[11px] sm:text-xs font-semibold rounded-full transition-all border flex items-center gap-2 ${isActive ? "bg-brand-500 text-white border-brand-500 shadow-md shadow-brand-500/20" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}" onclick="selectKec('${k}')">
-            ${getKecamatanLabel(k)} <span class="text-[9px] ${isActive ? "bg-black/20 text-white" : "bg-gray-100 text-gray-400"} px-1.5 py-0.5 rounded-full">${pct}%</span>
+            const pct = pDen > 0 ? ((pVal / pDen) * 100).toFixed(0) : "0";
+            const isActive = progActiveKec === k;
+            return `<button class="whitespace-nowrap px-4 py-2 text-[11px] sm:text-xs font-semibold rounded-full transition-all border flex items-center gap-2 ${isActive ? "bg-brand-500 text-white border-brand-500 shadow-md" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}" onclick="selectKecProgress('${k}')">
+            ${getKecLabel(k)} <span class="text-[9px] ${isActive ? "bg-black/20 text-white" : "bg-gray-100 text-gray-400"} px-1.5 py-0.5 rounded-full">${pct}%</span>
           </button>`;
           })
           .join("");
-        container.innerHTML = html;
+        document.getElementById("kecTabs").innerHTML = html;
       }
 
-      function selectKec(kec) {
-        activeKec = kec;
-        buildKecTabs();
-        applyFilters();
+      function selectKecProgress(kec) {
+        progActiveKec = kec;
+        buildKecTabsProgress();
+        applyFiltersProgress();
       }
 
-      // ============================================================
-      //  FILTER & APPLY
-      // ============================================================
-      function applyFilters() {
+      function applyFiltersProgress() {
+        if (progDataAll.length === 0) return;
         const fStatus = document.getElementById("fStatus").value;
         const search = (
-          document.getElementById("searchInput")?.value || ""
+          document.getElementById("searchInput").value || ""
         ).toLowerCase();
 
-        filtered = allData.filter((r) => {
-          if (activeKec && r.kecCode !== activeKec) return false;
+        progDataFiltered = progDataAll.filter((r) => {
+          if (progActiveKec && r.kecCode !== progActiveKec) return false;
           if (fStatus && r[fStatus] === 0) return false;
           if (search) {
             const hay =
-              `${r.username} ${r.fullCode} ${r.kecCode} ${r.kecDesa}`.toLowerCase();
+              `${r.username} ${r.fullCode} ${r.kecCode}`.toLowerCase();
             if (!hay.includes(search)) return false;
           }
           return true;
         });
 
-        document.getElementById("kecFilterInfo").textContent = activeKec
-          ? `Kec ${activeKec}`
+        document.getElementById("kecFilterInfo").textContent = progActiveKec
+          ? `Kec ${progActiveKec}`
           : "Semua";
         document.getElementById("filteredInfo").textContent =
-          `${filtered.length} SLS ditampilkan`;
+          `${progDataFiltered.length} SLS ditampilkan`;
+        document.getElementById("infoRows").innerHTML =
+          `<i class="fa-solid fa-database text-brand-500"></i> ${progDataAll.length} SLS &middot; ${new Set(progDataAll.map((r) => r.userId)).size} PPL`;
 
-        updateKPIs();
-        drawChart();
-        renderTable();
+        updateKPIsProgress();
+        drawChartProgress();
+        renderTableProgress();
       }
 
-      function resetFilters() {
-        activeKec = "";
+      function resetFiltersProgress() {
+        progActiveKec = "";
         document.getElementById("fStatus").value = "";
         document.getElementById("searchInput").value = "";
-        buildKecTabs();
-        applyFilters();
+        buildKecTabsProgress();
+        applyFiltersProgress();
       }
 
-      // ============================================================
-      //  KPI & CHARTS
-      // ============================================================
-      function updateKPIs() {
-        const sum = (key) => filtered.reduce((a, r) => a + (r[key] || 0), 0);
+      function updateKPIsProgress() {
+        const sum = (key) =>
+          progDataFiltered.reduce((a, r) => a + (r[key] || 0), 0);
         const total = sum("target"),
           open = sum("OPEN"),
           app = sum("APPROVED"),
           sub = sum("SUBMITTED"),
           draft = sum("DRAFT"),
           rej = sum("REJECTED");
-        const numProg = sub + rej + app;
-        const denProg = open + draft + sub + app + rej;
+        const numProg = sub + rej + app,
+          denProg = open + draft + sub + app + rej;
         const pctProg = denProg > 0 ? (numProg / denProg) * 100 : 0;
 
         document.getElementById("kTarget").textContent =
@@ -1235,85 +1468,65 @@
             text: "text-gray-500",
           },
         ];
-
         document.getElementById("statusPanel").innerHTML = breakdown
           .map((it) => {
             const pct = total > 0 ? (it.val / total) * 100 : 0;
-            return `
-            <div class="mb-2">
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-medium text-gray-600">${it.label}</span>
-                <span class="font-bold ${it.text}">${it.val.toLocaleString("id-ID")}</span>
-              </div>
-              <div class="w-full bg-gray-100 rounded-full h-1.5">
-                <div class="${it.color} h-1.5 rounded-full progress-bar" style="width:${Math.min(100, pct)}%"></div>
-              </div>
-            </div>`;
+            return `<div class="mb-2"><div class="flex justify-between text-xs mb-1"><span class="font-medium text-gray-600">${it.label}</span><span class="font-bold ${it.text}">${it.val.toLocaleString("id-ID")}</span></div><div class="w-full bg-gray-100 rounded-full h-1.5"><div class="${it.color} h-1.5 rounded-full progress-bar" style="width:${Math.min(100, pct)}%"></div></div></div>`;
           })
           .join("");
 
-        drawPieChart(app, sub, draft, rej, open);
-      }
-
-      let pieInst = null;
-      function drawPieChart(app, sub, draft, rej, open) {
-        const ctx = document.getElementById("pieChart");
-        if (!ctx) return;
         if (pieInst) pieInst.destroy();
-        if (app + sub + draft + rej + open === 0) return;
-
-        pieInst = new Chart(ctx, {
-          type: "doughnut",
-          data: {
-            labels: ["Approved", "Submitted", "Draft", "Rejected", "OPEN"],
-            datasets: [
-              {
-                data: [app, sub, draft, rej, open],
-                backgroundColor: [
-                  "#22c55e",
-                  "#f97316",
-                  "#facc15",
-                  "#f87171",
-                  "#e2e8f0",
-                ],
-                borderWidth: 0,
-                hoverOffset: 4,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: "75%",
-            plugins: {
-              legend: { display: false },
-              tooltip: { padding: 10, cornerRadius: 8 },
+        if (total > 0) {
+          const ctx = document.getElementById("pieChart");
+          pieInst = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+              labels: ["Approved", "Submitted", "Draft", "Rejected", "OPEN"],
+              datasets: [
+                {
+                  data: [app, sub, draft, rej, open],
+                  backgroundColor: [
+                    "#22c55e",
+                    "#f97316",
+                    "#facc15",
+                    "#f87171",
+                    "#e2e8f0",
+                  ],
+                  borderWidth: 0,
+                },
+              ],
             },
-          },
-        });
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: "75%",
+              plugins: { legend: { display: false } },
+            },
+          });
+        }
       }
 
       function setChartMode(mode) {
-        chartMode = mode;
-        ["kec", "ppl"].forEach((m) => {
-          const btn = document.getElementById(
-            "cBtn" + m.charAt(0).toUpperCase() + m.slice(1),
-          );
-          if (btn)
-            btn.className = `px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold transition ${m === mode ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-800"}`;
-        });
+        progChartMode = mode;
+        document.getElementById("cBtnKec").className =
+          mode === "kec"
+            ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold bg-white text-gray-800 shadow-sm"
+            : "px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold text-gray-500 hover:text-gray-800";
+        document.getElementById("cBtnPpl").className =
+          mode === "ppl"
+            ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold bg-white text-gray-800 shadow-sm"
+            : "px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold text-gray-500 hover:text-gray-800";
         document.getElementById("chartLabel").textContent =
           mode === "kec" ? "Progress per Kecamatan" : "Progress PPL (Top 25)";
-        drawChart();
+        drawChartProgress();
       }
 
-      function drawChart() {
+      function drawChartProgress() {
         const agg = {};
-        filtered.forEach((r) => {
-          const k = chartMode === "kec" ? r.kecCode : r.username;
+        progDataFiltered.forEach((r) => {
+          const k = progChartMode === "kec" ? r.kecCode : r.username;
           if (!agg[k])
             agg[k] = { target: 0, APP: 0, SUB: 0, DRF: 0, OPN: 0, REJ: 0 };
-          agg[k].target += r.target;
           agg[k].APP += r.APPROVED;
           agg[k].SUB += r.SUBMITTED;
           agg[k].DRF += r.DRAFT;
@@ -1322,22 +1535,16 @@
         });
 
         let entries = Object.entries(agg)
-          .map(([k, v]) => {
-            const tot = v.APP + v.SUB + v.DRF + v.OPN + v.REJ;
-            return {
-              label:
-                chartMode === "ppl" ? k.split("@")[0] : getKecamatanLabel(k),
-              ...v,
-              tot,
-            };
-          })
-          .sort((a, b) => b.target - a.target);
-
-        if (chartMode === "ppl") entries = entries.slice(0, 25);
+          .map(([k, v]) => ({
+            label: progChartMode === "ppl" ? k.split("@")[0] : getKecLabel(k),
+            ...v,
+            tot: v.APP + v.SUB + v.DRF + v.OPN + v.REJ,
+          }))
+          .sort((a, b) => b.tot - a.tot);
+        if (progChartMode === "ppl") entries = entries.slice(0, 25);
 
         const ctx = document.getElementById("mainChart").getContext("2d");
         if (chartInst) chartInst.destroy();
-
         chartInst = new Chart(ctx, {
           type: "bar",
           data: {
@@ -1347,117 +1554,68 @@
                 label: "Apprv",
                 data: entries.map((e) => (e.tot ? (e.APP / e.tot) * 100 : 0)),
                 backgroundColor: "#22c55e",
-                borderRadius: 2,
               },
               {
                 label: "Submt",
                 data: entries.map((e) => (e.tot ? (e.SUB / e.tot) * 100 : 0)),
                 backgroundColor: "#f97316",
-                borderRadius: 2,
               },
               {
                 label: "Draft",
                 data: entries.map((e) => (e.tot ? (e.DRF / e.tot) * 100 : 0)),
                 backgroundColor: "#facc15",
-                borderRadius: 2,
               },
               {
                 label: "Rejct",
                 data: entries.map((e) => (e.tot ? (e.REJ / e.tot) * 100 : 0)),
                 backgroundColor: "#f87171",
-                borderRadius: 2,
               },
               {
                 label: "Open",
                 data: entries.map((e) => (e.tot ? (e.OPN / e.tot) * 100 : 0)),
                 backgroundColor: "#e2e8f0",
-                borderRadius: 2,
               },
             ],
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: { mode: "index", intersect: false },
             scales: {
-              x: {
-                stacked: true,
-                grid: { display: false },
-                ticks: { font: { size: 10 } },
-              },
+              x: { stacked: true },
               y: {
                 stacked: true,
                 max: 100,
-                ticks: { callback: (v) => v + "%", font: { size: 10 } },
-                border: { dash: [4, 4] },
+                ticks: { callback: (v) => v + "%" },
               },
             },
-            plugins: {
-              legend: {
-                position: "top",
-                align: "end",
-                labels: {
-                  usePointStyle: true,
-                  boxWidth: 6,
-                  font: { size: 10 },
-                },
-              },
-              tooltip: {
-                callbacks: {
-                  label: (c) => ` ${c.dataset.label}: ${c.raw.toFixed(1)}%`,
-                },
-                padding: 10,
-                cornerRadius: 8,
-              },
-            },
+            plugins: { legend: { position: "top" } },
           },
         });
       }
 
-      // ============================================================
-      //  TABLE
-      // ============================================================
       function switchTableView(view) {
-        tableView = view;
-        ["ppl", "sls", "kec"].forEach((v) => {
-          const btn = document.getElementById("tBtn" + v.toUpperCase());
-          if (btn)
-            btn.className = `px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold transition ${v === view ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-800"}`;
-        });
-        document.getElementById("thKeyLabel").textContent =
-          view === "ppl"
-            ? "Nama PPL"
-            : view === "sls"
-              ? "Kode SLS"
-              : "Kecamatan";
-        renderTable();
+        progTableView = view;
+        applyFiltersProgress();
       }
-
-      function sortBy(col) {
-        if (sortCol === col) sortDir = sortDir === "asc" ? "desc" : "asc";
+      function sortByProgress(col) {
+        if (progSortCol === col)
+          progSortDir = progSortDir === "asc" ? "desc" : "asc";
         else {
-          sortCol = col;
-          sortDir = "desc";
+          progSortCol = col;
+          progSortDir = "desc";
         }
-        document.querySelectorAll(".sort-icon").forEach((el) => {
-          el.className = "fa-solid fa-sort sort-icon";
-        });
-        const activeIcon = document.getElementById(
-          "si" + (col.charAt(0).toUpperCase() + col.slice(1)),
-        );
-        if (activeIcon)
-          activeIcon.className = `fa-solid ${sortDir === "asc" ? "fa-sort-up" : "fa-sort-down"} sort-icon active`;
-        renderTable();
+        renderTableProgress();
       }
 
-      function buildTableRows() {
+      function renderTableProgress() {
         const agg = {};
-        filtered.forEach((r) => {
-          let key;
-          if (tableView === "ppl") key = r.username;
-          else if (tableView === "sls") key = r.fullCode;
-          else key = r.kecCode;
-
+        progDataFiltered.forEach((r) => {
+          let key =
+            progTableView === "ppl"
+              ? r.username
+              : progTableView === "sls"
+                ? r.fullCode
+                : r.kecCode;
           if (!agg[key])
             agg[key] = {
               loc: new Set(),
@@ -1468,12 +1626,15 @@
               SUB: 0,
               REJ: 0,
               name: r.namePPL,
-              kecamatan: getKecamatanLabel(r.kecCode),
+              kec: getKecLabel(r.kecCode),
             };
-          if (tableView === "ppl") agg[key].loc.add(r.fullCode);
-          else if (tableView === "kec") agg[key].loc.add(r.username);
-          else agg[key].loc.add(r.namePPL);
-
+          agg[key].loc.add(
+            progTableView === "ppl"
+              ? r.fullCode
+              : progTableView === "kec"
+                ? r.username
+                : r.namePPL,
+          );
           agg[key].target += r.target;
           agg[key].APP += r.APPROVED;
           agg[key].OPN += r.OPEN;
@@ -1483,192 +1644,438 @@
         });
 
         let rows = Object.entries(agg).map(([k, v]) => {
-          const progVal = v.SUB + v.REJ + v.APP;
-          const progDen = v.OPN + v.DRF + v.SUB + v.APP + v.REJ;
-          const pct = progDen > 0 ? (progVal / progDen) * 100 : 0;
-          const locList = [...v.loc].sort();
+          const progVal = v.SUB + v.REJ + v.APP,
+            progDen = v.OPN + v.DRF + v.SUB + v.APP + v.REJ;
           return {
             key: k,
             loc:
-              tableView === "kec"
-                ? `${locList.length} PPL`
-                : locList.join(", "),
-            detailLoc: locList.join(", "),
+              progTableView === "kec"
+                ? `${v.loc.size} PPL`
+                : [...v.loc].join(", "),
             progVal,
-            pct,
+            pct: progDen > 0 ? (progVal / progDen) * 100 : 0,
             ...v,
           };
         });
 
-        const search = (
-          document.getElementById("searchInput")?.value || ""
-        ).toLowerCase();
-        if (search)
-          rows = rows.filter(
-            (r) =>
-              r.key.toLowerCase().includes(search) ||
-              r.loc.toLowerCase().includes(search),
-          );
-
         rows.sort((a, b) => {
           let va =
-            a[sortCol] !== undefined
-              ? a[sortCol]
+            a[progSortCol] !== undefined
+              ? a[progSortCol]
               : a[
-                  sortCol === "APPROVED"
+                  progSortCol === "APPROVED"
                     ? "APP"
-                    : sortCol === "SUBMITTED"
+                    : progSortCol === "SUBMITTED"
                       ? "SUB"
-                      : sortCol === "REJECTED"
+                      : progSortCol === "REJECTED"
                         ? "REJ"
-                        : sortCol === "DRAFT"
+                        : progSortCol === "DRAFT"
                           ? "DRF"
-                          : sortCol
+                          : progSortCol
                 ];
           let vb =
-            b[sortCol] !== undefined
-              ? b[sortCol]
+            b[progSortCol] !== undefined
+              ? b[progSortCol]
               : b[
-                  sortCol === "APPROVED"
+                  progSortCol === "APPROVED"
                     ? "APP"
-                    : sortCol === "SUBMITTED"
+                    : progSortCol === "SUBMITTED"
                       ? "SUB"
-                      : sortCol === "REJECTED"
+                      : progSortCol === "REJECTED"
                         ? "REJ"
-                        : sortCol === "DRAFT"
+                        : progSortCol === "DRAFT"
                           ? "DRF"
-                          : sortCol
+                          : progSortCol
                 ];
           if (typeof va === "string")
-            return sortDir === "asc"
+            return progSortDir === "asc"
               ? va.localeCompare(vb)
               : vb.localeCompare(va);
-          return sortDir === "asc" ? va - vb : vb - va;
+          return progSortDir === "asc" ? va - vb : vb - va;
         });
 
-        return rows;
+        const tbody = document.getElementById("tableBodyProgress");
+        tbody.innerHTML = rows
+          .map(
+            (item) => `
+          <tr class="hover:bg-brand-50/40">
+            <td class="px-5 py-3 font-semibold text-gray-800"><div class="truncate max-w-[160px]">${progTableView === "ppl" ? item.name : progTableView === "kec" ? getKecLabel(item.key) : item.key}</div>${progTableView === "ppl" ? `<div class="text-[10px] text-gray-400">${item.key}</div>` : ""}</td>
+            <td class="px-5 py-3 text-gray-500 text-[11px]"><div class="truncate max-w-[150px]" title="${item.loc}">${item.loc}</div></td>
+            <td class="px-5 py-3 text-right text-gray-600">${item.target}</td>
+            <td class="px-5 py-3 text-right font-bold text-brand-600">${item.progVal}</td>
+            <td class="px-5 py-3 text-right font-bold ${item.pct >= 90 ? "text-green-600" : item.pct >= 50 ? "text-brand-600" : "text-gray-500"}">${item.pct.toFixed(1)}%</td>
+            <td class="px-5 py-3 text-right font-semibold text-green-600">${item.APP}</td>
+            <td class="px-5 py-3 text-right font-medium text-brand-500">${item.SUB}</td>
+            <td class="px-5 py-3 text-right font-medium text-yellow-500">${item.DRF}</td>
+            <td class="px-5 py-3 text-right font-medium text-red-400">${item.REJ}</td>
+            <td class="px-5 py-3 text-right font-medium text-gray-400">${item.OPN}</td>
+          </tr>`,
+          )
+          .join("");
       }
 
-      function renderTable() {
-        const rows = buildTableRows();
+      // ============================================================
+      //  ANOMALI LOGIC (Tab 2)
+      // ============================================================
 
-        const tbody = document.getElementById("tableBody");
-        tbody.innerHTML = "";
-        rows.forEach((item) => {
-          const pctColor =
-            item.pct >= 90
-              ? "text-green-600"
-              : item.pct >= 50
-                ? "text-brand-600"
-                : "text-gray-500";
-          const tr = document.createElement("tr");
-          tr.className = "hover:bg-brand-50/40 transition-colors";
-          tr.innerHTML = `
-            <td class="px-5 py-3 font-semibold text-gray-800 whitespace-nowrap max-w-[160px] sm:max-w-[200px]">
-              <div class="truncate" title="${item.key}">${tableView === "ppl" ? item.name : tableView === "kec" ? getKecamatanLabel(item.key) : item.key}</div>
-              ${tableView === "ppl" ? `<div class="text-[10px] text-gray-400 font-normal truncate">${item.key}</div>` : ""}
-            </td>
-            <td class="px-5 py-3 text-gray-500 text-[11px] whitespace-nowrap max-w-[150px]"><div class="truncate" title="${item.loc}">${item.loc}</div></td>
-            <td class="px-5 py-3 text-right text-gray-600">${item.target.toLocaleString()}</td>
-            <td class="px-5 py-3 text-right font-bold text-brand-600">${item.progVal.toLocaleString()}</td>
-            <td class="px-5 py-3 text-right">
-              <div class="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-1.5">
-                <span class="text-[11px] font-bold ${pctColor}">${item.pct.toFixed(1)}%</span>
-                <div class="w-12 sm:w-16 bg-gray-100 rounded-full h-1.5 hidden sm:block">
-                  <div class="bg-brand-500 h-1.5 rounded-full" style="width:${Math.min(100, item.pct)}%"></div>
-                </div>
-              </div>
-            </td>
-            <td class="px-5 py-3 text-right font-semibold text-green-600">${item.APP.toLocaleString()}</td>
-            <td class="px-5 py-3 text-right font-medium text-brand-500">${item.SUB.toLocaleString()}</td>
-            <td class="px-5 py-3 text-right font-medium text-yellow-500">${item.DRF.toLocaleString()}</td>
-            <td class="px-5 py-3 text-right font-medium text-red-400">${item.REJ.toLocaleString()}</td>
-            <td class="px-5 py-3 text-right font-medium text-gray-400">${item.OPN.toLocaleString()}</td>
-          `;
-          tbody.appendChild(tr);
-        });
+      // Mengakomodir Format Download Langsung BPS & Template Kustom
+      function getAnomaliLink(row) {
+        const candidateKeys = [
+          "Link",
+          "link",
+          "URL",
+          "url",
+          "Tautan",
+          "tautan",
+          "Link Anomali",
+          "link_anomali",
+          "Link Detail",
+          "link_detail",
+          "Link Google Form",
+          "link_google_form",
+          "Link Form",
+          "link_form",
+          "Tautan Anomali",
+          "tautan_anomali",
+          "Link Dokumen",
+          "link_dokumen",
+        ];
 
-        document.getElementById("tableFooter").children[0].textContent =
-          `${rows.length} baris ditampilkan`;
-      }
-
-      function exportExcel() {
-        if (!filtered.length) return alert("Data kosong.");
-        const rows = buildTableRows();
-
-        let exportRows = [];
-        if (tableView === "ppl") {
-          exportRows = rows.map((r) => ({
-            "Nama PPL": r.name || r.key.split("@")[0],
-            "Email PPL": r.key,
-            Kecamatan: r.kecamatan,
-            "Jumlah SLS": r.detailLoc
-              ? r.detailLoc.split(",").filter(Boolean).length
-              : 0,
-            SLS: r.detailLoc,
-            Target: r.target,
-            "Progres (%)": Number(r.pct.toFixed(1)),
-            Approved: r.APP,
-            Submitted: r.SUB,
-            Draft: r.DRF,
-            Rejected: r.REJ,
-            Open: r.OPN,
-          }));
-        } else if (tableView === "kec") {
-          exportRows = rows.map((r) => ({
-            Kecamatan: getKecamatanLabel(r.key),
-            "Kode Kecamatan": r.key,
-            "Jumlah PPL": r.detailLoc
-              ? r.detailLoc.split(",").filter(Boolean).length
-              : 0,
-            PPL: r.detailLoc,
-            Target: r.target,
-            "Progres (%)": Number(r.pct.toFixed(1)),
-            Approved: r.APP,
-            Submitted: r.SUB,
-            Draft: r.DRF,
-            Rejected: r.REJ,
-            Open: r.OPN,
-          }));
-        } else {
-          exportRows = rows.map((r) => ({
-            SLS: r.key,
-            Kecamatan: r.kecamatan,
-            PPL: r.detailLoc,
-            Target: r.target,
-            "Progres (%)": Number(r.pct.toFixed(1)),
-            Approved: r.APP,
-            Submitted: r.SUB,
-            Draft: r.DRF,
-            Rejected: r.REJ,
-            Open: r.OPN,
-          }));
+        for (const key of candidateKeys) {
+          const value = row[key];
+          if (typeof value === "string") {
+            const trimmed = value.trim();
+            if (trimmed && trimmed !== "-" && trimmed.toLowerCase() !== "nan") {
+              return trimmed;
+            }
+          }
         }
+
+        return "";
+      }
+
+      function parseRowAnomali(row, type) {
+        // Handle variations of keys (BPS default vs custom template)
+        const kKec = String(row["Kode Kec"] || row.kode_kec || "")
+          .trim()
+          .padStart(3, "0");
+        const kDesa = String(row["Kode Desa"] || row.kode_desa || "")
+          .trim()
+          .padStart(3, "0");
+        const kSls = String(row["Kode SLS"] || row.kode_sls || "")
+          .trim()
+          .padStart(4, "0");
+        const nPetugas = String(
+          row["Email Petugas"] ||
+            row.nama_petugas ||
+            row.email_petugas ||
+            "Tidak Diketahui",
+        ).trim();
+
+        let subjek = "-";
+        if (type === "keluarga") {
+          subjek = String(row["Nama KRT"] || row.nama_krt || "-").trim();
+        } else {
+          subjek = String(row["Nama Usaha"] || row.nama_usaha || "-").trim();
+        }
+
+        const jAnomali = String(
+          row["Nama Anomali"] || row.jenis_anomali || "Anomali Lainnya",
+        ).trim();
+        const deskripsi = String(
+          row.deskripsi || row.deskripsi_anomali || jAnomali,
+        ).trim(); // BPS usually puts everything in "Nama Anomali"
+        const statusRaw = String(
+          row["Tindak Lanjut"] || row.status_perbaikan || "Belum",
+        )
+          .trim()
+          .toLowerCase();
+
+        const isSelesai =
+          statusRaw.includes("sudah") ||
+          statusRaw === "1" ||
+          statusRaw === "selesai" ||
+          statusRaw === "true";
+
+        return {
+          kecCode: kKec,
+          desaCode: kDesa,
+          slsCode: kSls,
+          wilayahStr: `[${kKec}] ${getKecLabel(kKec)} / Desa ${kDesa} / SLS ${kSls}`,
+          petugas: nPetugas,
+          subjek: subjek,
+          jenis: jAnomali,
+          desc: deskripsi,
+          link: getAnomaliLink(row),
+          statusText: isSelesai ? "Sudah" : "Belum",
+          isSelesai: isSelesai,
+        };
+      }
+
+      function updateBadgeAnomali() {
+        const total = anoDataKeluarga.length + anoDataUsaha.length;
+        const belum =
+          anoDataKeluarga.filter((a) => !a.isSelesai).length +
+          anoDataUsaha.filter((a) => !a.isSelesai).length;
+        const badge = document.getElementById("badgeAnomali");
+        if (belum > 0) {
+          badge.textContent = belum > 99 ? "99+" : belum;
+          badge.classList.remove("hidden");
+        } else {
+          badge.classList.add("hidden");
+        }
+      }
+
+      function switchSubTabAnomali(type) {
+        anoActiveTab = type;
+        const btnKel = document.getElementById("subTabKeluarga");
+        const btnUsa = document.getElementById("subTabUsaha");
+
+        if (type === "keluarga") {
+          btnKel.className =
+            "px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition";
+          btnUsa.className =
+            "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+          anoCurrentData = anoDataKeluarga;
+          document.getElementById("thSubjekAnomali").textContent = "Nama KRT";
+        } else {
+          btnUsa.className =
+            "px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition";
+          btnKel.className =
+            "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+          anoCurrentData = anoDataUsaha;
+          document.getElementById("thSubjekAnomali").textContent = "Nama Usaha";
+        }
+
+        document.getElementById("filterAKec").value = "";
+        populateDropdownsAnomali(anoCurrentData);
+        applyFiltersAnomali("all");
+      }
+
+      function populateDropdownsAnomali(dataPool, cascadeFrom = null) {
+        const getDistinct = (arr, key) =>
+          [...new Set(arr.map((item) => item[key]))].sort();
+        const selKec = document.getElementById("filterAKec"),
+          selDesa = document.getElementById("filterADesa"),
+          selSls = document.getElementById("filterASls");
+        const selPetugas = document.getElementById("filterAPetugas"),
+          selJenis = document.getElementById("filterAJenis");
+        const valKec = selKec.value,
+          valDesa = selDesa.value,
+          valSls = selSls.value,
+          valPet = selPetugas.value,
+          valJen = selJenis.value;
+
+        if (
+          cascadeFrom === null ||
+          cascadeFrom === "all" ||
+          cascadeFrom === "kec"
+        ) {
+          selKec.innerHTML =
+            '<option value="">Semua Kecamatan</option>' +
+            getDistinct(dataPool, "kecCode")
+              .map((v) => `<option value="${v}">${getKecLabel(v)}</option>`)
+              .join("");
+          selKec.value =
+            valKec && getDistinct(dataPool, "kecCode").includes(valKec)
+              ? valKec
+              : "";
+        }
+
+        let poolForDesa = selKec.value
+          ? dataPool.filter((r) => r.kecCode === selKec.value)
+          : dataPool;
+
+        if (
+          cascadeFrom === null ||
+          cascadeFrom === "kec" ||
+          cascadeFrom === "desa" ||
+          cascadeFrom === "all"
+        ) {
+          const desaValues = getDistinct(poolForDesa, "desaCode");
+          selDesa.innerHTML =
+            '<option value="">Semua Desa</option>' +
+            desaValues
+              .map((v) => `<option value="${v}">${v}</option>`)
+              .join("");
+          selDesa.value =
+            valDesa && desaValues.includes(valDesa) ? valDesa : "";
+        }
+
+        let poolForSls = selKec.value
+          ? dataPool.filter((r) => r.kecCode === selKec.value)
+          : dataPool;
+        if (selDesa.value) {
+          poolForSls = poolForSls.filter((r) => r.desaCode === selDesa.value);
+        }
+        if (
+          cascadeFrom === null ||
+          cascadeFrom === "kec" ||
+          cascadeFrom === "desa" ||
+          cascadeFrom === "sls" ||
+          cascadeFrom === "all"
+        ) {
+          const slsValues = getDistinct(poolForSls, "slsCode");
+          selSls.innerHTML =
+            '<option value="">Semua SLS</option>' +
+            slsValues.map((v) => `<option value="${v}">${v}</option>`).join("");
+          selSls.value = valSls && slsValues.includes(valSls) ? valSls : "";
+        }
+
+        let poolForFilters = selKec.value
+          ? dataPool.filter((r) => r.kecCode === selKec.value)
+          : dataPool;
+        if (selDesa.value) {
+          poolForFilters = poolForFilters.filter(
+            (r) => r.desaCode === selDesa.value,
+          );
+        }
+        if (selSls.value) {
+          poolForFilters = poolForFilters.filter(
+            (r) => r.slsCode === selSls.value,
+          );
+        }
+
+        const petugasValues = getDistinct(poolForFilters, "petugas");
+        const jenisValues = getDistinct(poolForFilters, "jenis");
+
+        selPetugas.innerHTML =
+          '<option value="">Semua Petugas</option>' +
+          petugasValues
+            .map((v) => `<option value="${v}">${v}</option>`)
+            .join("");
+        selJenis.innerHTML =
+          '<option value="">Semua Jenis Anomali</option>' +
+          jenisValues.map((v) => `<option value="${v}">${v}</option>`).join("");
+
+        selPetugas.value =
+          valPet && petugasValues.includes(valPet) ? valPet : "";
+        selJenis.value = valJen && jenisValues.includes(valJen) ? valJen : "";
+      }
+
+      function applyFiltersAnomali(source) {
+        if (
+          source === "kec" ||
+          source === "desa" ||
+          source === "sls" ||
+          source === "all"
+        ) {
+          populateDropdownsAnomali(anoCurrentData, source);
+        }
+
+        const vKec = document.getElementById("filterAKec").value,
+          vDesa = document.getElementById("filterADesa").value,
+          vSls = document.getElementById("filterASls").value;
+        const vPetugas = document.getElementById("filterAPetugas").value,
+          vJenis = document.getElementById("filterAJenis").value;
+
+        anoFiltered = anoCurrentData.filter((r) => {
+          if (vKec && r.kecCode !== vKec) return false;
+          if (vDesa && r.desaCode !== vDesa) return false;
+          if (vSls && r.slsCode !== vSls) return false;
+          if (vPetugas && r.petugas !== vPetugas) return false;
+          if (vJenis && r.jenis !== vJenis) return false;
+          return true;
+        });
+
+        const tot = anoFiltered.length;
+        document.getElementById("kAnomaliTotal").textContent =
+          tot.toLocaleString("id-ID");
+        document.getElementById("infoAnomaliFiltered").textContent =
+          `Menampilkan ${tot} baris data`;
+
+        renderTableAnomali();
+      }
+
+      function resetFiltersAnomali() {
+        document.getElementById("filterAKec").value = "";
+        document.getElementById("filterADesa").value = "";
+        document.getElementById("filterASls").value = "";
+        document.getElementById("filterAPetugas").value = "";
+        document.getElementById("filterAJenis").value = "";
+        populateDropdownsAnomali(anoCurrentData, "all");
+        applyFiltersAnomali("all");
+      }
+
+      function renderTableAnomali() {
+        const tbody = document.getElementById("tableBodyAnomali");
+        if (anoFiltered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">Tidak ada data anomali yang sesuai filter.</td></tr>`;
+          return;
+        }
+
+        const rows = anoFiltered
+          .slice(0, 100)
+          .map(
+            (r) => `
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-4 py-3"><div class="text-[11px] text-gray-500 font-mono">${r.wilayahStr}</div></td>
+            <td class="px-4 py-3 font-medium text-gray-800">${r.petugas}</td>
+            <td class="px-4 py-3 font-semibold text-brand-600">${r.subjek}</td>
+            <td class="px-4 py-3 text-gray-600 text-[11px] font-medium leading-tight max-w-[200px]" title="${r.desc}">${r.desc}</td>
+            <td class="px-4 py-3 text-center">
+              ${
+                r.link
+                  ? `<a href="${r.link}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-semibold transition">
+                      <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Buka
+                    </a>`
+                  : '<span class="text-gray-400 text-[10px]">-</span>'
+              }
+            </td>
+          </tr>
+        `,
+          )
+          .join("");
+
+        let extra =
+          anoFiltered.length > 100
+            ? `<tr><td colspan="5" class="px-4 py-3 text-center text-[11px] text-gray-400 bg-gray-50">Menampilkan 100 dari ${anoFiltered.length} data. Gunakan filter/export untuk melihat semua.</td></tr>`
+            : "";
+        tbody.innerHTML = rows + extra;
+      }
+
+      function exportExcelAnomali() {
+        if (!anoFiltered.length) return alert("Data kosong.");
+        const exportRows = anoFiltered.map((r) => ({
+          Kecamatan: getKecLabel(r.kecCode),
+          "Kode Desa": r.desaCode,
+          "Kode SLS": r.slsCode,
+          Petugas: r.petugas,
+          [anoActiveTab === "keluarga" ? "Nama KRT" : "Nama Usaha"]: r.subjek,
+          "Keterangan Anomali": r.desc,
+          Link: r.link || "",
+        }));
 
         const ws = XLSX.utils.json_to_sheet(exportRows);
         const wb = XLSX.utils.book_new();
-        const sheetName =
-          tableView === "ppl"
-            ? "Per_PPL"
-            : tableView === "kec"
-              ? "Per_Kecamatan"
-              : "Per_SLS";
-        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        XLSX.utils.book_append_sheet(wb, ws, `Anomali_${anoActiveTab}`);
         XLSX.writeFile(
           wb,
-          `Monitoring_SE2026_${sheetName}_${new Date().getTime()}.xlsx`,
+          `Data_Anomali_${anoActiveTab}_${new Date().getTime()}.xlsx`,
         );
       }
 
+      function exportExcelProgress() {
+        alert(
+          "Fungsi Export Progress sedang disiapkan di versi ini. Silakan gunakan Export Anomali.",
+        );
+      }
+
+      // Inisialisasi Saat Load
       document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("sheetUrl").value = HARDCODED_URL;
-        connectedUrl = HARDCODED_URL;
-        const savedInt = localStorage.getItem("fasih_interval");
-        if (savedInt) {
-          document.getElementById("intervalSelect").value = savedInt;
-          updateInterval();
-        }
-        fetchData(true);
+        // Terapkan hardcoded URL langsung ke dalam input box di Pengaturan
+        document.getElementById("sheetUrlProgress").value = urls.progress || "";
+        document.getElementById("sheetUrlAnomaliKeluarga").value =
+          urls.anoKel || "Belum ada link hardcode untuk Anomali Keluarga";
+        document.getElementById("sheetUrlAnomaliUsaha").value =
+          urls.anoUsaha || "Belum ada link hardcode untuk Anomali Usaha";
+
+        // Coba baca parameter auto-refresh yang mungkin tersimpan
+        const sInt = localStorage.getItem("fasih_interval");
+        if (sInt) document.getElementById("intervalSelect").value = sInt;
+
+        // Jalankan Fetch otomatis (Karena Data sekarang Di-hardcode)
+        fetchDataAll(false);
       });
     </script>
   </body>
