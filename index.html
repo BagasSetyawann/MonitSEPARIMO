@@ -1595,6 +1595,34 @@
 
       function switchTableView(view) {
         progTableView = view;
+        const btnP = document.getElementById("tBtnPPL");
+        const btnS = document.getElementById("tBtnSLS");
+        const btnK = document.getElementById("tBtnKec");
+        if (btnP && btnS && btnK) {
+          btnP.className =
+            view === "ppl"
+              ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
+              : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
+          btnS.className =
+            view === "sls"
+              ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
+              : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
+          btnK.className =
+            view === "kec"
+              ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
+              : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
+        }
+
+        const title = document.getElementById("tableTitle");
+        if (title) {
+          title.textContent =
+            view === "ppl"
+              ? "Rincian Data PPL"
+              : view === "sls"
+                ? "Rincian Data SLS"
+                : "Rincian Data Kecamatan";
+        }
+
         applyFiltersProgress();
       }
       function sortByProgress(col) {
@@ -2056,8 +2084,74 @@
       }
 
       function exportExcelProgress() {
-        alert(
-          "Fungsi Export Progress sedang disiapkan di versi ini. Silakan gunakan Export Anomali.",
+        if (!progDataFiltered || progDataFiltered.length === 0)
+          return alert("Data kosong.");
+
+        // Aggregrate data similarly to renderTableProgress()
+        const agg = {};
+        progDataFiltered.forEach((r) => {
+          let key =
+            progTableView === "ppl"
+              ? r.username
+              : progTableView === "sls"
+                ? r.fullCode
+                : r.kecCode;
+          if (!agg[key])
+            agg[key] = {
+              loc: new Set(),
+              target: 0,
+              APP: 0,
+              OPN: 0,
+              DRF: 0,
+              SUB: 0,
+              REJ: 0,
+              name: r.namePPL,
+              kec: getKecLabel(r.kecCode),
+            };
+          agg[key].loc.add(
+            progTableView === "ppl"
+              ? r.fullCode
+              : progTableView === "kec"
+                ? r.username
+                : r.namePPL,
+          );
+          agg[key].target += r.target;
+          agg[key].APP += r.APPROVED;
+          agg[key].OPN += r.OPEN;
+          agg[key].DRF += r.DRAFT;
+          agg[key].SUB += r.SUBMITTED;
+          agg[key].REJ += r.REJECTED;
+        });
+
+        const exportRows = Object.entries(agg).map(([k, v]) => {
+          const progVal = v.SUB + v.REJ + v.APP,
+            progDen = v.OPN + v.DRF + v.SUB + v.APP + v.REJ;
+          const pct = progDen > 0 ? (progVal / progDen) * 100 : 0;
+          return {
+            Key: k,
+            Nama: v.name,
+            Kecamatan: v.kec,
+            Lokasi:
+              progTableView === "kec"
+                ? `${v.loc.size} PPL`
+                : [...v.loc].join(", "),
+            Target: v.target,
+            Progress: progVal,
+            "Pct Selesai (%)": parseFloat(pct.toFixed(2)),
+            Approved: v.APP,
+            Submitted: v.SUB,
+            Draft: v.DRF,
+            Rejected: v.REJ,
+            Open: v.OPN,
+          };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(exportRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, `Progress_${progTableView}`);
+        XLSX.writeFile(
+          wb,
+          `Data_Progress_${progTableView}_${new Date().getTime()}.xlsx`,
         );
       }
 
