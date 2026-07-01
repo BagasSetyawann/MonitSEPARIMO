@@ -773,7 +773,7 @@
       </div>
 
       <!-- KPIs Anomali -->
-      <div class="grid grid-cols-1 gap-4 mb-6">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div
           class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4"
         >
@@ -789,6 +789,46 @@
             <h3
               class="text-2xl font-black text-gray-800 leading-none mt-1"
               id="kAnomaliTotal"
+            >
+              0
+            </h3>
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4"
+        >
+          <div
+            class="bg-green-50 w-12 h-12 rounded-full flex items-center justify-center text-green-500 text-xl"
+          >
+            <i class="fa-solid fa-check"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-gray-400 uppercase">
+              Sudah Selesai
+            </p>
+            <h3
+              class="text-2xl font-black text-green-500 leading-none mt-1"
+              id="kAnomaliSudah"
+            >
+              0
+            </h3>
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4"
+        >
+          <div
+            class="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center text-gray-400 text-xl"
+          >
+            <i class="fa-regular fa-clock"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-gray-400 uppercase">
+              Belum Selesai
+            </p>
+            <h3
+              class="text-2xl font-black text-gray-500 leading-none mt-1"
+              id="kAnomaliBelum"
             >
               0
             </h3>
@@ -887,6 +927,9 @@
                 <th class="px-4 py-3 font-bold max-w-[200px]">
                   Jenis Anomali / Keterangan
                 </th>
+                <th class="px-4 py-3 font-bold text-center w-36">
+                  Status Perbaikan
+                </th>
                 <th class="px-4 py-3 font-bold text-center w-28">Aksi</th>
               </tr>
             </thead>
@@ -919,6 +962,18 @@
         "https://docs.google.com/spreadsheets/d/e/2PACX-1vT14YnYV6GJ0AC7yKmdb7yRDcwAY2f01CSbUzH7ptdgFpqbURsTbVYTLC58a-fLHEeVB57tQAIpPjQ8/pub?output=csv";
 
       // ============================================================
+      //  ENDPOINT UPDATE STATUS (Google Apps Script Web App)
+      //  Wajib diisi agar tombol "Tandai Sudah/Belum" bisa menulis
+      //  balik ke Google Spreadsheet. Lihat instruksi setup Apps
+      //  Script yang menyertai file ini.
+      // ============================================================
+      const HARDCODED_SCRIPT_ANO_KEL =
+        "https://script.google.com/macros/s/AKfycbyxhJJQNO1S38WS-I3lfLUMJ8hwD2ZYzlCLRQorLl4YPI3GCWHj3Xl9l5rJqLnn9g27/exec";
+      const HARDCODED_SCRIPT_ANO_USA =
+        "https://script.google.com/macros/s/AKfycbym7gMuK4Oa2n27sAdU9jF28Il4GDn1qaavdP-BOUzwwPkrcQOu4Grglxm4wfWCKNmgsg/exec"; // Harus SAMA PERSIS dengan SECRET_KEY di kode Apps Script.
+      const UPDATE_SECRET_KEY = "uhuyapipi";
+
+      // ============================================================
       //  STATE VARIABLES
       // ============================================================
       // State Progress
@@ -946,6 +1001,8 @@
         progress: HARDCODED_URL_PROGRESS,
         anoKel: HARDCODED_URL_ANO_KEL,
         anoUsaha: HARDCODED_URL_ANO_USA,
+        scriptKel: HARDCODED_SCRIPT_ANO_KEL,
+        scriptUsaha: HARDCODED_SCRIPT_ANO_USA,
       };
 
       // Referensi Kecamatan BPS (Parigi Moutong)
@@ -1077,6 +1134,8 @@
       }
 
       // Fetch Khusus Data CSV Raw dari Export Sistem BPS (Membersihkan Metadata BPS)
+      // Sekaligus melacak nomor baris ASLI di Google Sheet untuk tiap baris data,
+      // supaya update status bisa ditulis balik ke baris yang tepat.
       function fetchBPSCSV(url) {
         return fetch(url + (url.includes("?") ? "&" : "?") + "_t=" + Date.now())
           .then((res) => res.text())
@@ -1097,17 +1156,37 @@
               }
             }
 
-            // Buang metadata di atas header, dan baris format (1),(2)... jika ada
-            const validCsv = lines
-              .slice(startIdx)
-              .filter((l) => !l.startsWith("(1),(2)"))
-              .join("\n");
+            const headerLine = lines[startIdx];
+
+            // Buang metadata di atas header, dan baris format (1),(2)... jika ada,
+            // sambil mencatat nomor baris asli (1-indexed, sesuai baris di Sheet).
+            const dataLinesWithRowNum = [];
+            for (let i = startIdx + 1; i < lines.length; i++) {
+              const l = lines[i];
+              if (l.startsWith("(1),(2)")) continue;
+              if (l.trim() === "") continue;
+              dataLinesWithRowNum.push({ line: l, rowNum: i + 1 });
+            }
+
+            const validCsv = [
+              headerLine,
+              ...dataLinesWithRowNum.map((d) => d.line),
+            ].join("\n");
 
             return new Promise((resolve) => {
               Papa.parse(validCsv, {
                 header: true,
                 skipEmptyLines: true,
-                complete: resolve,
+                complete: (res) => {
+                  if (res.data) {
+                    res.data.forEach((row, idx) => {
+                      if (dataLinesWithRowNum[idx]) {
+                        row.__sheetRow = dataLinesWithRowNum[idx].rowNum;
+                      }
+                    });
+                  }
+                  resolve(res);
+                },
                 error: () => resolve({ data: null }),
               });
             });
@@ -1814,7 +1893,7 @@
           row.deskripsi || row.deskripsi_anomali || jAnomali,
         ).trim(); // BPS usually puts everything in "Nama Anomali"
         const statusRaw = String(
-          row["Tindak Lanjut"] || row.status_perbaikan || "Belum",
+          row["tindak_lanjut"] || row.status_perbaikan || "Belum",
         )
           .trim()
           .toLowerCase();
@@ -1837,6 +1916,8 @@
           link: getAnomaliLink(row),
           statusText: isSelesai ? "Sudah" : "Belum",
           isSelesai: isSelesai,
+          sheetRow: row.__sheetRow || null,
+          anoType: type,
         };
       }
 
@@ -2007,8 +2088,14 @@
         });
 
         const tot = anoFiltered.length;
+        const sudah = anoFiltered.filter((r) => r.isSelesai).length;
+        const belum = tot - sudah;
         document.getElementById("kAnomaliTotal").textContent =
           tot.toLocaleString("id-ID");
+        document.getElementById("kAnomaliSudah").textContent =
+          sudah.toLocaleString("id-ID");
+        document.getElementById("kAnomaliBelum").textContent =
+          belum.toLocaleString("id-ID");
         document.getElementById("infoAnomaliFiltered").textContent =
           `Menampilkan ${tot} baris data`;
 
@@ -2028,7 +2115,7 @@
       function renderTableAnomali() {
         const tbody = document.getElementById("tableBodyAnomali");
         if (anoFiltered.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">Tidak ada data anomali yang sesuai filter.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Tidak ada data anomali yang sesuai filter.</td></tr>`;
           return;
         }
 
@@ -2041,6 +2128,20 @@
             <td class="px-4 py-3 font-medium text-gray-800">${r.petugas}</td>
             <td class="px-4 py-3 font-semibold text-brand-600">${r.subjek}</td>
             <td class="px-4 py-3 text-gray-600 text-[11px] font-medium leading-tight max-w-[200px]" title="${r.desc}">${r.desc}</td>
+            <td class="px-4 py-3 text-center">
+              <div class="flex flex-col items-center gap-1">
+                <select
+                  onchange="updateAnomaliStatus(${r.sheetRow ?? "null"}, '${r.anoType}', this)"
+                  data-original="${r.statusText}"
+                  ${r.sheetRow ? "" : 'disabled title="Baris sheet tidak terdeteksi, tidak bisa diupdate otomatis"'}
+                  class="text-[11px] font-semibold rounded-full px-2 py-1.5 border focus:outline-none focus:ring-2 focus:ring-brand-50 cursor-pointer transition disabled:opacity-50 disabled:cursor-not-allowed ${r.isSelesai ? "bg-green-50 border-green-200 text-green-600" : "bg-gray-50 border-gray-200 text-gray-500"}"
+                >
+                  <option value="Belum" ${!r.isSelesai ? "selected" : ""}>Belum Selesai</option>
+                  <option value="Sudah" ${r.isSelesai ? "selected" : ""}>Sudah Selesai</option>
+                </select>
+                <i class="fa-solid fa-circle-notch fa-spin text-brand-500 text-[10px] hidden statusSpinner"></i>
+              </div>
+            </td>
             <td class="px-4 py-3 text-center">
               ${
                 r.link
@@ -2057,9 +2158,74 @@
 
         let extra =
           anoFiltered.length > 100
-            ? `<tr><td colspan="5" class="px-4 py-3 text-center text-[11px] text-gray-400 bg-gray-50">Menampilkan 100 dari ${anoFiltered.length} data. Gunakan filter/export untuk melihat semua.</td></tr>`
+            ? `<tr><td colspan="6" class="px-4 py-3 text-center text-[11px] text-gray-400 bg-gray-50">Menampilkan 100 dari ${anoFiltered.length} data. Gunakan filter/export untuk melihat semua.</td></tr>`
             : "";
         tbody.innerHTML = rows + extra;
+      }
+
+      // Menulis balik status "Sudah/Belum" ke Google Spreadsheet lewat
+      // Apps Script Web App (lihat instruksi setup Apps Script terpisah).
+      async function updateAnomaliStatus(sheetRow, type, selectEl) {
+        const scriptUrl =
+          type === "keluarga" ? urls.scriptKel : urls.scriptUsaha;
+        const newStatus = selectEl.value;
+        const originalValue = selectEl.dataset.original;
+
+        if (!sheetRow) {
+          alert(
+            "Baris data ini tidak memiliki referensi baris Sheet yang valid, sehingga tidak bisa diupdate otomatis.",
+          );
+          selectEl.value = originalValue;
+          return;
+        }
+
+        if (!scriptUrl || scriptUrl.startsWith("GANTI_DENGAN")) {
+          alert(
+            "URL Apps Script Web App belum dikonfigurasi. Lihat instruksi setup Apps Script yang menyertai dashboard ini, lalu isi HARDCODED_SCRIPT_ANO_KEL / HARDCODED_SCRIPT_ANO_USA di kode.",
+          );
+          selectEl.value = originalValue;
+          return;
+        }
+
+        const wrapper = selectEl.closest("td");
+        const spinner = wrapper
+          ? wrapper.querySelector(".statusSpinner")
+          : null;
+        selectEl.disabled = true;
+        if (spinner) spinner.classList.remove("hidden");
+
+        try {
+          const res = await fetch(scriptUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              row: sheetRow,
+              status: newStatus,
+              secret: UPDATE_SECRET_KEY,
+            }),
+          });
+          const json = await res.json();
+          if (!json.success) throw new Error(json.error || "Gagal menyimpan.");
+
+          // Update state lokal supaya UI langsung sinkron tanpa perlu refresh
+          const isSelesai = newStatus === "Sudah";
+          const pool = type === "keluarga" ? anoDataKeluarga : anoDataUsaha;
+          const target = pool.find((r) => r.sheetRow === sheetRow);
+          if (target) {
+            target.isSelesai = isSelesai;
+            target.statusText = newStatus;
+          }
+          selectEl.dataset.original = newStatus;
+
+          updateBadgeAnomali();
+          applyFiltersAnomali(null); // re-hitung KPI & render ulang tabel tanpa reset filter dropdown
+        } catch (err) {
+          alert("Gagal menyimpan perubahan ke Spreadsheet: " + err.message);
+          selectEl.value = originalValue;
+        } finally {
+          selectEl.disabled = false;
+          if (spinner) spinner.classList.add("hidden");
+        }
       }
 
       function exportExcelAnomali() {
@@ -2071,6 +2237,7 @@
           Petugas: r.petugas,
           [anoActiveTab === "keluarga" ? "Nama KRT" : "Nama Usaha"]: r.subjek,
           "Keterangan Anomali": r.desc,
+          "Status Perbaikan": r.statusText,
           Link: r.link || "",
         }));
 
