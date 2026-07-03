@@ -1735,7 +1735,7 @@
         // Hitung sisa hari dari hari ini sampai 15 Juli 2026
         const today = new Date();
         const targetDate = new Date('2026-07-15T23:59:59');
-        let daysLeft = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+        let daysLeft = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24))-1;
         if (daysLeft < 1) daysLeft = 1; // Mencegah pembagian 0 atau minus
 
         let rows = Object.entries(agg).map(([k, v]) => {
