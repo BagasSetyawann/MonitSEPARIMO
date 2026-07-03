@@ -694,6 +694,13 @@
                   % Selesai<i class="fa-solid fa-sort sort-icon" id="siPct"></i>
                 </th>
                 <th
+                  class="px-5 py-3 text-right font-bold text-blue-600 sortable"
+                  onclick="sortByProgress('dailyTarget')"
+                  title="Target yang harus diselesaikan tiap harinya sampai tanggal 15 Juli agar tercapai 40%"
+                >
+                  Target/Hari<br>(s.d 15 Jul)<i class="fa-solid fa-sort sort-icon" id="siDailyTarget"></i>
+                </th>
+                <th
                   class="px-5 py-3 text-right font-bold text-green-600 sortable"
                   onclick="sortByProgress('APPROVED')"
                 >
@@ -741,7 +748,8 @@
           class="px-5 py-3 text-[10px] text-gray-400 border-t border-gray-100 flex justify-between bg-gray-50/50"
           id="tableFooterProgress"
         >
-          <span></span><span></span>
+          <span>* Target/Hari dihitung untuk mengejar Progress minimal 40% (Target 40% dikurangi Progress Saat Ini dibagi Sisa Hari)</span>
+          <span></span>
         </div>
       </div>
     </main>
@@ -1244,19 +1252,6 @@
               }
             }),
           );
-        } else {
-          Papa.parse(DUMMY_ANO_KEL, {
-            header: true,
-            complete: (res) => {
-              anoDataKeluarga = res.data
-                .map((r) => parseRowAnomali(r, "keluarga"))
-                .filter(Boolean);
-              const ts = getLatestUpdatedAt(res.data);
-              if (ts && (!latestDataTimestamp || ts > latestDataTimestamp)) {
-                latestDataTimestamp = ts;
-              }
-            },
-          });
         }
 
         // 3. Fetch Anomali Usaha (Smart Cleanup BPS)
@@ -1274,19 +1269,6 @@
               }
             }),
           );
-        } else {
-          Papa.parse(DUMMY_ANO_USA, {
-            header: true,
-            complete: (res) => {
-              anoDataUsaha = res.data
-                .map((r) => parseRowAnomali(r, "usaha"))
-                .filter(Boolean);
-              const ts = getLatestUpdatedAt(res.data);
-              if (ts && (!latestDataTimestamp || ts > latestDataTimestamp)) {
-                latestDataTimestamp = ts;
-              }
-            },
-          });
         }
 
         await Promise.allSettled(promises);
@@ -1750,9 +1732,21 @@
           agg[key].REJ += r.REJECTED;
         });
 
+        // Hitung sisa hari dari hari ini sampai 15 Juli 2026
+        const today = new Date();
+        const targetDate = new Date('2026-07-15T23:59:59');
+        let daysLeft = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+        if (daysLeft < 1) daysLeft = 1; // Mencegah pembagian 0 atau minus
+
         let rows = Object.entries(agg).map(([k, v]) => {
-          const progVal = v.SUB + v.REJ + v.APP,
-            progDen = v.OPN + v.DRF + v.SUB + v.APP + v.REJ;
+          const progVal = v.SUB + v.REJ + v.APP;
+          const progDen = v.OPN + v.DRF + v.SUB + v.APP + v.REJ;
+          
+          // Kolom Kalkulasi Target/Hari
+          const target40 = Math.ceil(v.target * 0.4);
+          const shortfall = Math.max(0, target40 - progVal);
+          const dailyTarget = shortfall > 0 ? (shortfall / daysLeft) : 0;
+
           return {
             key: k,
             loc:
@@ -1761,6 +1755,8 @@
                 : [...v.loc].join(", "),
             progVal,
             pct: progDen > 0 ? (progVal / progDen) * 100 : 0,
+            dailyTarget,
+            shortfall,
             ...v,
           };
         });
@@ -1811,6 +1807,9 @@
             <td class="px-5 py-3 text-right text-gray-600">${item.target}</td>
             <td class="px-5 py-3 text-right font-bold text-brand-600">${item.progVal}</td>
             <td class="px-5 py-3 text-right font-bold ${item.pct >= 90 ? "text-green-600" : item.pct >= 50 ? "text-brand-600" : "text-gray-500"}">${item.pct.toFixed(2)}%</td>
+            <td class="px-5 py-3 text-right font-bold text-blue-600 bg-blue-50/30" title="Kekurangan s.d 40%: ${item.shortfall} dokumen">
+               ${item.dailyTarget > 0 ? item.dailyTarget.toFixed(1) : '<i class="fa-solid fa-check text-green-500" title="Sudah Tercapai"></i>'}
+            </td>
             <td class="px-5 py-3 text-right font-semibold text-green-600">${item.APP}</td>
             <td class="px-5 py-3 text-right font-medium text-brand-500">${item.SUB}</td>
             <td class="px-5 py-3 text-right font-medium text-yellow-500">${item.DRF}</td>
@@ -2289,11 +2288,23 @@
           agg[key].SUB += r.SUBMITTED;
           agg[key].REJ += r.REJECTED;
         });
+        
+        // Hitung sisa hari dari hari ini sampai 15 Juli 2026
+        const today = new Date();
+        const targetDate = new Date('2026-07-15T23:59:59');
+        let daysLeft = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+        if (daysLeft < 1) daysLeft = 1;
 
         const exportRows = Object.entries(agg).map(([k, v]) => {
           const progVal = v.SUB + v.REJ + v.APP,
             progDen = v.OPN + v.DRF + v.SUB + v.APP + v.REJ;
           const pct = progDen > 0 ? (progVal / progDen) * 100 : 0;
+          
+          // Kalkulasi Target harian 15 Jul 40%
+          const target40 = Math.ceil(v.target * 0.4);
+          const shortfall = Math.max(0, target40 - progVal);
+          const dailyTarget = shortfall > 0 ? (shortfall / daysLeft) : 0;
+
           return {
             Key: k,
             Nama: v.name,
@@ -2305,6 +2316,9 @@
             Target: v.target,
             Progress: progVal,
             "Pct Selesai (%)": parseFloat(pct.toFixed(2)),
+            "Target 40% (15 Jul)": target40,
+            "Kekurangan (Dok)": shortfall,
+            "Target/Hari (s.d 15 Jul)": parseFloat(dailyTarget.toFixed(2)),
             Approved: v.APP,
             Submitted: v.SUB,
             Draft: v.DRF,
