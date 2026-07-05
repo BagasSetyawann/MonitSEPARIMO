@@ -1786,8 +1786,7 @@
         // Hitung sisa hari dari hari ini sampai 15 Juli 2026
         const today = new Date();
         const targetDate = new Date("2026-07-15T23:59:59");
-        let daysLeft =
-          Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24)) - 1;
+        let daysLeft = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
         if (daysLeft < 1) daysLeft = 1; // Mencegah pembagian 0 atau minus
 
         let rows = Object.entries(agg).map(([k, v]) => {
@@ -2377,7 +2376,7 @@
             "Pct Selesai (%)": parseFloat(pct.toFixed(2)),
             "Target 40% (15 Jul)": target40,
             "Kekurangan (Dok)": shortfall,
-            "Target/Hari (s.d 15 Jul)": parseFloat(dailyTarget.toFixed(2)),
+            "Target/Hari (s.d 15 Jul)": parseFloat(dailyTarget.toFixed(1)),
             Approved: v.APP,
             Submitted: v.SUB,
             Draft: v.DRF,
