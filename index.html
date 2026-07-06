@@ -790,8 +790,17 @@
           >
             <i class="fa-solid fa-store mr-2 text-brand-500"></i> Anomali Usaha
           </button>
+          <button
+            onclick="switchSubTabAnomali('panduan')"
+            id="subTabPanduan"
+            class="px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition"
+          >
+            <i class="fa-solid fa-book mr-2 text-brand-500"></i> Panduan
+          </button>
         </div>
       </div>
+
+      <div id="anomaliDataSection">
 
       <!-- KPIs Anomali -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -961,6 +970,226 @@
               <!-- Content Injected via JS -->
             </tbody>
           </table>
+        </div>
+      </div>
+      </div>
+
+      <!-- ========== PANDUAN ANOMALI SECTION ========== -->
+      <div id="anomaliPanduanSection" class="hidden fade-in space-y-6">
+        <!-- Header Card -->
+        <div class="bg-gradient-to-r from-brand-500 to-orange-600 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+          <div class="absolute right-[-20px] top-1/2 -translate-y-1/2 opacity-15">
+            <i class="fa-solid fa-book-open text-9xl"></i>
+          </div>
+          <div class="relative z-10 max-w-2xl">
+            <span class="bg-white/20 text-white text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full mb-3 inline-block">Panduan Resmi</span>
+            <h2 class="text-2xl sm:text-3xl font-black mb-2 tracking-tight">Panduan Penanganan Anomali SE2026</h2>
+            <p class="text-xs sm:text-sm text-brand-100 font-medium leading-relaxed">
+              Panduan langkah-langkah verifikasi dan probing ulang untuk memperbaiki data hasil pendataan keluarga dan usaha yang masuk dalam kategori anomali.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <!-- Panduan Usaha Card -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+              <div class="bg-brand-50 text-brand-600 rounded-xl p-2.5 flex items-center justify-center">
+                <i class="fa-solid fa-store text-lg"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-gray-800 text-base">Panduan Anomali Usaha</h3>
+                <p class="text-[11px] text-gray-400">Daftar aturan validasi dan verifikasi untuk data usaha</p>
+              </div>
+            </div>
+            
+            <div class="space-y-4 flex-grow overflow-y-auto max-h-[600px] pr-2 scrollbar-hide">
+              <!-- Item 1 -->
+              <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali 1</span>
+                </div>
+                <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                  Kegiatan tidak memproduksi barang sendiri, namun komposisi pengeluaran pada biaya produksi dominan (&gt;50%)
+                </h4>
+                <div class="bg-white rounded-lg p-3 border border-gray-100">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah Solusi</span>
+                  <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                    <li>Cek Kategori Usaha</li>
+                    <li>Jika Bukan Kategori Industri (Kategori C) atau tidak memproduksi barang sendiri (R13b1 terisi Tidak), maka Rincian Biaya Produksi (R26b) tidak boleh lebih dari 50 persen dari Total Pengeluaran (R26f)</li>
+                  </ol>
+                </div>
+              </div>
+
+              <!-- Item 2 -->
+              <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali 2</span>
+                </div>
+                <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                  Selisih pendapatan dan pengeluaran negatif
+                </h4>
+                <div class="bg-white rounded-lg p-3 border border-gray-100">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah Solusi</span>
+                  <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                    <li>Cek Pendapatan usaha (R27a) apakah sudah sesuai dengan pendapatan setahun</li>
+                    <li>Cek Pengeluaran usaha (R26) apakah sudah sesuai dengan pengeluaran setahun. Pengeluaran usaha tidak termasuk pengeluaran untuk membeli aset usaha</li>
+                    <li>Untuk (R27a) pendapatan bisa 0 hanya untuk kategori hortikulturan dan perkebunan jika masih belum menghasilkan selain kategori tersebut pastikan diprobing ulang</li>
+                  </ol>
+                </div>
+              </div>
+
+              <!-- Item 3 -->
+              <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali 3</span>
+                </div>
+                <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                  Anomali Status Badan Usaha 'Bukan Badan Usaha' dengan permodalan korporasi publik
+                </h4>
+                <div class="bg-white rounded-lg p-3 border border-gray-100">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah Solusi</span>
+                  <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                    <li>Cek Status Badan Usaha (R11a), apa benar status badan usahanya Kode 13. Bukan Badan Usaha?</li>
+                    <li>Cek Susunan kepemelikan modal (R29), jika benar Status Badan Usaha (R11a) berkode 13, maka susunan kepemilikan modal dari Korporasi Publik (R29c) harusnya terisi 0</li>
+                  </ol>
+                </div>
+              </div>
+
+              <!-- Item 6 -->
+              <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali 6</span>
+                </div>
+                <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                  Penggunaan Internet Pada Usaha Menengah dan Besar ("Pendapatan usaha menunjukkan skala unit usaha berkategori menengah dan besar, namun tidak menggunakan internet.")
+                </h4>
+                <div class="bg-white rounded-lg p-3 border border-gray-100">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah Solusi</span>
+                  <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                    <li>Cek terlebih dahulu pendapatan usaha (R.27) apakah sudah benar</li>
+                    <li>Cek kembali isian penggunaan internet (R.16) jika usaha kategori menengah dan besar</li>
+                  </ol>
+                </div>
+              </div>
+
+              <!-- Item 7 -->
+              <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali 7</span>
+                </div>
+                <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                  Kepemilikan Laporan Keuangan Pada Usaha Menengah dan Besar ("Pendapatan usaha menunjukkan skala unit usaha berkategori menengah dan besar, namun tidak memiliki laporan/catatan keuangan.")
+                </h4>
+                <div class="bg-white rounded-lg p-3 border border-gray-100">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah Solusi</span>
+                  <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                    <li>Cek terlebih dahulu pendapatan usaha (R.27) apakah sudah benar</li>
+                    <li>Cek kembali isian terdapat laporan keuangan (R.11.d) pada usaha kategori menengah dan besar</li>
+                  </ol>
+                </div>
+              </div>
+
+              <!-- Item 8 -->
+              <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali 8</span>
+                </div>
+                <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                  KBLI 2 digit hasil pendataan berbeda dengan KBLI 2 digit pada SBR, sehingga perlu dilakukan verifikasi kesesuaian klasifikasi usaha dan mapping kode KBLI apabila diperlukan.
+                </h4>
+                <div class="bg-white rounded-lg p-3 border border-gray-100">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah Solusi</span>
+                  <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                    <li>Cek Kesesuaian KBLI dan berikan catatan jika sudah sesuai.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panduan Keluarga Card -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+              <div class="bg-brand-50 text-brand-600 rounded-xl p-2.5 flex items-center justify-center">
+                <i class="fa-solid fa-users text-lg"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-gray-800 text-base">Panduan Anomali Keluarga</h3>
+                <p class="text-[11px] text-gray-400">Daftar aturan validasi dan verifikasi untuk data keluarga</p>
+              </div>
+            </div>
+            
+            <div class="space-y-4 flex-grow overflow-y-auto max-h-[600px] pr-2 scrollbar-hide">
+              <!-- Item 1 -->
+              <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali Keluarga 2</span>
+                </div>
+                <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                  Anomali Kepala Keluarga &lt; 10 Th di Rumah Sendiri ("Umur Kepala Keluarga &lt; 10 tahun dan tinggal di rumah milik sendiri")
+                </h4>
+                <div class="bg-white rounded-lg p-3 border border-gray-100">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah Solusi</span>
+                  <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                    <li>Cek isian umur kepala rumah tangga</li>
+                    <li>Cek isian terkait status perumahan</li>
+                  </ol>
+                </div>
+              </div>
+
+              <!-- Item 2 -->
+              <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali Keluarga 4</span>
+                </div>
+                <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                  Luas lantai per kapita &lt; 3 m2 atau &gt; 200 m2
+                </h4>
+                <div class="bg-white rounded-lg p-3 border border-gray-100">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah Solusi</span>
+                  <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                    <li>Cek isian terkait luas lantai tempat tinggal (Blok IV R.5) dan bagi dengan jumlah anggota keluarga yang tinggal untuk memperoleh luas lantai perkapita</li>
+                    <li>Perbaiki isian luas lantai jika tidak sesuai kondisi lapangan.</li>
+                  </ol>
+                </div>
+              </div>
+
+              <!-- Item 3 -->
+              <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali Keluarga 5</span>
+                </div>
+                <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                  Selisih pendapatan dan pengeluaran negatif
+                </h4>
+                <div class="bg-white rounded-lg p-3 border border-gray-100">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah Solusi</span>
+                  <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                    <li>Cek isian rincian pengeluaran pada (IV)</li>
+                  </ol>
+                </div>
+              </div>
+
+              <!-- Item 4 -->
+              <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                  <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali Keluarga 6</span>
+                </div>
+                <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                  Anomali Listrik Rendah &amp; Ada Barang Mewah ("Pengeluaran listrik sebulan &lt; Rp100.000 atau daya listrik &lt; 900 watt tetapi memiliki lemari es/kulkas, AC, komputer/laptop/tablet")
+                </h4>
+                <div class="bg-white rounded-lg p-3 border border-gray-100">
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah Solusi</span>
+                  <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                    <li>Cek terkait isian daya listrik</li>
+                    <li>Cek isian pengeluaran listrik sebulan</li>
+                    <li>Cek isian terkait aset kepemilikan seperti lemari es/kulkas, AC, Komputer/laptop/tablet</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -1994,26 +2223,50 @@
         anoActiveTab = type;
         const btnKel = document.getElementById("subTabKeluarga");
         const btnUsa = document.getElementById("subTabUsaha");
+        const btnPan = document.getElementById("subTabPanduan");
+        const dataSec = document.getElementById("anomaliDataSection");
+        const panSec = document.getElementById("anomaliPanduanSection");
 
         if (type === "keluarga") {
           btnKel.className =
             "px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition";
           btnUsa.className =
             "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+          btnPan.className =
+            "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+          dataSec.classList.remove("hidden");
+          panSec.classList.add("hidden");
           anoCurrentData = anoDataKeluarga;
           document.getElementById("thSubjekAnomali").textContent = "Nama KRT";
-        } else {
+          
+          document.getElementById("filterAKec").value = "";
+          populateDropdownsAnomali(anoCurrentData);
+          applyFiltersAnomali("all");
+        } else if (type === "usaha") {
           btnUsa.className =
             "px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition";
           btnKel.className =
             "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+          btnPan.className =
+            "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+          dataSec.classList.remove("hidden");
+          panSec.classList.add("hidden");
           anoCurrentData = anoDataUsaha;
           document.getElementById("thSubjekAnomali").textContent = "Nama Usaha";
+          
+          document.getElementById("filterAKec").value = "";
+          populateDropdownsAnomali(anoCurrentData);
+          applyFiltersAnomali("all");
+        } else if (type === "panduan") {
+          btnPan.className =
+            "px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition";
+          btnKel.className =
+            "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+          btnUsa.className =
+            "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+          dataSec.classList.add("hidden");
+          panSec.classList.remove("hidden");
         }
-
-        document.getElementById("filterAKec").value = "";
-        populateDropdownsAnomali(anoCurrentData);
-        applyFiltersAnomali("all");
       }
 
       function populateDropdownsAnomali(dataPool, cascadeFrom = null) {
