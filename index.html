@@ -391,7 +391,7 @@
         <div class="relative z-10">
           <div class="flex justify-between items-start mb-2">
             <p class="text-[10px] sm:text-xs font-bold text-brand-100 uppercase tracking-wider"
-              title="Disubmit + Diapprove + Direject + Direvoke">
+              title="Total Target - (Open + Draft)">
               Progress Lapangan
             </p>
           </div>
@@ -1449,7 +1449,7 @@
         .map((k) => {
           const pool = progDataAll.filter((r) => r.kecCode === k);
           const pVal = pool.reduce(
-            (s, r) => s + r.target - r.OPEN,
+            (s, r) => s + r.target - r.OPEN - r.DRAFT,
             0,
           );
           const pDen = pool.reduce(
@@ -1527,7 +1527,7 @@
         edAdm = sum("EDITED_BY_ADMIN_KABUPATEN"),
         rejAdm = sum("REJECTED_BY_ADMIN_KABUPATEN");
 
-      const numProg = total - open;
+      const numProg = total - open - draft;
       const pctProg = total > 0 ? (numProg / total) * 100 : 0;
 
       document.getElementById("kTarget").textContent =
@@ -1833,7 +1833,7 @@
       if (daysLeft < 1) daysLeft = 1; // Mencegah pembagian 0 atau minus
 
       let rows = Object.entries(agg).map(([k, v]) => {
-        const progVal = v.target - v.OPEN;
+        const progVal = v.target - v.OPEN - v.DRAFT;
         const progDen = v.target;
 
         // Kolom Kalkulasi Target/Hari
@@ -2401,7 +2401,7 @@
       if (daysLeft < 1) daysLeft = 1;
 
       const exportRows = Object.entries(agg).map(([k, v]) => {
-        const progVal = v.target - v.OPEN;
+        const progVal = v.target - v.OPEN - v.DRAFT;
         const pct = v.target > 0 ? (progVal / v.target) * 100 : 0;
 
         // Kalkulasi Target harian 15 Jul 40%
