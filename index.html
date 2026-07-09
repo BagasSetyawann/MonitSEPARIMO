@@ -350,12 +350,12 @@
           <option value="">Semua Status</option>
           <option value="OPEN">Ada OPEN</option>
           <option value="DRAFT">Ada DRAFT</option>
-          <option value="SUBMITTED_BY_PENCACAH">Ada SUB PCH</option>
+          <option value="SUBMITTED_BY_PENCACAH">Ada SUB PPL</option>
           <option value="SUBMITTED_RESPONDENT">Ada SUB RSP</option>
-          <option value="APPROVED_BY_PENGAWAS">Ada APP PGW</option>
-          <option value="REJECTED_BY_PENGAWAS">Ada REJ PGW</option>
-          <option value="REVOKED_BY_PENGAWAS">Ada REV PGW</option>
-          <option value="EDITED_BY_PENGAWAS">Ada ED PGW</option>
+          <option value="APPROVED_BY_PENGAWAS">Ada APP PML</option>
+          <option value="REJECTED_BY_PENGAWAS">Ada REJ PML</option>
+          <option value="REVOKED_BY_PENGAWAS">Ada REV PML</option>
+          <option value="EDITED_BY_PENGAWAS">Ada ED PML</option>
           <option value="COMPLETED_BY_ADMIN_KABUPATEN">Ada COMP ADM</option>
           <option value="EDITED_BY_ADMIN_KABUPATEN">Ada ED ADM</option>
           <option value="REJECTED_BY_ADMIN_KABUPATEN">Ada REJ ADM</option>
@@ -524,17 +524,37 @@
                 title="Target yang harus diselesaikan tiap harinya sampai tanggal 15 Juli agar tercapai 40%">
                 Target/Hari<br />(s.d 15 Jul)<i class="fa-solid fa-sort sort-icon" id="siDailyTarget"></i>
               </th>
-              <th class="px-5 py-3 text-right font-bold text-gray-400 sortable" onclick="sortByProgress('OPEN')">Open<i class="fa-solid fa-sort sort-icon" id="siOPEN"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-yellow-500 sortable" onclick="sortByProgress('DRAFT')">Draft<i class="fa-solid fa-sort sort-icon" id="siDRAFT"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-blue-500 sortable" onclick="sortByProgress('SUBMITTED_BY_PENCACAH')">Sub Pch<i class="fa-solid fa-sort sort-icon" id="siSUBMITTED_BY_PENCACAH"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-indigo-500 sortable" onclick="sortByProgress('SUBMITTED_RESPONDENT')">Sub Rsp<i class="fa-solid fa-sort sort-icon" id="siSUBMITTED_RESPONDENT"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-green-500 sortable" onclick="sortByProgress('APPROVED_BY_PENGAWAS')">App Pgw<i class="fa-solid fa-sort sort-icon" id="siAPPROVED_BY_PENGAWAS"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-red-500 sortable" onclick="sortByProgress('REJECTED_BY_PENGAWAS')">Rej Pgw<i class="fa-solid fa-sort sort-icon" id="siREJECTED_BY_PENGAWAS"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-orange-500 sortable" onclick="sortByProgress('REVOKED_BY_PENGAWAS')">Rev Pgw<i class="fa-solid fa-sort sort-icon" id="siREVOKED_BY_PENGAWAS"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-teal-500 sortable" onclick="sortByProgress('EDITED_BY_PENGAWAS')">Ed Pgw<i class="fa-solid fa-sort sort-icon" id="siEDITED_BY_PENGAWAS"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-emerald-500 sortable" onclick="sortByProgress('COMPLETED_BY_ADMIN_KABUPATEN')">Comp Adm<i class="fa-solid fa-sort sort-icon" id="siCOMPLETED_BY_ADMIN_KABUPATEN"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-cyan-500 sortable" onclick="sortByProgress('EDITED_BY_ADMIN_KABUPATEN')">Ed Adm<i class="fa-solid fa-sort sort-icon" id="siEDITED_BY_ADMIN_KABUPATEN"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-rose-500 sortable" onclick="sortByProgress('REJECTED_BY_ADMIN_KABUPATEN')">Rej Adm<i class="fa-solid fa-sort sort-icon" id="siREJECTED_BY_ADMIN_KABUPATEN"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-gray-400 sortable" onclick="sortByProgress('OPEN')">Open<i
+                  class="fa-solid fa-sort sort-icon" id="siOPEN"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-yellow-500 sortable" onclick="sortByProgress('DRAFT')">
+                Draft<i class="fa-solid fa-sort sort-icon" id="siDRAFT"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-blue-500 sortable"
+                onclick="sortByProgress('SUBMITTED_BY_PENCACAH')">Sub PPL<i class="fa-solid fa-sort sort-icon"
+                  id="siSUBMITTED_BY_PENCACAH"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-indigo-500 sortable"
+                onclick="sortByProgress('SUBMITTED_RESPONDENT')">Sub Rsp<i class="fa-solid fa-sort sort-icon"
+                  id="siSUBMITTED_RESPONDENT"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-green-500 sortable"
+                onclick="sortByProgress('APPROVED_BY_PENGAWAS')">App PML<i class="fa-solid fa-sort sort-icon"
+                  id="siAPPROVED_BY_PENGAWAS"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-red-500 sortable"
+                onclick="sortByProgress('REJECTED_BY_PENGAWAS')">Rej PML<i class="fa-solid fa-sort sort-icon"
+                  id="siREJECTED_BY_PENGAWAS"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-orange-500 sortable"
+                onclick="sortByProgress('REVOKED_BY_PENGAWAS')">Rev PML<i class="fa-solid fa-sort sort-icon"
+                  id="siREVOKED_BY_PENGAWAS"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-teal-500 sortable"
+                onclick="sortByProgress('EDITED_BY_PENGAWAS')">Ed PML<i class="fa-solid fa-sort sort-icon"
+                  id="siEDITED_BY_PENGAWAS"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-emerald-500 sortable"
+                onclick="sortByProgress('COMPLETED_BY_ADMIN_KABUPATEN')">Comp Adm<i class="fa-solid fa-sort sort-icon"
+                  id="siCOMPLETED_BY_ADMIN_KABUPATEN"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-cyan-500 sortable"
+                onclick="sortByProgress('EDITED_BY_ADMIN_KABUPATEN')">Ed Adm<i class="fa-solid fa-sort sort-icon"
+                  id="siEDITED_BY_ADMIN_KABUPATEN"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-rose-500 sortable"
+                onclick="sortByProgress('REJECTED_BY_ADMIN_KABUPATEN')">Rej Adm<i class="fa-solid fa-sort sort-icon"
+                  id="siREJECTED_BY_ADMIN_KABUPATEN"></i></th>
             </tr>
           </thead>
           <tbody id="tableBodyProgress" class="divide-y divide-gray-50 bg-white"></tbody>
@@ -1497,12 +1517,12 @@
       const total = sum("target"),
         open = sum("OPEN"),
         draft = sum("DRAFT"),
-        subPch = sum("SUBMITTED_BY_PENCACAH"),
+        subPPL = sum("SUBMITTED_BY_PENCACAH"),
         subRsp = sum("SUBMITTED_RESPONDENT"),
-        appPgw = sum("APPROVED_BY_PENGAWAS"),
-        rejPgw = sum("REJECTED_BY_PENGAWAS"),
-        revPgw = sum("REVOKED_BY_PENGAWAS"),
-        edPgw = sum("EDITED_BY_PENGAWAS"),
+        appPML = sum("APPROVED_BY_PENGAWAS"),
+        rejPML = sum("REJECTED_BY_PENGAWAS"),
+        revPML = sum("REVOKED_BY_PENGAWAS"),
+        edPML = sum("EDITED_BY_PENGAWAS"),
         compAdm = sum("COMPLETED_BY_ADMIN_KABUPATEN"),
         edAdm = sum("EDITED_BY_ADMIN_KABUPATEN"),
         rejAdm = sum("REJECTED_BY_ADMIN_KABUPATEN");
@@ -1519,7 +1539,7 @@
       document.getElementById("barProgress").style.width =
         Math.min(100, pctProg) + "%";
 
-      const approvedPml = appPgw + compAdm + edAdm + edPgw;
+      const approvedPml = appPML + compAdm + edAdm + edPML;
       document.getElementById("kApproved").textContent =
         approvedPml.toLocaleString("id-ID");
       document.getElementById("kOpen").textContent =
@@ -1534,7 +1554,7 @@
         },
         {
           label: "Submitted",
-          val: subPch + subRsp,
+          val: subPPL + subRsp,
           color: "bg-brand-500",
           text: "text-brand-600",
         },
@@ -1546,13 +1566,13 @@
         },
         {
           label: "Rejected",
-          val: rejPgw + rejAdm,
+          val: rejPML + rejAdm,
           color: "bg-red-400",
           text: "text-red-500",
         },
         {
           label: "Revoked",
-          val: revPgw,
+          val: revPML,
           color: "bg-orange-400",
           text: "text-orange-600",
         },
@@ -1588,10 +1608,10 @@
               {
                 data: [
                   approvedPml,
-                  subPch + subRsp,
+                  subPPL + subRsp,
                   draft,
-                  rejPgw + rejAdm,
-                  revPgw,
+                  rejPML + rejAdm,
+                  revPML,
                   open,
                 ],
                 backgroundColor: [
