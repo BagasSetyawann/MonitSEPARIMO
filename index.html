@@ -1054,6 +1054,25 @@
     // State Anomali
     let anoDataKeluarga = [];
     let anoDataUsaha = [];
+    let localStatusUpdates = {};
+
+    try {
+      const stored = localStorage.getItem("monit_local_status_updates");
+      if (stored) {
+        localStatusUpdates = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error("Gagal memuat localStatusUpdates dari localStorage:", e);
+    }
+
+    function saveLocalStatusUpdates() {
+      try {
+        localStorage.setItem("monit_local_status_updates", JSON.stringify(localStatusUpdates));
+      } catch (e) {
+        console.error("Gagal menyimpan localStatusUpdates ke localStorage:", e);
+      }
+    }
+
     let anoActiveTab = "keluarga"; // 'keluarga' or 'usaha'
     let anoCurrentData = [];
     let anoFiltered = [];
@@ -2065,11 +2084,30 @@
         .trim()
         .toLowerCase();
 
-      const isSelesai =
+      const sheetRow = row.__sheetRow || null;
+      const updateKey = `${type}_${sheetRow}`;
+
+      let isSelesai =
         statusRaw.includes("sudah") ||
         statusRaw === "1" ||
         statusRaw === "selesai" ||
         statusRaw === "true";
+
+      let statusText = isSelesai ? "Sudah" : "Belum";
+
+      // Sinkronisasi dengan localStatusUpdates (untuk mengatasi caching Google Sheets CSV)
+      if (sheetRow && localStatusUpdates[updateKey] !== undefined) {
+        const localStatus = localStatusUpdates[updateKey];
+        if (statusText === localStatus) {
+          // CSV sudah sinkron/up-to-date dengan local status, hapus key dari localStatusUpdates
+          delete localStatusUpdates[updateKey];
+          saveLocalStatusUpdates();
+        } else {
+          // Gunakan status lokal karena CSV masih out-of-sync (terkena cache)
+          statusText = localStatus;
+          isSelesai = localStatus === "Sudah";
+        }
+      }
 
       return {
         kecCode: kKec,
@@ -2081,9 +2119,9 @@
         jenis: jAnomali,
         desc: deskripsi,
         link: getAnomaliLink(row),
-        statusText: isSelesai ? "Sudah" : "Belum",
+        statusText: statusText,
         isSelesai: isSelesai,
-        sheetRow: row.__sheetRow || null,
+        sheetRow: sheetRow,
         anoType: type,
       };
     }
@@ -2574,6 +2612,10 @@
 
         // Update state lokal supaya UI langsung sinkron tanpa perlu refresh
         const isSelesai = newStatus === "Sudah";
+        const updateKey = `${type}_${sheetRow}`;
+        localStatusUpdates[updateKey] = newStatus;
+        saveLocalStatusUpdates();
+
         const pool = type === "keluarga" ? anoDataKeluarga : anoDataUsaha;
         const target = pool.find((r) => r.sheetRow === sheetRow);
         if (target) {
