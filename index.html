@@ -687,16 +687,20 @@
           <table class="min-w-full text-xs text-left">
             <thead>
               <tr class="text-gray-500 border-b border-gray-200 bg-gray-50 uppercase tracking-wider text-[10px]">
-                <th class="px-4 py-3 font-bold">Wilayah (Kec/Desa/SLS)</th>
-                <th class="px-4 py-3 font-bold">Petugas</th>
-                <th class="px-4 py-3 font-bold" id="thSubjekAnomali">
-                  Nama KRT
+                <th class="px-4 py-3 font-bold sortable" onclick="sortByAnomali('wilayahStr')">
+                  Wilayah (Kec/Desa/SLS)<i class="fa-solid fa-sort sort-icon" id="siAnoWilayah"></i>
                 </th>
-                <th class="px-4 py-3 font-bold max-w-[200px]">
-                  Jenis Anomali / Keterangan
+                <th class="px-4 py-3 font-bold sortable" onclick="sortByAnomali('petugas')">
+                  Petugas<i class="fa-solid fa-sort sort-icon" id="siAnoPetugas"></i>
                 </th>
-                <th class="px-4 py-3 font-bold text-center w-36">
-                  Status Perbaikan
+                <th class="px-4 py-3 font-bold sortable" onclick="sortByAnomali('subjek')">
+                  <span id="thSubjekAnomali">Nama KRT</span><i class="fa-solid fa-sort sort-icon" id="siAnoSubjek"></i>
+                </th>
+                <th class="px-4 py-3 font-bold max-w-[200px] sortable" onclick="sortByAnomali('desc')">
+                  Jenis Anomali / Keterangan<i class="fa-solid fa-sort sort-icon" id="siAnoDesc"></i>
+                </th>
+                <th class="px-4 py-3 font-bold text-center w-36 sortable" onclick="sortByAnomali('isSelesai')">
+                  Status Perbaikan<i class="fa-solid fa-sort sort-icon" id="siAnoStatus"></i>
                 </th>
                 <th class="px-4 py-3 font-bold text-center w-28">Aksi</th>
               </tr>
@@ -1024,6 +1028,8 @@
     let anoActiveTab = "keluarga"; // 'keluarga' or 'usaha'
     let anoCurrentData = [];
     let anoFiltered = [];
+    let anoSortCol = "wilayahStr";
+    let anoSortDir = "asc";
 
     // Global State
     let autoTimer = null;
@@ -1779,6 +1785,25 @@
       renderTableProgress();
     }
     function renderTableProgress() {
+      // Update progress sort icons visual state
+      const progIcons = [
+        "key", "loc", "target", "progVal", "pct", "dailyTarget", "OPEN", "DRAFT",
+        "SUBMITTED_BY_PENCACAH", "SUBMITTED_RESPONDENT", "APPROVED_BY_PENGAWAS",
+        "REJECTED_BY_PENGAWAS", "REVOKED_BY_PENGAWAS", "EDITED_BY_PENGAWAS",
+        "COMPLETED_BY_ADMIN_KABUPATEN", "EDITED_BY_ADMIN_KABUPATEN", "REJECTED_BY_ADMIN_KABUPATEN"
+      ];
+
+      progIcons.forEach((colName) => {
+        const iconEl = document.getElementById("si" + colName);
+        if (iconEl) {
+          if (colName === progSortCol) {
+            iconEl.className = `fa-solid ${progSortDir === "asc" ? "fa-sort-up" : "fa-sort-down"} sort-icon active`;
+          } else {
+            iconEl.className = "fa-solid fa-sort sort-icon";
+          }
+        }
+      });
+
       const agg = {};
       progDataFiltered.forEach((r) => {
         let key =
@@ -2205,6 +2230,16 @@
       applyFiltersAnomali("all");
     }
 
+    function sortByAnomali(col) {
+      if (anoSortCol === col) {
+        anoSortDir = anoSortDir === "asc" ? "desc" : "asc";
+      } else {
+        anoSortCol = col;
+        anoSortDir = "asc";
+      }
+      renderTableAnomali();
+    }
+
     function renderTableAnomali() {
       const tbody = document.getElementById("tableBodyAnomali");
       if (anoFiltered.length === 0) {
@@ -2212,7 +2247,51 @@
         return;
       }
 
-      const rows = anoFiltered
+      // Update sort icons visual state for Anomali table
+      const anoIcons = {
+        wilayahStr: "siAnoWilayah",
+        petugas: "siAnoPetugas",
+        subjek: "siAnoSubjek",
+        desc: "siAnoDesc",
+        isSelesai: "siAnoStatus"
+      };
+
+      Object.entries(anoIcons).forEach(([colName, iconId]) => {
+        const iconEl = document.getElementById(iconId);
+        if (iconEl) {
+          if (colName === anoSortCol) {
+            iconEl.className = `fa-solid ${anoSortDir === "asc" ? "fa-sort-up" : "fa-sort-down"} sort-icon active`;
+          } else {
+            iconEl.className = "fa-solid fa-sort sort-icon";
+          }
+        }
+      });
+
+      // Sort data before slicing and rendering
+      const sortedData = [...anoFiltered];
+      sortedData.sort((a, b) => {
+        let va = a[anoSortCol];
+        let vb = b[anoSortCol];
+
+        if (va === undefined || va === null) va = "";
+        if (vb === undefined || vb === null) vb = "";
+
+        if (typeof va === "string") {
+          return anoSortDir === "asc"
+            ? va.localeCompare(vb, undefined, { numeric: true, sensitivity: 'base' })
+            : vb.localeCompare(va, undefined, { numeric: true, sensitivity: 'base' });
+        }
+
+        if (typeof va === "boolean") {
+          const na = va ? 1 : 0;
+          const nb = vb ? 1 : 0;
+          return anoSortDir === "asc" ? na - nb : nb - na;
+        }
+
+        return anoSortDir === "asc" ? (va > vb ? 1 : va < vb ? -1 : 0) : (va < vb ? 1 : va > vb ? -1 : 0);
+      });
+
+      const rows = sortedData
         .slice(0, 100)
         .map(
           (r) => `
@@ -2249,8 +2328,8 @@
         .join("");
 
       let extra =
-        anoFiltered.length > 100
-          ? `<tr><td colspan="6" class="px-4 py-3 text-center text-[11px] text-gray-400 bg-gray-50">Menampilkan 100 dari ${anoFiltered.length} data. Gunakan filter/export untuk melihat semua.</td></tr>`
+        sortedData.length > 100
+          ? `<tr><td colspan="6" class="px-4 py-3 text-center text-[11px] text-gray-400 bg-gray-50">Menampilkan 100 dari ${sortedData.length} data. Gunakan filter/export untuk melihat semua.</td></tr>`
           : "";
       tbody.innerHTML = rows + extra;
     }
