@@ -1187,6 +1187,7 @@
 
     function updateInterval() {
       const sec = parseInt(document.getElementById("intervalSelect").value);
+      localStorage.setItem("fasih_interval", sec);
       if (urls.progress) startAutoRefresh(sec);
     }
 
@@ -1347,14 +1348,56 @@
         );
       }
 
-      // Init UI
+      // Hide empty loading state if visible
       document.getElementById("emptyState").classList.add("hidden");
-      document.getElementById("view-progress").classList.remove("hidden"); // Default Tab
 
       buildKecTabsProgress();
       applyFiltersProgress();
       updateBadgeAnomali();
-      switchSubTabAnomali(anoActiveTab);
+
+      // Update anomaly data while preserving the user's active dropdown filters
+      anoCurrentData = anoActiveTab === "keluarga" ? anoDataKeluarga : anoDataUsaha;
+
+      const currentKec = document.getElementById("filterAKec").value;
+      const currentDesa = document.getElementById("filterADesa").value;
+      const currentSls = document.getElementById("filterASls").value;
+      const currentPetugas = document.getElementById("filterAPetugas").value;
+      const currentJenis = document.getElementById("filterAJenis").value;
+
+      // Populate dropdowns with updated data
+      populateDropdownsAnomali(anoCurrentData);
+
+      // Restore dropdown values if they are still valid in the new options list
+      if (currentKec && [...document.getElementById("filterAKec").options].some(o => o.value === currentKec)) {
+        document.getElementById("filterAKec").value = currentKec;
+        populateDropdownsAnomali(anoCurrentData, "kec");
+        
+        if (currentDesa && [...document.getElementById("filterADesa").options].some(o => o.value === currentDesa)) {
+          document.getElementById("filterADesa").value = currentDesa;
+          populateDropdownsAnomali(anoCurrentData, "desa");
+          
+          if (currentSls && [...document.getElementById("filterASls").options].some(o => o.value === currentSls)) {
+            document.getElementById("filterASls").value = currentSls;
+            populateDropdownsAnomali(anoCurrentData, "sls");
+          }
+        }
+      }
+      if (currentPetugas && [...document.getElementById("filterAPetugas").options].some(o => o.value === currentPetugas)) {
+        document.getElementById("filterAPetugas").value = currentPetugas;
+      }
+      if (currentJenis && [...document.getElementById("filterAJenis").options].some(o => o.value === currentJenis)) {
+        document.getElementById("filterAJenis").value = currentJenis;
+      }
+
+      // Re-apply filters
+      applyFiltersAnomali(null);
+
+      // Only force default view tab visibility on initial load (when both views are hidden)
+      const viewProg = document.getElementById("view-progress");
+      const viewAno = document.getElementById("view-anomali");
+      if (viewProg.classList.contains("hidden") && viewAno.classList.contains("hidden")) {
+        viewProg.classList.remove("hidden");
+      }
 
       // Auto refresh
       const sec = parseInt(document.getElementById("intervalSelect").value);
