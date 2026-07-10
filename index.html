@@ -635,6 +635,33 @@
         </div>
       </div>
 
+      <!-- Progress Anomali per Kecamatan -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2">
+            <span class="w-2 h-6 bg-brand-500 rounded-full"></span> Ringkasan Progres Anomali per Kecamatan
+          </h3>
+          <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-lg self-start">
+            <span class="text-[10px] text-gray-400 font-bold px-2 uppercase">Urutkan:</span>
+            <button onclick="sortAnoKec('name')" id="btnSortAnoKecName"
+              class="px-2.5 py-1 text-[11px] rounded-md font-semibold bg-white text-gray-800 shadow-sm transition">
+              Nama
+            </button>
+            <button onclick="sortAnoKec('total')" id="btnSortAnoKecTotal"
+              class="px-2.5 py-1 text-[11px] rounded-md font-semibold text-gray-500 hover:text-gray-800 transition">
+              Jumlah
+            </button>
+            <button onclick="sortAnoKec('pct')" id="btnSortAnoKecPct"
+              class="px-2.5 py-1 text-[11px] rounded-md font-semibold text-gray-500 hover:text-gray-800 transition">
+              Progres
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[360px] overflow-y-auto pr-2 scrollbar-hide" id="gridAnoKec">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
       <!-- Filters Anomali -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
         <h3 class="font-bold text-gray-700 text-sm mb-3 flex items-center gap-2">
@@ -1030,6 +1057,7 @@
     let anoFiltered = [];
     let anoSortCol = "wilayahStr";
     let anoSortDir = "asc";
+    let anoKecSortBy = "name";
 
     // Global State
     let autoTimer = null;
@@ -2217,6 +2245,7 @@
       document.getElementById("infoAnomaliFiltered").textContent =
         `Menampilkan ${tot} baris data`;
 
+      renderAnoKecSummary();
       renderTableAnomali();
     }
 
@@ -2332,6 +2361,126 @@
           ? `<tr><td colspan="6" class="px-4 py-3 text-center text-[11px] text-gray-400 bg-gray-50">Menampilkan 100 dari ${sortedData.length} data. Gunakan filter/export untuk melihat semua.</td></tr>`
           : "";
       tbody.innerHTML = rows + extra;
+    }
+
+    function renderAnoKecSummary() {
+      const container = document.getElementById("gridAnoKec");
+      if (!container) return;
+
+      if (anoFiltered.length === 0) {
+        container.innerHTML = `<div class="col-span-full py-8 text-center text-gray-400 text-xs bg-gray-50 border border-dashed border-gray-200 rounded-xl">Tidak ada data anomali yang sesuai filter.</div>`;
+        return;
+      }
+
+      // Aggregate anomalies by Kecamatan code from anoFiltered
+      const agg = {};
+      anoFiltered.forEach((item) => {
+        const kCode = item.kecCode;
+        if (!agg[kCode]) {
+          agg[kCode] = {
+            code: kCode,
+            name: getKecLabel(kCode),
+            total: 0,
+            selesai: 0,
+            belum: 0,
+          };
+        }
+        agg[kCode].total++;
+        if (item.isSelesai) {
+          agg[kCode].selesai++;
+        } else {
+          agg[kCode].belum++;
+        }
+      });
+
+      // Convert to array
+      let list = Object.values(agg);
+
+      // Sort list
+      list.sort((a, b) => {
+        if (anoKecSortBy === "name") {
+          return a.name.localeCompare(b.name);
+        } else if (anoKecSortBy === "total") {
+          return b.total - a.total; // highest count first
+        } else if (anoKecSortBy === "pct") {
+          const pctA = a.total > 0 ? (a.selesai / a.total) : 0;
+          const pctB = b.total > 0 ? (b.selesai / b.total) : 0;
+          if (pctA !== pctB) return pctB - pctA; // highest percentage first
+          return b.total - a.total; // then highest total
+        }
+        return 0;
+      });
+
+      // Render cards
+      container.innerHTML = list
+        .map((k) => {
+          const pct = k.total > 0 ? (k.selesai / k.total) * 100 : 0;
+          // Determine color scheme based on progress percentage
+          let progressColor = "bg-gray-50 border-gray-200";
+          let textColor = "text-gray-500";
+          let progressFillColor = "bg-gray-400";
+
+          if (pct >= 100) {
+            progressColor = "bg-green-50/50 border-green-100 hover:border-green-300";
+            textColor = "text-green-600";
+            progressFillColor = "bg-green-500";
+          } else if (pct >= 50) {
+            progressColor = "bg-brand-50/50 border-brand-100 hover:border-brand-300";
+            textColor = "text-brand-600";
+            progressFillColor = "bg-brand-500";
+          } else if (pct > 0) {
+            progressColor = "bg-amber-50/50 border-amber-100 hover:border-amber-300";
+            textColor = "text-amber-600";
+            progressFillColor = "bg-amber-500";
+          } else {
+            progressColor = "bg-red-50/50 border-red-100 hover:border-red-300";
+            textColor = "text-red-600";
+            progressFillColor = "bg-red-500";
+          }
+
+          return `
+            <div class="border rounded-xl p-3.5 flex flex-col justify-between hover:shadow-sm transition-all duration-200 bg-white ${progressColor}">
+              <div class="flex justify-between items-start gap-2 mb-2">
+                <span class="font-bold text-gray-800 text-[11px] tracking-tight uppercase truncate" title="${k.name}">
+                  ${k.name}
+                </span>
+                <span class="text-xs font-black ${textColor}">${pct.toFixed(1)}%</span>
+              </div>
+              <div class="mt-auto">
+                <div class="w-full bg-gray-200/60 h-1.5 rounded-full mb-2">
+                  <div class="${progressFillColor} h-1.5 rounded-full" style="width: ${pct}%"></div>
+                </div>
+                <div class="flex justify-between text-[10px] text-gray-500 font-medium">
+                  <span>Selesai: <strong class="text-gray-700">${k.selesai}</strong>/${k.total}</span>
+                  <span>Belum: <strong class="text-red-500 font-semibold">${k.belum}</strong></span>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function sortAnoKec(by) {
+      anoKecSortBy = by;
+      // Update UI active buttons
+      const btnName = document.getElementById("btnSortAnoKecName");
+      const btnTotal = document.getElementById("btnSortAnoKecTotal");
+      const btnPct = document.getElementById("btnSortAnoKecPct");
+
+      if (btnName && btnTotal && btnPct) {
+        btnName.className = by === "name"
+          ? "px-2.5 py-1 text-[11px] rounded-md font-semibold bg-white text-gray-800 shadow-sm transition"
+          : "px-2.5 py-1 text-[11px] rounded-md font-semibold text-gray-500 hover:text-gray-800 transition";
+        btnTotal.className = by === "total"
+          ? "px-2.5 py-1 text-[11px] rounded-md font-semibold bg-white text-gray-800 shadow-sm transition"
+          : "px-2.5 py-1 text-[11px] rounded-md font-semibold text-gray-500 hover:text-gray-800 transition";
+        btnPct.className = by === "pct"
+          ? "px-2.5 py-1 text-[11px] rounded-md font-semibold bg-white text-gray-800 shadow-sm transition"
+          : "px-2.5 py-1 text-[11px] rounded-md font-semibold text-gray-500 hover:text-gray-800 transition";
+      }
+
+      renderAnoKecSummary();
     }
 
     // Menulis balik status "Sudah/Belum" ke Google Spreadsheet lewat
