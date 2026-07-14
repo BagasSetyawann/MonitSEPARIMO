@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Progress FASIH SE2026</title>
+  <title>Monitoring Anomali SE2026</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -233,11 +233,11 @@
             <!-- MAIN NAVIGATION TABS -->
       <div class="flex gap-6 mt-1">
         <a href="index.html" id="mainTabProgress"
-          class="nav-tab-active pb-3 text-sm transition-colors flex items-center gap-2">
+          class="nav-tab-inactive pb-3 text-sm transition-colors flex items-center gap-2">
           <i class="fa-solid fa-bars-progress"></i> Dashboard Progress
         </a>
         <a href="anomali.html" id="mainTabAnomali"
-          class="nav-tab-inactive pb-3 text-sm transition-colors flex items-center gap-2 relative">
+          class="nav-tab-active pb-3 text-sm transition-colors flex items-center gap-2 relative">
           <i class="fa-solid fa-triangle-exclamation"></i> Monitoring Anomali
         </a>
       </div>
@@ -320,305 +320,446 @@
   </div>
 
   
-<!-- ========== VIEW: DASHBOARD PROGRESS ========== -->
-  <main id="view-progress" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full fade-in">
-    <!-- Info Row -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-      <div class="flex flex-wrap items-center gap-2 text-xs">
-        <span id="infoRows"
-          class="bg-white text-gray-600 shadow-sm border border-gray-100 rounded-full px-4 py-2 font-medium flex items-center gap-2"></span>
-        <span id="infoLastUpdate"
-          class="bg-white text-gray-500 shadow-sm border border-gray-100 rounded-full px-4 py-2 flex items-center gap-2"></span>
-      </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="mb-6">
-      <div class="flex items-center gap-2 mb-3 px-1">
-        <i class="fa-solid fa-filter text-gray-400 text-sm"></i>
-        <span class="text-sm font-bold text-gray-700">Filter Wilayah & PPL</span>
-        <span id="kecFilterInfo"
-          class="text-[11px] text-brand-500 bg-brand-50 px-2 py-0.5 rounded-full ml-auto font-medium hidden sm:inline-block"></span>
-      </div>
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 mb-3">
-        <div id="kecTabs" class="flex flex-wrap gap-2 py-1 px-1"></div>
-      </div>
-      <div class="flex flex-col sm:flex-row gap-2 items-center">
-        <select id="fStatus" onchange="applyFiltersProgress()"
-          class="w-full sm:w-auto border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-xs text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-50 cursor-pointer">
-          <option value="">Semua Status</option>
-          <option value="OPEN">Ada OPEN</option>
-          <option value="DRAFT">Ada DRAFT</option>
-          <option value="SUBMITTED_BY_PENCACAH">Ada SUB PPL</option>
-          <option value="SUBMITTED_RESPONDENT">Ada SUB RSP</option>
-          <option value="APPROVED_BY_PENGAWAS">Ada APP PML</option>
-          <option value="REJECTED_BY_PENGAWAS">Ada REJ PML</option>
-          <option value="REVOKED_BY_PENGAWAS">Ada REV PML</option>
-          <option value="EDITED_BY_PENGAWAS">Ada ED PML</option>
-          <option value="COMPLETED_BY_ADMIN_KABUPATEN">Ada COMP ADM</option>
-          <option value="EDITED_BY_ADMIN_KABUPATEN">Ada ED ADM</option>
-          <option value="REJECTED_BY_ADMIN_KABUPATEN">Ada REJ ADM</option>
-        </select>
-        <button onclick="resetFiltersProgress()"
-          class="w-full sm:w-auto text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
-          <i class="fa-solid fa-rotate-left"></i> Reset
+<!-- ========== VIEW: MONITORING ANOMALI ========== -->
+  <main id="view-anomali" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full fade-in">
+    <!-- Sub-Tabs Anomali -->
+    <div class="flex justify-center mb-6">
+      <div class="bg-gray-100 p-1 rounded-full inline-flex">
+        <button onclick="switchSubTabAnomali('keluarga')" id="subTabKeluarga"
+          class="px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition">
+          <i class="fa-solid fa-users mr-2 text-brand-500"></i> Anomali
+          Keluarga
         </button>
-        <span id="filteredInfo" class="sm:ml-auto text-xs text-gray-400 px-2"></span>
+        <button onclick="switchSubTabAnomali('usaha')" id="subTabUsaha"
+          class="px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition">
+          <i class="fa-solid fa-store mr-2 text-brand-500"></i> Anomali Usaha
+        </button>
+        <button onclick="switchSubTabAnomali('panduan')" id="subTabPanduan"
+          class="px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition">
+          <i class="fa-solid fa-book mr-2 text-brand-500"></i> Panduan
+        </button>
       </div>
     </div>
 
-    <!-- KPIs Progress -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover">
-        <div class="flex justify-between items-start mb-2">
-          <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">
-            Total Target
-          </p>
-          <div class="bg-gray-50 w-8 h-8 rounded-full flex items-center justify-center text-gray-400">
-            <i class="fa-solid fa-cubes text-sm"></i>
+    <div id="anomaliDataSection">
+
+      <!-- KPIs Anomali -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4">
+          <div class="bg-danger-50 w-12 h-12 rounded-full flex items-center justify-center text-danger-500 text-xl">
+            <i class="fa-solid fa-triangle-exclamation"></i>
           </div>
-        </div>
-        <h3 class="text-2xl sm:text-3xl font-black text-gray-800 leading-none" id="kTarget">
-          —
-        </h3>
-      </div>
-      <div
-        class="bg-brand-500 rounded-2xl shadow-sm shadow-brand-500/20 p-4 sm:p-5 card-hover relative overflow-hidden text-white">
-        <div class="absolute right-[-10px] top-1/2 -translate-y-1/2 opacity-20">
-          <i class="fa-solid fa-chart-line text-7xl"></i>
-        </div>
-        <div class="relative z-10">
-          <div class="flex justify-between items-start mb-2">
-            <p class="text-[10px] sm:text-xs font-bold text-brand-100 uppercase tracking-wider"
-              title="Total Target - (Open + Draft)">
-              Progress Lapangan
+          <div>
+            <p class="text-xs font-bold text-gray-400 uppercase">
+              Total Anomali
             </p>
-          </div>
-          <div class="flex items-end gap-2 mb-2">
-            <h3 class="text-2xl sm:text-3xl font-black leading-none" id="kProgress">
-              —
+            <h3 class="text-2xl font-black text-gray-800 leading-none mt-1" id="kAnomaliTotal">
+              0
             </h3>
-            <span class="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full mb-1" id="kProgressPct">0%</span>
           </div>
-          <div class="w-full bg-black/10 h-1.5 rounded-full">
-            <div class="bg-white h-1.5 rounded-full progress-bar" id="barProgress" style="width: 0%"></div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4">
+          <div class="bg-green-50 w-12 h-12 rounded-full flex items-center justify-center text-green-500 text-xl">
+            <i class="fa-solid fa-check"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-gray-400 uppercase">
+              Sudah Selesai
+            </p>
+            <h3 class="text-2xl font-black text-green-500 leading-none mt-1" id="kAnomaliSudah">
+              0
+            </h3>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4">
+          <div class="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center text-gray-400 text-xl">
+            <i class="fa-regular fa-clock"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-gray-400 uppercase">
+              Belum Selesai
+            </p>
+            <h3 class="text-2xl font-black text-gray-500 leading-none mt-1" id="kAnomaliBelum">
+              0
+            </h3>
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover">
-        <div class="flex justify-between items-start mb-2">
-          <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">
-            Approved PML
-          </p>
-          <div class="bg-green-50 w-8 h-8 rounded-full flex items-center justify-center text-green-500">
-            <i class="fa-solid fa-check-double text-sm"></i>
-          </div>
-        </div>
-        <h3 class="text-2xl sm:text-3xl font-black text-green-500 leading-none" id="kApproved">
-          —
-        </h3>
-      </div>
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover">
-        <div class="flex justify-between items-start mb-2">
-          <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">
-            Belum Dikerjakan
-          </p>
-          <div class="bg-gray-50 w-8 h-8 rounded-full flex items-center justify-center text-gray-400">
-            <i class="fa-regular fa-folder-open text-sm"></i>
-          </div>
-        </div>
-        <h3 class="text-2xl sm:text-3xl font-black text-gray-400 leading-none" id="kOpen">
-          —
-        </h3>
-      </div>
-    </div>
 
-    <!-- Charts Progress -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 lg:col-span-2 flex flex-col">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+      <!-- Progress Anomali per Kecamatan -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2">
-            <span class="w-2 h-6 bg-brand-500 rounded-full"></span><span id="chartLabel">Progress per Kecamatan</span>
+            <span class="w-2 h-6 bg-brand-500 rounded-full"></span> Ringkasan Progres Anomali per Kecamatan
           </h3>
-          <div class="flex bg-gray-50 p-1 rounded-lg">
-            <button onclick="setChartMode('kec')" id="cBtnKec"
-              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold bg-white text-gray-800 shadow-sm transition">
-              Wilayah
+          <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-lg self-start">
+            <span class="text-[10px] text-gray-400 font-bold px-2 uppercase">Urutkan:</span>
+            <button onclick="sortAnoKec('name')" id="btnSortAnoKecName"
+              class="px-2.5 py-1 text-[11px] rounded-md font-semibold bg-white text-gray-800 shadow-sm transition">
+              Nama
             </button>
-            <button onclick="setChartMode('ppl')" id="cBtnPpl"
-              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold text-gray-500 hover:text-gray-800 transition">
-              PPL Top 25
+            <button onclick="sortAnoKec('total')" id="btnSortAnoKecTotal"
+              class="px-2.5 py-1 text-[11px] rounded-md font-semibold text-gray-500 hover:text-gray-800 transition">
+              Jumlah
+            </button>
+            <button onclick="sortAnoKec('pct')" id="btnSortAnoKecPct"
+              class="px-2.5 py-1 text-[11px] rounded-md font-semibold text-gray-500 hover:text-gray-800 transition">
+              Progres
             </button>
           </div>
         </div>
-        <div class="relative flex-grow min-h-[250px] w-full">
-          <canvas id="mainChart"></canvas>
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[360px] overflow-y-auto pr-2 scrollbar-hide"
+          id="gridAnoKec">
+          <!-- Injected via JS -->
         </div>
       </div>
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 flex flex-col">
-        <h3 class="font-bold text-gray-700 text-sm mb-4 flex items-center gap-2">
-          <span class="w-2 h-6 bg-brand-500 rounded-full"></span> Proporsi
-          Status
+
+      <!-- Filters Anomali -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+        <h3 class="font-bold text-gray-700 text-sm mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-filter text-gray-400"></i> Filter Anomali
         </h3>
-        <div class="relative w-full h-[180px] mb-4 flex-shrink-0">
-          <canvas id="pieChart"></canvas>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <select id="filterAKec" onchange="applyFiltersAnomali('kec')"
+            class="border border-gray-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-50 bg-white">
+            <option value="">Semua Kecamatan</option>
+          </select>
+          <select id="filterADesa" onchange="applyFiltersAnomali('desa')"
+            class="border border-gray-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-50 bg-white">
+            <option value="">Semua Desa</option>
+          </select>
+          <select id="filterASls" onchange="applyFiltersAnomali('sls')"
+            class="border border-gray-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-50 bg-white">
+            <option value="">Semua SLS</option>
+          </select>
+          <select id="filterAPetugas" onchange="applyFiltersAnomali('petugas')"
+            class="border border-gray-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-50 bg-white">
+            <option value="">Semua Petugas</option>
+          </select>
+          <select id="filterAJenis" onchange="applyFiltersAnomali('jenis')"
+            class="border border-gray-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-50 bg-white">
+            <option value="">Semua Jenis Anomali</option>
+          </select>
         </div>
-        <div id="statusPanel" class="space-y-3 mt-2 overflow-y-auto max-h-[200px] pr-2 scrollbar-hide"></div>
+        <div class="mt-3 flex justify-between items-center">
+          <button onclick="resetFiltersAnomali()"
+            class="text-gray-500 hover:text-brand-600 text-xs font-semibold flex items-center gap-1 transition">
+            <i class="fa-solid fa-rotate-left"></i> Reset Filter
+          </button>
+          <span id="infoAnomaliFiltered" class="text-xs text-gray-400">Menampilkan 0 baris</span>
+        </div>
+      </div>
+
+      <!-- Table Anomali -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+        <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+          <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2">
+            <span class="w-2 h-6 bg-danger-500 rounded-full"></span> Detail
+            Tabel Anomali
+          </h3>
+          <button onclick="exportExcelAnomali()"
+            class="bg-gray-800 hover:bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2">
+            <i class="fa-solid fa-download"></i> Export
+          </button>
+        </div>
+        <div class="table-wrap overflow-x-auto">
+          <table class="min-w-full text-xs text-left">
+            <thead>
+              <tr class="text-gray-500 border-b border-gray-200 bg-gray-50 uppercase tracking-wider text-[10px]">
+                <th class="px-4 py-3 font-bold sortable" onclick="sortByAnomali('wilayahStr')">
+                  Wilayah (Kec/Desa/SLS)<i class="fa-solid fa-sort sort-icon" id="siAnoWilayah"></i>
+                </th>
+                <th class="px-4 py-3 font-bold sortable" onclick="sortByAnomali('petugas')">
+                  Petugas<i class="fa-solid fa-sort sort-icon" id="siAnoPetugas"></i>
+                </th>
+                <th class="px-4 py-3 font-bold sortable" onclick="sortByAnomali('subjek')">
+                  <span id="thSubjekAnomali">Nama KRT</span><i class="fa-solid fa-sort sort-icon" id="siAnoSubjek"></i>
+                </th>
+                <th class="px-4 py-3 font-bold max-w-[200px] sortable" onclick="sortByAnomali('desc')">
+                  Jenis Anomali / Keterangan<i class="fa-solid fa-sort sort-icon" id="siAnoDesc"></i>
+                </th>
+                <th class="px-4 py-3 font-bold text-center w-36 sortable" onclick="sortByAnomali('isSelesai')">
+                  Status Perbaikan<i class="fa-solid fa-sort sort-icon" id="siAnoStatus"></i>
+                </th>
+                <th class="px-4 py-3 font-bold text-center w-28">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBodyAnomali" class="divide-y divide-gray-100 bg-white">
+              <!-- Content Injected via JS -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Table Progress -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 flex flex-col">
+    <!-- ========== PANDUAN ANOMALI SECTION ========== -->
+    <div id="anomaliPanduanSection" class="hidden fade-in space-y-6">
+      <!-- Header Card -->
       <div
-        class="p-4 sm:p-5 border-b border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2 shrink-0">
-          <span class="w-2 h-6 bg-brand-500 rounded-full"></span><span id="tableTitle">Rincian Data PPL</span>
-        </h3>
-        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto lg:justify-end">
-          <div class="relative flex-grow sm:flex-grow-0">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-            <input type="text" id="searchInput" oninput="applyFiltersProgress()" placeholder="Cari nama, kode..."
-              class="w-full sm:w-48 border border-gray-200 rounded-xl pl-8 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-50 bg-gray-50 focus:bg-white transition" />
-          </div>
-          <div class="flex bg-gray-50 p-1 rounded-xl">
-            <button onclick="switchTableView('ppl')" id="tBtnPPL"
-              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition">
-              PPL
-            </button>
-            <button onclick="switchTableView('sls')" id="tBtnSLS"
-              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition">
-              SLS
-            </button>
-            <button onclick="switchTableView('kec')" id="tBtnKec"
-              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition">
-              Kec
-            </button>
-          </div>
-          <button onclick="exportExcelProgress()"
-            class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ml-auto sm:ml-0">
-            <i class="fa-solid fa-download"></i><span class="hidden sm:inline">Export</span>
-          </button>
+        class="bg-gradient-to-r from-brand-500 to-orange-600 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+        <div class="absolute right-[-20px] top-1/2 -translate-y-1/2 opacity-15">
+          <i class="fa-solid fa-book-open text-9xl"></i>
+        </div>
+        <div class="relative z-10 max-w-2xl">
+          <span
+            class="bg-white/20 text-white text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full mb-3 inline-block">Panduan
+            Resmi</span>
+          <h2 class="text-2xl sm:text-3xl font-black mb-2 tracking-tight">Panduan Penanganan Anomali SE2026</h2>
+          <p class="text-xs sm:text-sm text-brand-100 font-medium leading-relaxed">
+            Panduan langkah-langkah verifikasi dan probing ulang untuk memperbaiki data hasil pendataan keluarga dan
+            usaha yang masuk dalam kategori anomali.
+          </p>
         </div>
       </div>
-      <div class="table-wrap overflow-x-auto">
-        <table class="min-w-full text-xs text-left">
-          <thead>
-            <tr class="text-gray-400 border-b border-gray-100 uppercase tracking-wider text-[10px]">
-              <th class="px-5 py-3 font-bold sortable" onclick="sortByProgress('key')">
-                <span id="thKeyLabel">Nama / ID</span><i class="fa-solid fa-sort sort-icon" id="siKey"></i>
-              </th>
-              <th class="px-5 py-3 font-bold sortable" onclick="sortByProgress('loc')">
-                Lokasi<i class="fa-solid fa-sort sort-icon" id="siLoc"></i>
-              </th>
-              <th class="px-5 py-3 text-right font-bold sortable" onclick="sortByProgress('target')">
-                Target<i class="fa-solid fa-sort sort-icon" id="siTarget"></i>
-              </th>
-              <th class="px-5 py-3 text-right font-bold text-brand-600 sortable" onclick="sortByProgress('progVal')">
-                Progress<i class="fa-solid fa-sort sort-icon" id="siProgVal"></i>
-              </th>
-              <th class="px-5 py-3 text-right font-bold sortable w-24" onclick="sortByProgress('pct')">
-                % Selesai<i class="fa-solid fa-sort sort-icon" id="siPct"></i>
-              </th>
-              <th class="px-5 py-3 text-right font-bold text-blue-600 sortable" onclick="sortByProgress('dailyTarget')"
-                title="Target yang harus diselesaikan tiap harinya sampai tanggal 15 Juli agar tercapai 40%">
-                Target/Hari<br />(s.d 15 Jul)<i class="fa-solid fa-sort sort-icon" id="siDailyTarget"></i>
-              </th>
-              <th class="px-5 py-3 text-right font-bold text-gray-400 sortable" onclick="sortByProgress('OPEN')">Open<i
-                  class="fa-solid fa-sort sort-icon" id="siOPEN"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-yellow-500 sortable" onclick="sortByProgress('DRAFT')">
-                Draft<i class="fa-solid fa-sort sort-icon" id="siDRAFT"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-blue-500 sortable"
-                onclick="sortByProgress('SUBMITTED_BY_PENCACAH')">Sub PPL<i class="fa-solid fa-sort sort-icon"
-                  id="siSUBMITTED_BY_PENCACAH"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-indigo-500 sortable"
-                onclick="sortByProgress('SUBMITTED_RESPONDENT')">Sub Rsp<i class="fa-solid fa-sort sort-icon"
-                  id="siSUBMITTED_RESPONDENT"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-green-500 sortable"
-                onclick="sortByProgress('APPROVED_BY_PENGAWAS')">App PML<i class="fa-solid fa-sort sort-icon"
-                  id="siAPPROVED_BY_PENGAWAS"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-red-500 sortable"
-                onclick="sortByProgress('REJECTED_BY_PENGAWAS')">Rej PML<i class="fa-solid fa-sort sort-icon"
-                  id="siREJECTED_BY_PENGAWAS"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-orange-500 sortable"
-                onclick="sortByProgress('REVOKED_BY_PENGAWAS')">Rev PML<i class="fa-solid fa-sort sort-icon"
-                  id="siREVOKED_BY_PENGAWAS"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-teal-500 sortable"
-                onclick="sortByProgress('EDITED_BY_PENGAWAS')">Ed PML<i class="fa-solid fa-sort sort-icon"
-                  id="siEDITED_BY_PENGAWAS"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-emerald-500 sortable"
-                onclick="sortByProgress('COMPLETED_BY_ADMIN_KABUPATEN')">Comp Adm<i class="fa-solid fa-sort sort-icon"
-                  id="siCOMPLETED_BY_ADMIN_KABUPATEN"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-cyan-500 sortable"
-                onclick="sortByProgress('EDITED_BY_ADMIN_KABUPATEN')">Ed Adm<i class="fa-solid fa-sort sort-icon"
-                  id="siEDITED_BY_ADMIN_KABUPATEN"></i></th>
-              <th class="px-5 py-3 text-right font-bold text-rose-500 sortable"
-                onclick="sortByProgress('REJECTED_BY_ADMIN_KABUPATEN')">Rej Adm<i class="fa-solid fa-sort sort-icon"
-                  id="siREJECTED_BY_ADMIN_KABUPATEN"></i></th>
-            </tr>
-          </thead>
-          <tbody id="tableBodyProgress" class="divide-y divide-gray-50 bg-white"></tbody>
-        </table>
-      </div>
-      <div class="px-5 py-3 text-[10px] text-gray-400 border-t border-gray-100 flex justify-between bg-gray-50/50"
-        id="tableFooterProgress">
-        <span>* Target/Hari dihitung untuk mengejar Progress minimal 40% (Target
-          40% dikurangi Progress Saat Ini dibagi Sisa Hari)</span>
-        <span></span>
-      </div>
-    </div>
 
-    <!-- Table Progress PML & PPL -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 flex flex-col">
-      <div
-        class="p-4 sm:p-5 border-b border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2 shrink-0">
-          <span class="w-2 h-6 bg-brand-500 rounded-full"></span><span id="realisasiTableTitle">Progress PML &
-            PPL</span>
-        </h3>
-        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto lg:justify-end">
-          <div class="relative flex-grow sm:flex-grow-0">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-            <input type="text" id="searchRealisasiInput" oninput="applyFiltersRealisasi()" placeholder="Cari nama..."
-              class="w-full sm:w-48 border border-gray-200 rounded-xl pl-8 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-50 bg-gray-50 focus:bg-white transition" />
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Panduan Usaha Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+            <div class="bg-brand-50 text-brand-600 rounded-xl p-2.5 flex items-center justify-center">
+              <i class="fa-solid fa-store text-lg"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-gray-800 text-base">Panduan Anomali Usaha</h3>
+              <p class="text-[11px] text-gray-400">Daftar aturan validasi dan verifikasi untuk data usaha</p>
+            </div>
           </div>
-          <div class="flex bg-gray-50 p-1 rounded-xl">
-            <button onclick="switchRealisasiView('pml')" id="rBtnPML"
-              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition">
-              Per PML
-            </button>
-            <button onclick="switchRealisasiView('ppl')" id="rBtnPPL"
-              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition">
-              Per PPL
-            </button>
-            <button onclick="switchRealisasiView('kec')" id="rBtnKec"
-              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition">
-              Per Kec
-            </button>
+
+          <div class="space-y-4 flex-grow overflow-y-auto max-h-[600px] pr-2 scrollbar-hide">
+            <!-- Item 1 -->
+            <div
+              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
+                  1</span>
+              </div>
+              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                Kegiatan tidak memproduksi barang sendiri, namun komposisi pengeluaran pada biaya produksi dominan
+                (&gt;50%)
+              </h4>
+              <div class="bg-white rounded-lg p-3 border border-gray-100">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
+                  Solusi</span>
+                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Cek Kategori Usaha</li>
+                  <li>Jika Bukan Kategori Industri (Kategori C) atau tidak memproduksi barang sendiri (R13b1 terisi
+                    Tidak), maka Rincian Biaya Produksi (R26b) tidak boleh lebih dari 50 persen dari Total Pengeluaran
+                    (R26f)</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div
+              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
+                  2</span>
+              </div>
+              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                Selisih pendapatan dan pengeluaran negatif
+              </h4>
+              <div class="bg-white rounded-lg p-3 border border-gray-100">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
+                  Solusi</span>
+                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Cek Pendapatan usaha (R27a) apakah sudah sesuai dengan pendapatan setahun</li>
+                  <li>Cek Pengeluaran usaha (R26) apakah sudah sesuai dengan pengeluaran setahun. Pengeluaran usaha
+                    tidak termasuk pengeluaran untuk membeli aset usaha</li>
+                  <li>Untuk (R27a) pendapatan bisa 0 hanya untuk kategori hortikulturan dan perkebunan jika masih belum
+                    menghasilkan selain kategori tersebut pastikan diprobing ulang</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div
+              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
+                  3</span>
+              </div>
+              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                Anomali Status Badan Usaha 'Bukan Badan Usaha' dengan permodalan korporasi publik
+              </h4>
+              <div class="bg-white rounded-lg p-3 border border-gray-100">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
+                  Solusi</span>
+                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Cek Status Badan Usaha (R11a), apa benar status badan usahanya Kode 13. Bukan Badan Usaha?</li>
+                  <li>Cek Susunan kepemelikan modal (R29), jika benar Status Badan Usaha (R11a) berkode 13, maka susunan
+                    kepemilikan modal dari Korporasi Publik (R29c) harusnya terisi 0</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Item 6 -->
+            <div
+              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
+                  6</span>
+              </div>
+              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                Penggunaan Internet Pada Usaha Menengah dan Besar ("Pendapatan usaha menunjukkan skala unit usaha
+                berkategori menengah dan besar, namun tidak menggunakan internet.")
+              </h4>
+              <div class="bg-white rounded-lg p-3 border border-gray-100">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
+                  Solusi</span>
+                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Cek terlebih dahulu pendapatan usaha (R.27) apakah sudah benar</li>
+                  <li>Cek kembali isian penggunaan internet (R.16) jika usaha kategori menengah dan besar</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Item 7 -->
+            <div
+              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
+                  7</span>
+              </div>
+              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                Kepemilikan Laporan Keuangan Pada Usaha Menengah dan Besar ("Pendapatan usaha menunjukkan skala unit
+                usaha berkategori menengah dan besar, namun tidak memiliki laporan/catatan keuangan.")
+              </h4>
+              <div class="bg-white rounded-lg p-3 border border-gray-100">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
+                  Solusi</span>
+                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Cek terlebih dahulu pendapatan usaha (R.27) apakah sudah benar</li>
+                  <li>Cek kembali isian terdapat laporan keuangan (R.11.d) pada usaha kategori menengah dan besar</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Item 8 -->
+            <div
+              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
+                  8</span>
+              </div>
+              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                KBLI 2 digit hasil pendataan berbeda dengan KBLI 2 digit pada SBR, sehingga perlu dilakukan verifikasi
+                kesesuaian klasifikasi usaha dan mapping kode KBLI apabila diperlukan.
+              </h4>
+              <div class="bg-white rounded-lg p-3 border border-gray-100">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
+                  Solusi</span>
+                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Cek Kesesuaian KBLI dan berikan catatan jika sudah sesuai.</li>
+                </ol>
+              </div>
+            </div>
           </div>
-          <button onclick="exportExcelRealisasi()"
-            class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ml-auto sm:ml-0">
-            <i class="fa-solid fa-download"></i><span class="hidden sm:inline">Export</span>
-          </button>
         </div>
-      </div>
-      <div class="table-wrap overflow-x-auto">
-        <table class="min-w-full text-xs text-left">
-          <thead id="realisasiTableHeader">
-            <!-- Dynamic headers -->
-          </thead>
-          <tbody id="tableBodyRealisasi" class="divide-y divide-gray-50 bg-white"></tbody>
-        </table>
-      </div>
-      <div class="px-5 py-3 text-[10px] text-gray-400 border-t border-gray-100 flex justify-between bg-gray-50/50"
-        id="tableFooterRealisasi">
-        <span>* Progress dihitung dari total approve dibagi dengan total target.</span>
-        <span id="realisasiCountInfo"></span>
+
+        <!-- Panduan Keluarga Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+            <div class="bg-brand-50 text-brand-600 rounded-xl p-2.5 flex items-center justify-center">
+              <i class="fa-solid fa-users text-lg"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-gray-800 text-base">Panduan Anomali Keluarga</h3>
+              <p class="text-[11px] text-gray-400">Daftar aturan validasi dan verifikasi untuk data keluarga</p>
+            </div>
+          </div>
+
+          <div class="space-y-4 flex-grow overflow-y-auto max-h-[600px] pr-2 scrollbar-hide">
+            <!-- Item 1 -->
+            <div
+              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
+                  Keluarga 2</span>
+              </div>
+              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                Anomali Kepala Keluarga &lt; 10 Th di Rumah Sendiri ("Umur Kepala Keluarga &lt; 10 tahun dan tinggal di
+                rumah milik sendiri")
+              </h4>
+              <div class="bg-white rounded-lg p-3 border border-gray-100">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
+                  Solusi</span>
+                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Cek isian umur kepala rumah tangga</li>
+                  <li>Cek isian terkait status perumahan</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div
+              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
+                  Keluarga 4</span>
+              </div>
+              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                Luas lantai per kapita &lt; 3 m2 atau &gt; 200 m2
+              </h4>
+              <div class="bg-white rounded-lg p-3 border border-gray-100">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
+                  Solusi</span>
+                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Cek isian terkait luas lantai tempat tinggal (Blok IV R.5) dan bagi dengan jumlah anggota keluarga
+                    yang tinggal untuk memperoleh luas lantai perkapita</li>
+                  <li>Perbaiki isian luas lantai jika tidak sesuai kondisi lapangan.</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div
+              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
+                  Keluarga 5</span>
+              </div>
+              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                Selisih pendapatan dan pengeluaran negatif
+              </h4>
+              <div class="bg-white rounded-lg p-3 border border-gray-100">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
+                  Solusi</span>
+                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Cek isian rincian pengeluaran pada (IV)</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div
+              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
+                  Keluarga 6</span>
+              </div>
+              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
+                Anomali Listrik Rendah &amp; Ada Barang Mewah ("Pengeluaran listrik sebulan &lt; Rp100.000 atau daya
+                listrik &lt; 900 watt tetapi memiliki lemari es/kulkas, AC, komputer/laptop/tablet")
+              </h4>
+              <div class="bg-white rounded-lg p-3 border border-gray-100">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
+                  Solusi</span>
+                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Cek terkait isian daya listrik</li>
+                  <li>Cek isian pengeluaran listrik sebulan</li>
+                  <li>Cek isian terkait aset kepemilikan seperti lemari es/kulkas, AC, Komputer/laptop/tablet</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
 
   
-
 <footer class="text-gray-400 py-6 text-center text-xs mt-auto">
     &copy; 2026 Badan Pusat Statistik Kabupaten Parigi Moutong
   </footer>
@@ -898,12 +1039,16 @@
       const promises = [];
       let latestDataTimestamp = null;
 
-      // 1. Fetch Progress (Standard)
-      if (urls.progress) {
+      // Progress data tidak dimuat di halaman Anomali ini.
+
+      // 2. Fetch Anomali Keluarga (Smart Cleanup BPS)
+      if (urls.anoKel && urls.anoKel.includes("docs.google")) {
         promises.push(
-          fetchStandardCSV(urls.progress).then((res) => {
+          fetchBPSCSV(urls.anoKel).then((res) => {
             if (res.data) {
-              progDataAll = res.data.map(parseRowProgress).filter(Boolean);
+              anoDataKeluarga = res.data
+                .map((r) => parseRowAnomali(r, "keluarga"))
+                .filter(Boolean);
               const ts = getLatestUpdatedAt(res.data);
               if (ts && (!latestDataTimestamp || ts > latestDataTimestamp)) {
                 latestDataTimestamp = ts;
@@ -911,7 +1056,23 @@
             }
           }),
         );
-         // Anomali data tidak dimuat di halaman Progress ini.
+      }
+
+      // 3. Fetch Anomali Usaha (Smart Cleanup BPS)
+      if (urls.anoUsaha && urls.anoUsaha.includes("docs.google")) {
+        promises.push(
+          fetchBPSCSV(urls.anoUsaha).then((res) => {
+            if (res.data) {
+              anoDataUsaha = res.data
+                .map((r) => parseRowAnomali(r, "usaha"))
+                .filter(Boolean);
+              const ts = getLatestUpdatedAt(res.data);
+              if (ts && (!latestDataTimestamp || ts > latestDataTimestamp)) {
+                latestDataTimestamp = ts;
+              }
+            }
+          }),
+        );
       }
 
       await Promise.allSettled(promises);
@@ -934,10 +1095,48 @@
       // Hide empty loading state if visible
       document.getElementById("emptyState").classList.add("hidden");
 
-      buildKecTabsProgress();
-      applyFiltersProgress();
-      applyFiltersRealisasi();
-      // Anomali render tidak dilakukan di halaman ini
+      // Progress render tidak dilakukan di halaman ini.
+      updateBadgeAnomali();
+
+
+      // Update anomaly data while preserving the user's active dropdown filters
+      anoCurrentData = anoActiveTab === "keluarga" ? anoDataKeluarga : anoDataUsaha;
+
+      const currentKec = document.getElementById("filterAKec").value;
+      const currentDesa = document.getElementById("filterADesa").value;
+      const currentSls = document.getElementById("filterASls").value;
+      const currentPetugas = document.getElementById("filterAPetugas").value;
+      const currentJenis = document.getElementById("filterAJenis").value;
+
+      // Populate dropdowns with updated data
+      populateDropdownsAnomali(anoCurrentData);
+
+      // Restore dropdown values if they are still valid in the new options list
+      if (currentKec && [...document.getElementById("filterAKec").options].some(o => o.value === currentKec)) {
+        document.getElementById("filterAKec").value = currentKec;
+        populateDropdownsAnomali(anoCurrentData, "kec");
+
+        if (currentDesa && [...document.getElementById("filterADesa").options].some(o => o.value === currentDesa)) {
+          document.getElementById("filterADesa").value = currentDesa;
+          populateDropdownsAnomali(anoCurrentData, "desa");
+
+          if (currentSls && [...document.getElementById("filterASls").options].some(o => o.value === currentSls)) {
+            document.getElementById("filterASls").value = currentSls;
+            populateDropdownsAnomali(anoCurrentData, "sls");
+          }
+        }
+      }
+      if (currentPetugas && [...document.getElementById("filterAPetugas").options].some(o => o.value === currentPetugas)) {
+        document.getElementById("filterAPetugas").value = currentPetugas;
+      }
+      if (currentJenis && [...document.getElementById("filterAJenis").options].some(o => o.value === currentJenis)) {
+        document.getElementById("filterAJenis").value = currentJenis;
+      }
+
+      // Re-apply filters
+      applyFiltersAnomali(null);
+
+      // No view-progress on this page
 
       // Auto refresh
       const sec = parseInt(document.getElementById("intervalSelect").value);
