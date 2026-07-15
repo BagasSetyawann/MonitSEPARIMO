@@ -1876,6 +1876,7 @@
         anoDataKeluarga.filter((a) => !a.isSelesai).length +
         anoDataUsaha.filter((a) => !a.isSelesai).length;
       const badge = document.getElementById("badgeAnomali");
+      if (!badge) return; // elemen tidak ada di halaman ini
       if (belum > 0) {
         badge.textContent = belum > 99 ? "99+" : belum;
         badge.classList.remove("hidden");
@@ -1883,6 +1884,7 @@
         badge.classList.add("hidden");
       }
     }
+
 
     function switchSubTabAnomali(type) {
       anoActiveTab = type;
@@ -2336,6 +2338,9 @@
       selectEl.disabled = true;
       if (spinner) spinner.classList.remove("hidden");
 
+      let success = false;
+      let errorMsg = null;
+
       try {
         const res = await fetch(scriptUrl, {
           method: "POST",
@@ -2361,16 +2366,34 @@
           target.isSelesai = isSelesai;
           target.statusText = newStatus;
         }
-        selectEl.dataset.original = newStatus;
 
         updateBadgeAnomali();
-        applyFiltersAnomali(null); // re-hitung KPI & render ulang tabel tanpa reset filter dropdown
+        success = true;
       } catch (err) {
-        alert("Gagal menyimpan perubahan ke Spreadsheet: " + err.message);
-        selectEl.value = originalValue;
+        errorMsg = err.message;
       } finally {
-        selectEl.disabled = false;
-        if (spinner) spinner.classList.add("hidden");
+        // Pastikan selectEl & spinner masih ada di DOM sebelum diakses
+        // (applyFiltersAnomali di bawah akan me-render ulang tabel, jadi
+        //  pembaruan UI mentah harus dilakukan di sini terlebih dahulu)
+        if (document.body.contains(selectEl)) {
+          selectEl.disabled = false;
+          if (spinner && document.body.contains(spinner)) {
+            spinner.classList.add("hidden");
+          }
+          if (!success) {
+            selectEl.value = originalValue;
+          } else {
+            selectEl.dataset.original = newStatus;
+          }
+        }
+      }
+
+      // Re-render tabel dilakukan di LUAR finally agar tidak menyebabkan
+      // akses ke elemen DOM yang sudah dihapus oleh render ulang
+      if (success) {
+        applyFiltersAnomali(null); // re-hitung KPI & render ulang tabel tanpa reset filter dropdown
+      } else if (errorMsg) {
+        alert("Gagal menyimpan perubahan ke Spreadsheet: " + errorMsg);
       }
     }
 
