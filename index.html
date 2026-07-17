@@ -1499,7 +1499,7 @@
         const progDen = v.target;
 
         // Kolom Kalkulasi Target/Hari
-        const target40 = Math.ceil(v.target * 0.4);
+        const target40 = Math.ceil(v.target);
         const shortfall = Math.max(0, target40 - progVal);
         const dailyTarget = shortfall > 0 ? shortfall / daysLeft : 0;
 
@@ -2261,7 +2261,7 @@
         const pct = v.target > 0 ? (progVal / v.target) * 100 : 0;
 
         // Kalkulasi Target harian 15 Ags 40%
-        const target40 = Math.ceil(v.target * 0.4);
+        const target40 = Math.ceil(v.target);
         const shortfall = Math.max(0, target40 - progVal);
         const dailyTarget = shortfall > 0 ? shortfall / daysLeft : 0;
 
