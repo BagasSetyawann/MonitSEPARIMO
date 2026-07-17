@@ -230,7 +230,7 @@
         </div>
       </div>
 
-            <!-- MAIN NAVIGATION TABS -->
+      <!-- MAIN NAVIGATION TABS -->
       <div class="flex gap-6 mt-1">
         <a href="index.html" id="mainTabProgress"
           class="nav-tab-active pb-3 text-sm transition-colors flex items-center gap-2">
@@ -244,7 +244,7 @@
     </div>
   </header>
 
-<!-- ========== SETUP PANEL ========== -->
+  <!-- ========== SETUP PANEL ========== -->
   <div id="setupPanel" class="hidden bg-white border-b border-gray-100 shadow-sm relative z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -319,8 +319,8 @@
     </p>
   </div>
 
-  
-<!-- ========== VIEW: DASHBOARD PROGRESS ========== -->
+
+  <!-- ========== VIEW: DASHBOARD PROGRESS ========== -->
   <main id="view-progress" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full fade-in">
     <!-- Info Row -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -520,8 +520,8 @@
                 % Selesai<i class="fa-solid fa-sort sort-icon" id="siPct"></i>
               </th>
               <th class="px-5 py-3 text-right font-bold text-blue-600 sortable" onclick="sortByProgress('dailyTarget')"
-                title="Target yang harus diselesaikan tiap harinya sampai tanggal 15 Juli agar tercapai 40%">
-                Target/Hari<br />(s.d 15 Jul)<i class="fa-solid fa-sort sort-icon" id="siDailyTarget"></i>
+                title="Target yang harus diselesaikan tiap harinya sampai tanggal 15 Ags agar tercapai 40%">
+                Target/Hari<br />(s.d 15 Ags)<i class="fa-solid fa-sort sort-icon" id="siDailyTarget"></i>
               </th>
               <th class="px-5 py-3 text-right font-bold text-gray-400 sortable" onclick="sortByProgress('OPEN')">Open<i
                   class="fa-solid fa-sort sort-icon" id="siOPEN"></i></th>
@@ -617,9 +617,9 @@
     </div>
   </main>
 
-  
 
-<footer class="text-gray-400 py-6 text-center text-xs mt-auto">
+
+  <footer class="text-gray-400 py-6 text-center text-xs mt-auto">
     &copy; 2026 Badan Pusat Statistik Kabupaten Parigi Moutong
   </footer>
 
@@ -911,7 +911,7 @@
             }
           }),
         );
-         // Anomali data tidak dimuat di halaman Progress ini.
+        // Anomali data tidak dimuat di halaman Progress ini.
       }
 
       await Promise.allSettled(promises);
@@ -1488,9 +1488,9 @@
         agg[key].REJECTED_BY_ADMIN_KABUPATEN += r.REJECTED_BY_ADMIN_KABUPATEN;
       });
 
-      // Hitung sisa hari dari hari ini sampai 15 Juli 2026
+      // Hitung sisa hari dari hari ini sampai 15 Ags 2026
       const today = new Date();
-      const targetDate = new Date("2026-07-15T23:59:59");
+      const targetDate = new Date("2026-08-15T23:59:59");
       let daysLeft = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
       if (daysLeft < 1) daysLeft = 1; // Mencegah pembagian 0 atau minus
 
@@ -1677,6 +1677,7 @@
         anoDataKeluarga.filter((a) => !a.isSelesai).length +
         anoDataUsaha.filter((a) => !a.isSelesai).length;
       const badge = document.getElementById("badgeAnomali");
+      if (!badge) return; // elemen tidak ada di halaman ini
       if (belum > 0) {
         badge.textContent = belum > 99 ? "99+" : belum;
         badge.classList.remove("hidden");
@@ -2249,9 +2250,9 @@
         agg[key].REJECTED_BY_ADMIN_KABUPATEN += r.REJECTED_BY_ADMIN_KABUPATEN;
       });
 
-      // Hitung sisa hari dari hari ini sampai 15 Juli 2026
+      // Hitung sisa hari dari hari ini sampai 15 Ags 2026
       const today = new Date();
-      const targetDate = new Date("2026-07-15T23:59:59");
+      const targetDate = new Date("2026-08-15T23:59:59");
       let daysLeft = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
       if (daysLeft < 1) daysLeft = 1;
 
@@ -2259,7 +2260,7 @@
         const progVal = v.target - v.OPEN - v.DRAFT;
         const pct = v.target > 0 ? (progVal / v.target) * 100 : 0;
 
-        // Kalkulasi Target harian 15 Jul 40%
+        // Kalkulasi Target harian 15 Ags 40%
         const target40 = Math.ceil(v.target * 0.4);
         const shortfall = Math.max(0, target40 - progVal);
         const dailyTarget = shortfall > 0 ? shortfall / daysLeft : 0;
@@ -2275,9 +2276,9 @@
           Target: v.target,
           Progress: progVal,
           "Pct Selesai (%)": parseFloat(pct.toFixed(2)),
-          "Target 40% (15 Jul)": target40,
+          "Target 40% (15 Ags)": target40,
           "Kekurangan (Dok)": shortfall,
-          "Target/Hari (s.d 15 Jul)": parseFloat(dailyTarget.toFixed(1)),
+          "Target/Hari (s.d 15 Ags)": parseFloat(dailyTarget.toFixed(1)),
           Open: v.OPEN,
           Draft: v.DRAFT,
           "Submitted Pencacah": v.SUBMITTED_BY_PENCACAH,
