@@ -520,7 +520,7 @@
                 % Selesai<i class="fa-solid fa-sort sort-icon" id="siPct"></i>
               </th>
               <th class="px-5 py-3 text-right font-bold text-blue-600 sortable" onclick="sortByProgress('dailyTarget')"
-                title="Target yang harus diselesaikan tiap harinya sampai tanggal 15 Ags agar tercapai 40%">
+                title="Target yang harus diselesaikan tiap harinya sampai tanggal 15 Ags agar tercapai 100%">
                 Target/Hari<br />(s.d 15 Ags)<i class="fa-solid fa-sort sort-icon" id="siDailyTarget"></i>
               </th>
               <th class="px-5 py-3 text-right font-bold text-gray-400 sortable" onclick="sortByProgress('OPEN')">Open<i
@@ -561,8 +561,8 @@
       </div>
       <div class="px-5 py-3 text-[10px] text-gray-400 border-t border-gray-100 flex justify-between bg-gray-50/50"
         id="tableFooterProgress">
-        <span>* Target/Hari dihitung untuk mengejar Progress minimal 40% (Target
-          40% dikurangi Progress Saat Ini dibagi Sisa Hari)</span>
+        <span>* Target/Hari dihitung untuk mengejar Progress minimal 100% (Target
+          100% dikurangi Progress Saat Ini dibagi Sisa Hari)</span>
         <span></span>
       </div>
     </div>
@@ -1537,7 +1537,7 @@
             <td class="px-5 py-3 text-right text-gray-600">${item.target}</td>
             <td class="px-5 py-3 text-right font-bold text-brand-600">${item.progVal}</td>
             <td class="px-5 py-3 text-right font-bold ${item.pct >= 90 ? "text-green-600" : item.pct >= 50 ? "text-brand-600" : "text-gray-500"}">${item.pct.toFixed(2)}%</td>
-            <td class="px-5 py-3 text-right font-bold text-blue-600 bg-blue-50/30" title="Kekurangan s.d 40%: ${item.shortfall} dokumen">
+            <td class="px-5 py-3 text-right font-bold text-blue-600 bg-blue-50/30" title="Kekurangan s.d 100%: ${item.shortfall} dokumen">
                ${item.dailyTarget > 0 ? item.dailyTarget.toFixed(1) : '<i class="fa-solid fa-check text-green-500" title="Sudah Tercapai"></i>'}
             </td>
             <td class="px-5 py-3 text-right font-medium text-gray-400">${item.OPEN}</td>
@@ -2260,7 +2260,7 @@
         const progVal = v.target - v.OPEN - v.DRAFT;
         const pct = v.target > 0 ? (progVal / v.target) * 100 : 0;
 
-        // Kalkulasi Target harian 15 Ags 40%
+        // Kalkulasi Target harian 15 Ags 100%
         const target40 = Math.ceil(v.target);
         const shortfall = Math.max(0, target40 - progVal);
         const dailyTarget = shortfall > 0 ? shortfall / daysLeft : 0;
@@ -2276,7 +2276,7 @@
           Target: v.target,
           Progress: progVal,
           "Pct Selesai (%)": parseFloat(pct.toFixed(2)),
-          "Target 40% (15 Ags)": target40,
+          "Target 100% (15 Ags)": target40,
           "Kekurangan (Dok)": shortfall,
           "Target/Hari (s.d 15 Ags)": parseFloat(dailyTarget.toFixed(1)),
           Open: v.OPEN,
