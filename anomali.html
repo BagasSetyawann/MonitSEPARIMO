@@ -1263,15 +1263,16 @@
         }
 
         let strHasilKemarin = "";
+        let hasHasilKemarin = false;
         for (const key in row) {
           const normKey = key.toLowerCase().replace(/[\s_]/g, "");
           if (normKey === "hasilkemarin") {
+            hasHasilKemarin = true;
             strHasilKemarin = String(row[key] || "").trim();
             break;
           }
         }
         const stKemarin = parseStatusProgress(strHasilKemarin);
-        const hasHasilKemarin = Boolean(strHasilKemarin);
 
         return {
           userId: row.userId || "",
