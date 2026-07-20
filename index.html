@@ -1,0 +1,2990 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Progress FASIH SE2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: "#fff7ed",
+              100: "#ffedd5",
+              400: "#fb923c",
+              500: "#f97316",
+              600: "#ea580c",
+              700: "#c2410c",
+              900: "#7c2d12",
+            },
+            danger: {
+              50: "#fef2f2",
+              500: "#ef4444",
+              600: "#dc2626",
+            },
+          },
+          fontFamily: { sans: ["Inter", "sans-serif"] },
+        },
+      },
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background: #f8fafc;
+    }
+
+    /* Clean Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px -8px rgba(234, 88, 12, 0.15);
+    }
+
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .table-wrap {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #f8fafc;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .sortable {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+
+    .sortable:hover {
+      color: #ea580c;
+    }
+
+    .sort-icon {
+      opacity: 0.3;
+      font-size: 10px;
+      margin-left: 4px;
+      transition: all 0.2s;
+    }
+
+    .sort-icon.active {
+      opacity: 1;
+      color: #ea580c;
+      transform: scale(1.2);
+    }
+
+    .pulse-dot {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .progress-bar {
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-tab-active {
+      color: #ea580c;
+      border-bottom: 3px solid #ea580c;
+      font-weight: 700;
+    }
+
+    .nav-tab-inactive {
+      color: #64748b;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+    }
+
+    .nav-tab-inactive:hover {
+      color: #334155;
+      border-bottom: 3px solid #cbd5e1;
+    }
+
+    @media (max-width: 640px) {
+      .table-wrap {
+        max-height: 400px;
+      }
+    }
+  </style>
+</head>
+
+<body class="text-gray-700 flex flex-col min-h-screen">
+  <!-- ========== HEADER ========== -->
+  <header class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-[70px]">
+        <div class="flex items-center gap-3">
+          <div class="bg-brand-50 text-brand-600 rounded-xl p-2.5 flex items-center justify-center">
+            <i class="fa-solid fa-chart-pie text-xl"></i>
+          </div>
+          <div>
+            <h1 class="font-extrabold text-lg sm:text-xl text-gray-800 tracking-tight leading-none">
+              SE<span class="text-brand-500">2026</span>
+            </h1>
+            <p class="text-[10px] sm:text-xs text-gray-400 font-medium tracking-wide mt-0.5 hidden sm:block">
+              KABUPATEN PARIGI MOUTONG
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div id="syncStatus"
+            class="hidden items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-100">
+            <span id="syncDot" class="w-2 h-2 rounded-full bg-green-400 pulse-dot inline-block"></span>
+            <span id="syncText" class="hidden sm:inline-block text-gray-500">Terhubung</span>
+          </div>
+          <button onclick="triggerRefresh()" id="btnRefresh" title="Refresh data sekarang"
+            class="hidden hover:bg-gray-50 text-gray-500 hover:text-brand-600 px-3 py-1.5 rounded-full text-sm transition flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate" id="refreshIcon"></i>
+          </button>
+          <button onclick="toggleSetup()"
+            class="bg-brand-50 hover:bg-brand-100 text-brand-600 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders"></i>
+            <span class="hidden sm:inline">Pengaturan</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN NAVIGATION TABS -->
+      <div class="flex gap-6 mt-1">
+        <a href="index.html" id="mainTabProgress"
+          class="nav-tab-active pb-3 text-sm transition-colors flex items-center gap-2">
+          <i class="fa-solid fa-bars-progress"></i> Dashboard Progress
+        </a>
+        <a href="anomali.html" id="mainTabAnomali"
+          class="nav-tab-inactive pb-3 text-sm transition-colors flex items-center gap-2 relative">
+          <i class="fa-solid fa-triangle-exclamation"></i> Monitoring Anomali
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== SETUP PANEL ========== -->
+  <div id="setupPanel" class="hidden bg-white border-b border-gray-100 shadow-sm relative z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Setup Progress -->
+        <div>
+          <h3 class="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-database text-brand-500"></i> Sumber Data
+            Progress FASIH
+          </h3>
+          <p class="text-xs text-gray-500 mb-3">
+            Tautan ditarik otomatis dari konfigurasi hardcode.
+          </p>
+          <input type="text" id="sheetUrlProgress"
+            class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-50 transition mb-3"
+            readonly />
+
+          <div class="flex gap-2 items-center">
+            <span class="text-xs text-gray-500 font-medium">Auto-refresh:</span>
+            <select id="intervalSelect" onchange="updateInterval()"
+              class="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none bg-white">
+              <option value="60">1 menit</option>
+              <option value="300" selected>5 menit</option>
+              <option value="600">10 menit</option>
+              <option value="1800">30 menit</option>
+              <option value="0">Manual</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Setup Anomali -->
+        <div>
+          <h3 class="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-bug text-danger-500"></i> Sumber Data
+            Anomali
+          </h3>
+          <p class="text-xs text-gray-500 mb-3">
+            Tautan ditarik otomatis dari konfigurasi hardcode.
+          </p>
+          <div class="space-y-2">
+            <input type="text" id="sheetUrlAnomaliKeluarga"
+              class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-danger-400 focus:ring-2 focus:ring-danger-50 transition bg-gray-50"
+              readonly />
+            <input type="text" id="sheetUrlAnomaliUsaha"
+              class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-danger-400 focus:ring-2 focus:ring-danger-50 transition bg-gray-50"
+              readonly />
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex flex-col sm:flex-row justify-between items-center border-t border-gray-100 pt-4 gap-4">
+        <div id="setupStatus" class="hidden text-sm px-4 py-2 rounded-xl border w-full sm:w-auto"></div>
+        <button onclick="connectAllSheets()"
+          class="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition flex items-center gap-2 justify-center">
+          <i class="fa-solid fa-rotate"></i> Refresh Manual
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== EMPTY STATE ========== -->
+  <div id="emptyState" class="flex-grow flex flex-col items-center justify-center py-20 px-4 text-center">
+    <div class="relative mb-6">
+      <div class="absolute inset-0 bg-brand-100 rounded-full blur-xl opacity-60"></div>
+      <div
+        class="relative bg-white w-20 h-20 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mx-auto">
+        <div class="spin border-4 border-brand-100 border-t-brand-500 rounded-full w-8 h-8"></div>
+      </div>
+    </div>
+    <h2 class="text-lg font-bold text-gray-800 mb-2">Memuat Data...</h2>
+    <p class="text-sm text-gray-500 max-w-xs">
+      Menyinkronkan data dari Google Spreadsheets.
+    </p>
+  </div>
+
+
+  <!-- ========== VIEW: DASHBOARD PROGRESS ========== -->
+  <main id="view-progress" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full fade-in">
+    <!-- Info Row -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div class="flex flex-wrap items-center gap-2 text-xs">
+        <span id="infoRows"
+          class="bg-white text-gray-600 shadow-sm border border-gray-100 rounded-full px-4 py-2 font-medium flex items-center gap-2"></span>
+        <span id="infoDeltaKab"
+          class="shadow-sm border rounded-full px-4 py-2 font-semibold flex items-center gap-1.5 text-xs hidden"></span>
+        <span id="infoLastUpdate"
+          class="bg-white text-gray-500 shadow-sm border border-gray-100 rounded-full px-4 py-2 flex items-center gap-2"></span>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-6">
+      <div class="flex items-center gap-2 mb-3 px-1">
+        <i class="fa-solid fa-filter text-gray-400 text-sm"></i>
+        <span class="text-sm font-bold text-gray-700">Filter Wilayah & PPL</span>
+        <span id="kecFilterInfo"
+          class="text-[11px] text-brand-500 bg-brand-50 px-2 py-0.5 rounded-full ml-auto font-medium hidden sm:inline-block"></span>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 mb-3">
+        <div id="kecTabs" class="flex flex-wrap gap-2 py-1 px-1"></div>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2 items-center">
+        <select id="fStatus" onchange="applyFiltersProgress()"
+          class="w-full sm:w-auto border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-xs text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-50 cursor-pointer">
+          <option value="">Semua Status</option>
+          <option value="OPEN">Ada OPEN</option>
+          <option value="DRAFT">Ada DRAFT</option>
+          <option value="SUBMITTED_BY_PENCACAH">Ada SUB PPL</option>
+          <option value="SUBMITTED_RESPONDENT">Ada SUB RSP</option>
+          <option value="APPROVED_BY_PENGAWAS">Ada APP PML</option>
+          <option value="REJECTED_BY_PENGAWAS">Ada REJ PML</option>
+          <option value="REVOKED_BY_PENGAWAS">Ada REV PML</option>
+          <option value="EDITED_BY_PENGAWAS">Ada ED PML</option>
+          <option value="COMPLETED_BY_ADMIN_KABUPATEN">Ada COMP ADM</option>
+          <option value="EDITED_BY_ADMIN_KABUPATEN">Ada ED ADM</option>
+          <option value="REJECTED_BY_ADMIN_KABUPATEN">Ada REJ ADM</option>
+        </select>
+        <button onclick="resetFiltersProgress()"
+          class="w-full sm:w-auto text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-rotate-left"></i> Reset
+        </button>
+        <span id="filteredInfo" class="sm:ml-auto text-xs text-gray-400 px-2"></span>
+      </div>
+    </div>
+
+    <!-- KPIs Progress -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover">
+        <div class="flex justify-between items-start mb-2">
+          <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">
+            Total Target
+          </p>
+          <div class="bg-gray-50 w-8 h-8 rounded-full flex items-center justify-center text-gray-400">
+            <i class="fa-solid fa-cubes text-sm"></i>
+          </div>
+        </div>
+        <h3 class="text-2xl sm:text-3xl font-black text-gray-800 leading-none" id="kTarget">
+          —
+        </h3>
+      </div>
+      <div
+        class="bg-brand-500 rounded-2xl shadow-sm shadow-brand-500/20 p-4 sm:p-5 card-hover relative overflow-hidden text-white">
+        <div class="absolute right-[-10px] top-1/2 -translate-y-1/2 opacity-20">
+          <i class="fa-solid fa-chart-line text-7xl"></i>
+        </div>
+        <div class="relative z-10">
+          <div class="flex justify-between items-start mb-2">
+            <p class="text-[10px] sm:text-xs font-bold text-brand-100 uppercase tracking-wider"
+              title="Total Target - (Open + Draft)">
+              Progress Lapangan
+            </p>
+          </div>
+          <div class="flex items-end gap-2 mb-2 flex-wrap">
+            <h3 class="text-2xl sm:text-3xl font-black leading-none" id="kProgress">
+              —
+            </h3>
+            <span class="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full mb-1" id="kProgressPct">0%</span>
+            <span class="text-xs font-bold px-2 py-0.5 rounded-full mb-1 hidden" id="kDeltaKabPct"></span>
+          </div>
+          <div class="w-full bg-black/10 h-1.5 rounded-full">
+            <div class="bg-white h-1.5 rounded-full progress-bar" id="barProgress" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover">
+        <div class="flex justify-between items-start mb-2">
+          <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">
+            Approved PML
+          </p>
+          <div class="bg-green-50 w-8 h-8 rounded-full flex items-center justify-center text-green-500">
+            <i class="fa-solid fa-check-double text-sm"></i>
+          </div>
+        </div>
+        <h3 class="text-2xl sm:text-3xl font-black text-green-500 leading-none" id="kApproved">
+          —
+        </h3>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 card-hover">
+        <div class="flex justify-between items-start mb-2">
+          <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">
+            Belum Dikerjakan
+          </p>
+          <div class="bg-gray-50 w-8 h-8 rounded-full flex items-center justify-center text-gray-400">
+            <i class="fa-regular fa-folder-open text-sm"></i>
+          </div>
+        </div>
+        <h3 class="text-2xl sm:text-3xl font-black text-gray-400 leading-none" id="kOpen">
+          —
+        </h3>
+      </div>
+    </div>
+
+    <!-- Charts Progress -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 lg:col-span-2 flex flex-col">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+          <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2">
+            <span class="w-2 h-6 bg-brand-500 rounded-full"></span><span id="chartLabel">Progress per Kecamatan</span>
+          </h3>
+          <div class="flex bg-gray-50 p-1 rounded-lg">
+            <button onclick="setChartMode('kec')" id="cBtnKec"
+              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold bg-white text-gray-800 shadow-sm transition">
+              Wilayah
+            </button>
+            <button onclick="setChartMode('ppl')" id="cBtnPpl"
+              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold text-gray-500 hover:text-gray-800 transition">
+              PPL Top 25
+            </button>
+          </div>
+        </div>
+        <div class="relative flex-grow min-h-[250px] w-full">
+          <canvas id="mainChart"></canvas>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 flex flex-col">
+        <h3 class="font-bold text-gray-700 text-sm mb-4 flex items-center gap-2">
+          <span class="w-2 h-6 bg-brand-500 rounded-full"></span> Proporsi
+          Status
+        </h3>
+        <div class="relative w-full h-[180px] mb-4 flex-shrink-0">
+          <canvas id="pieChart"></canvas>
+        </div>
+        <div id="statusPanel" class="space-y-3 mt-2 overflow-y-auto max-h-[200px] pr-2 scrollbar-hide"></div>
+      </div>
+    </div>
+
+    <!-- Table Progress -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 flex flex-col">
+      <div
+        class="p-4 sm:p-5 border-b border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2 shrink-0">
+          <span class="w-2 h-6 bg-brand-500 rounded-full"></span><span id="tableTitle">Rincian Data PPL</span>
+        </h3>
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto lg:justify-end">
+          <div class="relative flex-grow sm:flex-grow-0">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" id="searchInput" oninput="applyFiltersProgress()" placeholder="Cari nama, kode..."
+              class="w-full sm:w-48 border border-gray-200 rounded-xl pl-8 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-50 bg-gray-50 focus:bg-white transition" />
+          </div>
+          <div class="flex bg-gray-50 p-1 rounded-xl">
+            <button onclick="switchTableView('ppl')" id="tBtnPPL"
+              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition">
+              PPL
+            </button>
+            <button onclick="switchTableView('sls')" id="tBtnSLS"
+              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition">
+              SLS
+            </button>
+            <button onclick="switchTableView('kec')" id="tBtnKec"
+              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition">
+              Kec
+            </button>
+          </div>
+          <button onclick="exportExcelProgress()"
+            class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ml-auto sm:ml-0">
+            <i class="fa-solid fa-download"></i><span class="hidden sm:inline">Export</span>
+          </button>
+        </div>
+      </div>
+      <div class="table-wrap overflow-x-auto">
+        <table class="min-w-full text-xs text-left">
+          <thead>
+            <tr class="text-gray-400 border-b border-gray-100 uppercase tracking-wider text-[10px]">
+              <th class="px-5 py-3 font-bold sortable" onclick="sortByProgress('key')">
+                <span id="thKeyLabel">Nama / ID</span><i class="fa-solid fa-sort sort-icon" id="siKey"></i>
+              </th>
+              <th class="px-5 py-3 font-bold sortable" onclick="sortByProgress('loc')">
+                Lokasi<i class="fa-solid fa-sort sort-icon" id="siLoc"></i>
+              </th>
+              <th class="px-5 py-3 text-right font-bold sortable" onclick="sortByProgress('target')">
+                Target<i class="fa-solid fa-sort sort-icon" id="siTarget"></i>
+              </th>
+              <th class="px-5 py-3 text-right font-bold text-brand-600 sortable" onclick="sortByProgress('progVal')">
+                Progress<i class="fa-solid fa-sort sort-icon" id="siProgVal"></i>
+              </th>
+              <th class="px-5 py-3 text-right font-bold sortable w-24" onclick="sortByProgress('pct')">
+                % Selesai<i class="fa-solid fa-sort sort-icon" id="siPct"></i>
+              </th>
+              <th class="px-5 py-3 text-right font-bold text-emerald-600 sortable" onclick="sortByProgress('deltaPct')"
+                title="Selisih % Selesai antara Hari Ini (statusBreakdown) dan Hari Kemarin (hasil_kemarin)">
+                Delta % (H vs H-1)<i class="fa-solid fa-sort sort-icon" id="sideltaPct"></i>
+              </th>
+              <th class="px-5 py-3 text-right font-bold text-blue-600 sortable" onclick="sortByProgress('dailyTarget')"
+                title="Target yang harus diselesaikan tiap harinya sampai tanggal 15 Ags agar tercapai 100%">
+                Target/Hari<br />(s.d 15 Ags)<i class="fa-solid fa-sort sort-icon" id="siDailyTarget"></i>
+              </th>
+              <th class="px-5 py-3 text-right font-bold text-gray-400 sortable" onclick="sortByProgress('OPEN')">Open<i
+                  class="fa-solid fa-sort sort-icon" id="siOPEN"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-yellow-500 sortable" onclick="sortByProgress('DRAFT')">
+                Draft<i class="fa-solid fa-sort sort-icon" id="siDRAFT"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-blue-500 sortable"
+                onclick="sortByProgress('SUBMITTED_BY_PENCACAH')">Sub PPL<i class="fa-solid fa-sort sort-icon"
+                  id="siSUBMITTED_BY_PENCACAH"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-indigo-500 sortable"
+                onclick="sortByProgress('SUBMITTED_RESPONDENT')">Sub Rsp<i class="fa-solid fa-sort sort-icon"
+                  id="siSUBMITTED_RESPONDENT"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-green-500 sortable"
+                onclick="sortByProgress('APPROVED_BY_PENGAWAS')">App PML<i class="fa-solid fa-sort sort-icon"
+                  id="siAPPROVED_BY_PENGAWAS"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-red-500 sortable"
+                onclick="sortByProgress('REJECTED_BY_PENGAWAS')">Rej PML<i class="fa-solid fa-sort sort-icon"
+                  id="siREJECTED_BY_PENGAWAS"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-orange-500 sortable"
+                onclick="sortByProgress('REVOKED_BY_PENGAWAS')">Rev PML<i class="fa-solid fa-sort sort-icon"
+                  id="siREVOKED_BY_PENGAWAS"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-teal-500 sortable"
+                onclick="sortByProgress('EDITED_BY_PENGAWAS')">Ed PML<i class="fa-solid fa-sort sort-icon"
+                  id="siEDITED_BY_PENGAWAS"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-emerald-500 sortable"
+                onclick="sortByProgress('COMPLETED_BY_ADMIN_KABUPATEN')">Comp Adm<i class="fa-solid fa-sort sort-icon"
+                  id="siCOMPLETED_BY_ADMIN_KABUPATEN"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-cyan-500 sortable"
+                onclick="sortByProgress('EDITED_BY_ADMIN_KABUPATEN')">Ed Adm<i class="fa-solid fa-sort sort-icon"
+                  id="siEDITED_BY_ADMIN_KABUPATEN"></i></th>
+              <th class="px-5 py-3 text-right font-bold text-rose-500 sortable"
+                onclick="sortByProgress('REJECTED_BY_ADMIN_KABUPATEN')">Rej Adm<i class="fa-solid fa-sort sort-icon"
+                  id="siREJECTED_BY_ADMIN_KABUPATEN"></i></th>
+            </tr>
+          </thead>
+          <tbody id="tableBodyProgress" class="divide-y divide-gray-50 bg-white"></tbody>
+        </table>
+      </div>
+      <div class="px-5 py-3 text-[10px] text-gray-400 border-t border-gray-100 flex justify-between bg-gray-50/50"
+        id="tableFooterProgress">
+        <span>* Target/Hari dihitung untuk mengejar Progress minimal 100% (Target
+          100% dikurangi Progress Saat Ini dibagi Sisa Hari)</span>
+        <span></span>
+      </div>
+    </div>
+
+    <!-- Table Progress PML & PPL -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 flex flex-col">
+      <div
+        class="p-4 sm:p-5 border-b border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2 shrink-0">
+          <span class="w-2 h-6 bg-brand-500 rounded-full"></span><span id="realisasiTableTitle">Progress PML &
+            PPL</span>
+        </h3>
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto lg:justify-end">
+          <div class="relative flex-grow sm:flex-grow-0">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" id="searchRealisasiInput" oninput="applyFiltersRealisasi()" placeholder="Cari nama..."
+              class="w-full sm:w-48 border border-gray-200 rounded-xl pl-8 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-50 bg-gray-50 focus:bg-white transition" />
+          </div>
+          <div class="flex bg-gray-50 p-1 rounded-xl">
+            <button onclick="switchRealisasiView('pml')" id="rBtnPML"
+              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition">
+              Per PML
+            </button>
+            <button onclick="switchRealisasiView('ppl')" id="rBtnPPL"
+              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition">
+              Per PPL
+            </button>
+            <button onclick="switchRealisasiView('kec')" id="rBtnKec"
+              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition">
+              Per Kec
+            </button>
+          </div>
+          <button onclick="exportExcelRealisasi()"
+            class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ml-auto sm:ml-0">
+            <i class="fa-solid fa-download"></i><span class="hidden sm:inline">Export</span>
+          </button>
+        </div>
+      </div>
+      <div class="table-wrap overflow-x-auto">
+        <table class="min-w-full text-xs text-left">
+          <thead id="realisasiTableHeader">
+            <!-- Dynamic headers -->
+          </thead>
+          <tbody id="tableBodyRealisasi" class="divide-y divide-gray-50 bg-white"></tbody>
+        </table>
+      </div>
+      <div class="px-5 py-3 text-[10px] text-gray-400 border-t border-gray-100 flex justify-between bg-gray-50/50"
+        id="tableFooterRealisasi">
+        <span>* Progress dihitung dari total approve dibagi dengan total target.</span>
+        <span id="realisasiCountInfo"></span>
+      </div>
+    </div>
+  </main>
+
+
+
+  <footer class="text-gray-400 py-6 text-center text-xs mt-auto">
+    &copy; 2026 Badan Pusat Statistik Kabupaten Parigi Moutong
+  </footer>
+
+  <script>
+    // ============================================================
+    //  HARDCODE URL SPREADSHEET (GANTI URL CSV DI SINI)
+    // ============================================================
+    const HARDCODED_URL_PROGRESS =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSk5tIl0qRgX_m7FuPrg3S0I2piafa2xQKueukDLd2eizjrC4Eq6voDWJqHqcPr1P6D9Je_0LiPFshh/pub?output=csv";
+
+    // Kosongkan atau ganti dengan Link Google Sheets CSV milik Anda
+    const HARDCODED_URL_ANO_KEL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGR4pOZWbVhGfRBiLV-6DlaDayIlCGWgdOZyQ67JyrhjKPtONLhuTgCx8XrE91DZlAS0xKs5Qfh20B/pub?output=csv";
+    const HARDCODED_URL_ANO_USA =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vT14YnYV6GJ0AC7yKmdb7yRDcwAY2f01CSbUzH7ptdgFpqbURsTbVYTLC58a-fLHEeVB57tQAIpPjQ8/pub?output=csv";
+
+    // ============================================================
+    //  ENDPOINT UPDATE STATUS (Google Apps Script Web App)
+    //  Wajib diisi agar tombol "Tandai Sudah/Belum" bisa menulis
+    //  balik ke Google Spreadsheet. Lihat instruksi setup Apps
+    //  Script yang menyertai file ini.
+    // ============================================================
+    const HARDCODED_SCRIPT_ANO_KEL =
+      "https://script.google.com/macros/s/AKfycbyxhJJQNO1S38WS-I3lfLUMJ8hwD2ZYzlCLRQorLl4YPI3GCWHj3Xl9l5rJqLnn9g27/exec";
+    const HARDCODED_SCRIPT_ANO_USA =
+      "https://script.google.com/macros/s/AKfycbym7gMuK4Oa2n27sAdU9jF28Il4GDn1qaavdP-BOUzwwPkrcQOu4Grglxm4wfWCKNmgsg/exec"; // Harus SAMA PERSIS dengan SECRET_KEY di kode Apps Script.
+    const UPDATE_SECRET_KEY = "uhuyapipi";
+
+    // ============================================================
+    //  STATE VARIABLES
+    // ============================================================
+    // State Progress
+    let progDataAll = [];
+    let progDataFiltered = [];
+    let progActiveKec = "";
+    let progChartMode = "kec";
+    let progTableView = "ppl";
+    let progSortCol = "OPEN";
+    let progSortDir = "desc";
+
+    // State Realisasi PML
+    let realisasiView = "pml"; // 'pml', 'ppl', 'kec'
+    let realisasiSortCol = "pctProgress";
+    let realisasiSortDir = "desc";
+    let realisasiSearch = "";
+
+    let chartInst = null;
+    let pieInst = null;
+
+    // State Anomali
+    let anoDataKeluarga = [];
+    let anoDataUsaha = [];
+    let localStatusUpdates = {};
+
+    try {
+      const stored = localStorage.getItem("monit_local_status_updates");
+      if (stored) {
+        localStatusUpdates = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error("Gagal memuat localStatusUpdates dari localStorage:", e);
+    }
+
+    function saveLocalStatusUpdates() {
+      try {
+        localStorage.setItem("monit_local_status_updates", JSON.stringify(localStatusUpdates));
+      } catch (e) {
+        console.error("Gagal menyimpan localStatusUpdates ke localStorage:", e);
+      }
+    }
+
+    let anoActiveTab = "keluarga"; // 'keluarga' or 'usaha'
+    let anoCurrentData = [];
+    let anoFiltered = [];
+    let anoSortCol = "wilayahStr";
+    let anoSortDir = "asc";
+    let anoKecSortBy = "name";
+
+    // Global State
+    let autoTimer = null;
+    let lastUpdate = null;
+    let urls = {
+      progress: HARDCODED_URL_PROGRESS,
+      anoKel: HARDCODED_URL_ANO_KEL,
+      anoUsaha: HARDCODED_URL_ANO_USA,
+      scriptKel: HARDCODED_SCRIPT_ANO_KEL,
+      scriptUsaha: HARDCODED_SCRIPT_ANO_USA,
+    };
+
+    // Referensi Kecamatan BPS (Parigi Moutong)
+    const KEC_CODES = {
+      "010": "SAUSU",
+      "011": "TORUE",
+      "012": "BALINGGI",
+      "020": "PARIGI",
+      "021": "PARIGI SELATAN",
+      "022": "PARIGI BARAT",
+      "023": "PARIGI UTARA",
+      "024": "PARIGI TENGAH",
+      "030": "AMPIBABO",
+      "031": "KASIMBAR",
+      "032": "TORIBULU",
+      "033": "SINIU",
+      "040": "TINOMBO",
+      "041": "TINOMBO SELATAN",
+      "042": "SIDOAN",
+      "050": "TOMINI",
+      "051": "MEPANGA",
+      "052": "PALASA",
+      "060": "MOUTONG",
+      "061": "BOLANO LAMBUNU",
+      "062": "TAOPA",
+      "063": "BOLANO",
+      "064": "ONGKA MALINO",
+    };
+
+    function getKecLabel(code) {
+      return KEC_CODES[code] ? `${code} ${KEC_CODES[code]}` : `Kec-${code}`;
+    }
+
+    // ============================================================
+    //  UI NAVIGATION & SETUP
+    // ============================================================
+    function switchMainTab(tabId) { /* Navigation handled by page links */ }
+
+    function toggleSetup() {
+      document.getElementById("setupPanel").classList.toggle("hidden");
+    }
+
+    function parseUpdatedAtValue(value) {
+      if (value === null || value === undefined) return null;
+      if (value instanceof Date) {
+        return Number.isNaN(value.getTime()) ? null : value;
+      }
+
+      const str = String(value).trim();
+      if (!str || str === "-" || str.toLowerCase() === "nan") return null;
+
+      const parsed = Date.parse(str.replace(/\s+/, " "));
+      if (!Number.isNaN(parsed)) return new Date(parsed);
+      return null;
+    }
+
+    function getLatestUpdatedAt(rows) {
+      const keys = [
+        "updatedAt",
+        "UpdatedAt",
+        "updated_at",
+        "Updated_At",
+        "lastUpdated",
+        "LastUpdated",
+        "last_updated",
+        "Last Updated",
+        "Update Time",
+        "updated time",
+        "timestamp",
+        "Timestamp",
+        "createdAt",
+        "CreatedAt",
+      ];
+
+      let latest = null;
+      rows.forEach((row) => {
+        keys.forEach((key) => {
+          const parsed = parseUpdatedAtValue(row[key]);
+          if (parsed && (!latest || parsed > latest)) {
+            latest = parsed;
+          }
+        });
+      });
+
+      return latest;
+    }
+
+    function updateLastUpdateDisplay() {
+      const infoEl = document.getElementById("infoLastUpdate");
+      if (infoEl && lastUpdate) {
+        infoEl.innerHTML = `<i class="fa-solid fa-clock text-gray-400"></i> Terakhir diperbarui ${lastUpdate.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}`;
+      }
+    }
+
+    function updateInterval() {
+      const sec = parseInt(document.getElementById("intervalSelect").value);
+      localStorage.setItem("fasih_interval", sec);
+      if (urls.progress) startAutoRefresh(sec);
+    }
+
+    function connectAllSheets() {
+      const statusEl = document.getElementById("setupStatus");
+      statusEl.classList.remove("hidden");
+      statusEl.className =
+        "text-sm px-4 py-2 rounded-xl border bg-blue-50 border-blue-100 text-blue-600 w-full sm:w-auto";
+      statusEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Menyinkronkan data...`;
+
+      fetchDataAll(true);
+    }
+
+    // Fetch Khusus Data CSV Raw dari Export Sistem BPS (Membersihkan Metadata BPS)
+    // Sekaligus melacak nomor baris ASLI di Google Sheet untuk tiap baris data,
+    // supaya update status bisa ditulis balik ke baris yang tepat.
+    function fetchBPSCSV(url) {
+      return fetch(url + (url.includes("?") ? "&" : "?") + "_t=" + Date.now())
+        .then((res) => res.text())
+        .then((text) => {
+          const lines = text.split("\n");
+          let startIdx = 0;
+
+          // Cari baris yang mengandung header asli BPS
+          for (let i = 0; i < lines.length; i++) {
+            if (
+              lines[i].includes("Kode Kec") ||
+              lines[i].includes("kode_kec") ||
+              lines[i].includes("Nama KRT") ||
+              lines[i].includes("Nama Usaha")
+            ) {
+              startIdx = i;
+              break;
+            }
+          }
+
+          const headerLine = lines[startIdx];
+
+          // Buang metadata di atas header, dan baris format (1),(2)... jika ada,
+          // sambil mencatat nomor baris asli (1-indexed, sesuai baris di Sheet).
+          const dataLinesWithRowNum = [];
+          for (let i = startIdx + 1; i < lines.length; i++) {
+            const l = lines[i];
+            if (l.startsWith("(1),(2)")) continue;
+            if (l.trim() === "") continue;
+            dataLinesWithRowNum.push({ line: l, rowNum: i + 1 });
+          }
+
+          const validCsv = [
+            headerLine,
+            ...dataLinesWithRowNum.map((d) => d.line),
+          ].join("\n");
+
+          return new Promise((resolve) => {
+            Papa.parse(validCsv, {
+              header: true,
+              skipEmptyLines: true,
+              complete: (res) => {
+                if (res.data) {
+                  res.data.forEach((row, idx) => {
+                    if (dataLinesWithRowNum[idx]) {
+                      row.__sheetRow = dataLinesWithRowNum[idx].rowNum;
+                    }
+                  });
+                }
+                resolve(res);
+              },
+              error: () => resolve({ data: null }),
+            });
+          });
+        })
+        .catch(() => ({ data: null }));
+    }
+
+    function fetchStandardCSV(url) {
+      return new Promise((resolve) => {
+        Papa.parse(
+          url + (url.includes("?") ? "&" : "?") + "_t=" + Date.now(),
+          {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: resolve,
+            error: () => resolve({ data: null }),
+          },
+        );
+      });
+    }
+
+    async function fetchDataAll(fromSetup = false) {
+      setSyncUI("syncing");
+      const promises = [];
+      let latestDataTimestamp = null;
+
+      // 1. Fetch Progress (Standard)
+      if (urls.progress) {
+        promises.push(
+          fetchStandardCSV(urls.progress).then((res) => {
+            if (res.data) {
+              progDataAll = res.data.map(parseRowProgress).filter(Boolean);
+              const ts = getLatestUpdatedAt(res.data);
+              if (ts && (!latestDataTimestamp || ts > latestDataTimestamp)) {
+                latestDataTimestamp = ts;
+              }
+            }
+          }),
+        );
+        // Anomali data tidak dimuat di halaman Progress ini.
+      }
+
+      await Promise.allSettled(promises);
+
+      lastUpdate = latestDataTimestamp || new Date();
+      updateLastUpdateDisplay();
+      setSyncUI("ok");
+
+      if (fromSetup) {
+        const statusEl = document.getElementById("setupStatus");
+        statusEl.className =
+          "text-sm px-4 py-2 rounded-xl border bg-green-50 border-green-100 text-green-600 w-full sm:w-auto";
+        statusEl.innerHTML = `<i class="fa-solid fa-check mr-2"></i>Berhasil ditarik!`;
+        setTimeout(
+          () => document.getElementById("setupPanel").classList.add("hidden"),
+          1500,
+        );
+      }
+
+      // Hide empty loading state if visible
+      document.getElementById("emptyState").classList.add("hidden");
+
+      buildKecTabsProgress();
+      applyFiltersProgress();
+      applyFiltersRealisasi();
+      // Anomali render tidak dilakukan di halaman ini
+
+      // Auto refresh
+      const sec = parseInt(document.getElementById("intervalSelect").value);
+      startAutoRefresh(sec);
+    }
+
+    function triggerRefresh() {
+      const icon = document.getElementById("refreshIcon");
+      if (icon) icon.classList.add("spin");
+      fetchDataAll();
+      setTimeout(() => {
+        if (icon) icon.classList.remove("spin");
+      }, 1000);
+    }
+
+    function startAutoRefresh(sec) {
+      if (autoTimer) clearInterval(autoTimer);
+      if (sec > 0) autoTimer = setInterval(() => fetchDataAll(), sec * 1000);
+    }
+
+    function setSyncUI(state) {
+      const dot = document.getElementById("syncDot");
+      const text = document.getElementById("syncText");
+      const bar = document.getElementById("syncStatus");
+      const btn = document.getElementById("btnRefresh");
+      bar.classList.remove("hidden");
+      bar.classList.add("flex");
+      btn.classList.remove("hidden");
+      btn.classList.add("flex");
+
+      if (state === "ok") {
+        dot.className =
+          "w-2 h-2 rounded-full bg-green-400 pulse-dot inline-block";
+        text.textContent = `Terakhir ${lastUpdate.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`;
+      } else if (state === "syncing") {
+        dot.className =
+          "w-2 h-2 rounded-full bg-brand-400 pulse-dot inline-block";
+        text.textContent = "Sync...";
+      } else {
+        dot.className = "w-2 h-2 rounded-full bg-red-400 inline-block";
+        text.textContent = "Gagal";
+      }
+    }
+
+    // ============================================================
+    //  PROGRESS LOGIC (Tab 1)
+    // ============================================================
+    function normalizeStatusKey(raw) {
+      const key = String(raw || "")
+        .trim()
+        .toUpperCase();
+      if (!key) return null;
+      if (key === "OPEN") return "OPEN";
+      if (key === "DRAFT") return "DRAFT";
+      if (key === "SUBMITTED BY PENCACAH") return "SUBMITTED_BY_PENCACAH";
+      if (key === "SUBMITTED RESPONDENT") return "SUBMITTED_RESPONDENT";
+      if (key === "APPROVED BY PENGAWAS") return "APPROVED_BY_PENGAWAS";
+      if (key === "REJECTED BY PENGAWAS") return "REJECTED_BY_PENGAWAS";
+      if (key === "REVOKED BY PENGAWAS") return "REVOKED_BY_PENGAWAS";
+      if (key === "EDITED BY PENGAWAS") return "EDITED_BY_PENGAWAS";
+      if (key === "COMPLETED BY ADMIN KABUPATEN") return "COMPLETED_BY_ADMIN_KABUPATEN";
+      if (key === "EDITED BY ADMIN KABUPATEN") return "EDITED_BY_ADMIN_KABUPATEN";
+      if (key === "REJECTED BY ADMIN KABUPATEN") return "REJECTED_BY_ADMIN_KABUPATEN";
+      return null;
+    }
+
+    function parseStatusProgress(str) {
+      const r = {
+        OPEN: 0,
+        DRAFT: 0,
+        SUBMITTED_BY_PENCACAH: 0,
+        SUBMITTED_RESPONDENT: 0,
+        APPROVED_BY_PENGAWAS: 0,
+        REJECTED_BY_PENGAWAS: 0,
+        REVOKED_BY_PENGAWAS: 0,
+        EDITED_BY_PENGAWAS: 0,
+        COMPLETED_BY_ADMIN_KABUPATEN: 0,
+        EDITED_BY_ADMIN_KABUPATEN: 0,
+        REJECTED_BY_ADMIN_KABUPATEN: 0
+      };
+      if (!str) return r;
+      str
+        .split("|")
+        .map((p) => p.trim())
+        .forEach((p) => {
+          const ci = p.lastIndexOf(":");
+          if (ci === -1) return;
+          const baseK = normalizeStatusKey(p.slice(0, ci));
+          const v = parseInt(p.slice(ci + 1)) || 0;
+          if (baseK && r[baseK] !== undefined) r[baseK] += v;
+        });
+      return r;
+    }
+
+    function parseRowProgress(row) {
+      try {
+        const code = String(row.regionCode || "")
+          .replace(/[="]/g, "")
+          .trim();
+        if (code.length < 10) return null;
+        const kecCode = code.slice(4, 7),
+          desaCode = code.slice(7, 10),
+          slsCode = code.slice(10);
+        const username = (row.username || row.email || "").trim();
+        const st = parseStatusProgress(row.statusBreakdown);
+        const targetVal = st.OPEN + st.DRAFT + st.SUBMITTED_BY_PENCACAH + st.SUBMITTED_RESPONDENT + st.APPROVED_BY_PENGAWAS + st.REJECTED_BY_PENGAWAS + st.REVOKED_BY_PENGAWAS + st.EDITED_BY_PENGAWAS + st.COMPLETED_BY_ADMIN_KABUPATEN + st.EDITED_BY_ADMIN_KABUPATEN + st.REJECTED_BY_ADMIN_KABUPATEN;
+
+        let emailPml = "";
+        for (const key in row) {
+          const normKey = key.toLowerCase().replace(/[\s_]/g, "");
+          if (normKey === "emailpml") {
+            emailPml = String(row[key] || "").trim();
+            break;
+          }
+        }
+
+        let prelistAwal = 0;
+        for (const key in row) {
+          const normKey = key.toLowerCase().replace(/[\s_]/g, "");
+          if (normKey === "prelistawal") {
+            prelistAwal = parseInt(row[key]) || 0;
+            break;
+          }
+        }
+
+        let strHasilKemarin = "";
+        let hasHasilKemarin = false;
+        for (const key in row) {
+          const normKey = key.toLowerCase().replace(/[\s_]/g, "");
+          if (normKey === "hasilkemarin") {
+            hasHasilKemarin = true;
+            strHasilKemarin = String(row[key] || "").trim();
+            break;
+          }
+        }
+        const stKemarin = parseStatusProgress(strHasilKemarin);
+
+        return {
+          userId: row.userId || "",
+          username,
+          namePPL: username.split("@")[0],
+          emailPml,
+          namePML: emailPml ? emailPml.split("@")[0] : "Tanpa PML",
+          kecCode,
+          desaCode,
+          slsCode,
+          fullCode: code,
+          target: targetVal,
+          prelistAwal,
+          ...st,
+          hasHasilKemarin,
+          OPEN_KEMARIN: stKemarin.OPEN,
+          DRAFT_KEMARIN: stKemarin.DRAFT,
+          SUBMITTED_BY_PENCACAH_KEMARIN: stKemarin.SUBMITTED_BY_PENCACAH,
+          SUBMITTED_RESPONDENT_KEMARIN: stKemarin.SUBMITTED_RESPONDENT,
+          APPROVED_BY_PENGAWAS_KEMARIN: stKemarin.APPROVED_BY_PENGAWAS,
+          REJECTED_BY_PENGAWAS_KEMARIN: stKemarin.REJECTED_BY_PENGAWAS,
+          REVOKED_BY_PENGAWAS_KEMARIN: stKemarin.REVOKED_BY_PENGAWAS,
+          EDITED_BY_PENGAWAS_KEMARIN: stKemarin.EDITED_BY_PENGAWAS,
+          COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.COMPLETED_BY_ADMIN_KABUPATEN,
+          EDITED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.EDITED_BY_ADMIN_KABUPATEN,
+          REJECTED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.REJECTED_BY_ADMIN_KABUPATEN,
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function buildKecTabsProgress() {
+      const kecList = [...new Set(progDataAll.map((r) => r.kecCode))].sort();
+      let html = `<button class="whitespace-nowrap px-4 py-2 text-[11px] sm:text-xs font-semibold rounded-full transition-all border ${progActiveKec === "" ? "bg-brand-500 text-white border-brand-500 shadow-md" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}" onclick="selectKecProgress('')">Semua Wilayah</button>`;
+
+      html += kecList
+        .map((k) => {
+          const pool = progDataAll.filter((r) => r.kecCode === k);
+          const pVal = pool.reduce(
+            (s, r) => s + r.target - r.OPEN - r.DRAFT,
+            0,
+          );
+          const pDen = pool.reduce(
+            (s, r) => s + r.target,
+            0,
+          );
+          const pct = pDen > 0 ? ((pVal / pDen) * 100).toFixed(2) : "0.00";
+          const isActive = progActiveKec === k;
+          return `<button class="whitespace-nowrap px-4 py-2 text-[11px] sm:text-xs font-semibold rounded-full transition-all border flex items-center gap-2 ${isActive ? "bg-brand-500 text-white border-brand-500 shadow-md" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}" onclick="selectKecProgress('${k}')">
+            ${getKecLabel(k)} <span class="text-[9px] ${isActive ? "bg-black/20 text-white" : "bg-gray-100 text-gray-400"} px-1.5 py-0.5 rounded-full">${pct}%</span>
+          </button>`;
+        })
+        .join("");
+      document.getElementById("kecTabs").innerHTML = html;
+    }
+
+    function selectKecProgress(kec) {
+      progActiveKec = kec;
+      buildKecTabsProgress();
+      applyFiltersProgress();
+      applyFiltersRealisasi();
+    }
+
+    function applyFiltersProgress() {
+      if (progDataAll.length === 0) return;
+      const fStatus = document.getElementById("fStatus").value;
+      const search = (
+        document.getElementById("searchInput").value || ""
+      ).toLowerCase();
+
+      progDataFiltered = progDataAll.filter((r) => {
+        if (progActiveKec && r.kecCode !== progActiveKec) return false;
+        if (fStatus && r[fStatus] === 0) return false;
+        if (search) {
+          const hay =
+            `${r.username} ${r.fullCode} ${r.kecCode}`.toLowerCase();
+          if (!hay.includes(search)) return false;
+        }
+        return true;
+      });
+
+      document.getElementById("kecFilterInfo").textContent = progActiveKec
+        ? `Kec ${progActiveKec}`
+        : "Semua";
+      document.getElementById("filteredInfo").textContent =
+        `${progDataFiltered.length} SLS ditampilkan`;
+      document.getElementById("infoRows").innerHTML =
+        `<i class="fa-solid fa-database text-brand-500"></i> ${progDataAll.length} SLS &middot; ${new Set(progDataAll.map((r) => r.userId)).size} PPL`;
+
+      updateKPIsProgress();
+      drawChartProgress();
+      renderTableProgress();
+    }
+
+    function resetFiltersProgress() {
+      progActiveKec = "";
+      document.getElementById("fStatus").value = "";
+      document.getElementById("searchInput").value = "";
+      buildKecTabsProgress();
+      applyFiltersProgress();
+      applyFiltersRealisasi();
+    }
+
+    function updateKPIsProgress() {
+      const sum = (key) =>
+        progDataFiltered.reduce((a, r) => a + (r[key] || 0), 0);
+      const total = sum("target"),
+        open = sum("OPEN"),
+        draft = sum("DRAFT"),
+        subPPL = sum("SUBMITTED_BY_PENCACAH"),
+        subRsp = sum("SUBMITTED_RESPONDENT"),
+        appPML = sum("APPROVED_BY_PENGAWAS"),
+        rejPML = sum("REJECTED_BY_PENGAWAS"),
+        revPML = sum("REVOKED_BY_PENGAWAS"),
+        edPML = sum("EDITED_BY_PENGAWAS"),
+        compAdm = sum("COMPLETED_BY_ADMIN_KABUPATEN"),
+        edAdm = sum("EDITED_BY_ADMIN_KABUPATEN"),
+        rejAdm = sum("REJECTED_BY_ADMIN_KABUPATEN");
+
+      const numProg = total - open - draft;
+      const pctProg = total > 0 ? (numProg / total) * 100 : 0;
+
+      const openKemarin = sum("OPEN_KEMARIN");
+      const draftKemarin = sum("DRAFT_KEMARIN");
+      const numProgKemarin = total - openKemarin - draftKemarin;
+      const pctProgKemarin = total > 0 ? (numProgKemarin / total) * 100 : 0;
+      const deltaProgKab = numProg - numProgKemarin;
+      const deltaPctKab = pctProg - pctProgKemarin;
+      const hasHasilKemarinKab = progDataFiltered.some((r) => r.hasHasilKemarin);
+
+      document.getElementById("kTarget").textContent =
+        total.toLocaleString("id-ID");
+      document.getElementById("kProgress").textContent =
+        numProg.toLocaleString("id-ID");
+      document.getElementById("kProgressPct").textContent =
+        pctProg.toFixed(2) + "%";
+      document.getElementById("barProgress").style.width =
+        Math.min(100, pctProg) + "%";
+
+      const kDeltaKabEl = document.getElementById("kDeltaKabPct");
+      const infoDeltaEl = document.getElementById("infoDeltaKab");
+
+      if (kDeltaKabEl) {
+        if (hasHasilKemarinKab) {
+          kDeltaKabEl.classList.remove("hidden");
+          const sign = deltaPctKab > 0 ? "+" : "";
+          const badgeClass =
+            deltaPctKab > 0.0001
+              ? "bg-emerald-400/30 text-emerald-100 border border-emerald-300/30"
+              : deltaPctKab < -0.0001
+                ? "bg-rose-400/30 text-rose-100 border border-rose-300/30"
+                : "bg-white/20 text-white/90";
+          const icon =
+            deltaPctKab > 0.0001
+              ? '<i class="fa-solid fa-arrow-up text-[9px]"></i>'
+              : deltaPctKab < -0.0001
+                ? '<i class="fa-solid fa-arrow-down text-[9px]"></i>'
+                : "";
+
+          kDeltaKabEl.className = `text-xs font-bold px-2 py-0.5 rounded-full mb-1 flex items-center gap-1 ${badgeClass}`;
+          kDeltaKabEl.innerHTML = `${icon}${sign}${deltaPctKab.toFixed(2)}% (H-1)`;
+          kDeltaKabEl.title = `Delta Progress Kabupaten: ${sign}${deltaPctKab.toFixed(2)}% (${sign}${deltaProgKab.toLocaleString("id-ID")} dokumen dibanding kemarin)`;
+        } else {
+          kDeltaKabEl.classList.add("hidden");
+        }
+      }
+
+      if (infoDeltaEl) {
+        if (hasHasilKemarinKab) {
+          infoDeltaEl.classList.remove("hidden");
+          const sign = deltaPctKab > 0 ? "+" : "";
+          const infoBadgeClass =
+            deltaPctKab > 0.0001
+              ? "text-emerald-600 bg-emerald-50 border-emerald-100"
+              : deltaPctKab < -0.0001
+                ? "text-rose-600 bg-rose-50 border-rose-100"
+                : "text-gray-600 bg-white border-gray-100";
+          const icon =
+            deltaPctKab > 0.0001
+              ? '<i class="fa-solid fa-arrow-up text-[10px]"></i>'
+              : deltaPctKab < -0.0001
+                ? '<i class="fa-solid fa-arrow-down text-[10px]"></i>'
+                : "";
+
+          infoDeltaEl.className = `shadow-sm border rounded-full px-4 py-2 font-semibold flex items-center gap-1.5 text-xs ${infoBadgeClass}`;
+          infoDeltaEl.innerHTML = `<i class="fa-solid fa-chart-line text-brand-500"></i> Delta Kabupaten: ${icon}<span class="font-bold">${sign}${deltaPctKab.toFixed(2)}%</span> <span class="text-[10px] opacity-75">(${sign}${deltaProgKab.toLocaleString("id-ID")} dok)</span>`;
+        } else {
+          infoDeltaEl.classList.add("hidden");
+        }
+      }
+
+      const approvedPml = appPML + compAdm + edAdm + edPML;
+      document.getElementById("kApproved").textContent =
+        approvedPml.toLocaleString("id-ID");
+      document.getElementById("kOpen").textContent =
+        open.toLocaleString("id-ID");
+
+      const breakdown = [
+        {
+          label: "Approved",
+          val: approvedPml,
+          color: "bg-green-500",
+          text: "text-green-600",
+        },
+        {
+          label: "Submitted",
+          val: subPPL + subRsp,
+          color: "bg-brand-500",
+          text: "text-brand-600",
+        },
+        {
+          label: "Draft",
+          val: draft,
+          color: "bg-yellow-400",
+          text: "text-yellow-600",
+        },
+        {
+          label: "Rejected",
+          val: rejPML + rejAdm,
+          color: "bg-red-400",
+          text: "text-red-500",
+        },
+        {
+          label: "Revoked",
+          val: revPML,
+          color: "bg-orange-400",
+          text: "text-orange-600",
+        },
+        {
+          label: "Open",
+          val: open,
+          color: "bg-gray-200",
+          text: "text-gray-500",
+        },
+      ];
+      document.getElementById("statusPanel").innerHTML = breakdown
+        .map((it) => {
+          const pct = total > 0 ? (it.val / total) * 100 : 0;
+          return `<div class="mb-2"><div class="flex justify-between text-xs mb-1"><span class="font-medium text-gray-600">${it.label}</span><span class="font-bold ${it.text}">${it.val.toLocaleString("id-ID")}</span></div><div class="w-full bg-gray-100 rounded-full h-1.5"><div class="${it.color} h-1.5 rounded-full progress-bar" style="width:${Math.min(100, pct)}%"></div></div></div>`;
+        })
+        .join("");
+
+      if (pieInst) pieInst.destroy();
+      if (total > 0) {
+        const ctx = document.getElementById("pieChart");
+        pieInst = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: [
+              "Approved",
+              "Submitted",
+              "Draft",
+              "Rejected",
+              "Revoked",
+              "OPEN",
+            ],
+            datasets: [
+              {
+                data: [
+                  approvedPml,
+                  subPPL + subRsp,
+                  draft,
+                  rejPML + rejAdm,
+                  revPML,
+                  open,
+                ],
+                backgroundColor: [
+                  "#22c55e",
+                  "#f97316",
+                  "#facc15",
+                  "#f87171",
+                  "#fb923c",
+                  "#e2e8f0",
+                ],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "75%",
+            plugins: { legend: { display: false } },
+          },
+        });
+      }
+    }
+
+    function setChartMode(mode) {
+      progChartMode = mode;
+      document.getElementById("cBtnKec").className =
+        mode === "kec"
+          ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold bg-white text-gray-800 shadow-sm"
+          : "px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold text-gray-500 hover:text-gray-800";
+      document.getElementById("cBtnPpl").className =
+        mode === "ppl"
+          ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold bg-white text-gray-800 shadow-sm"
+          : "px-3 py-1.5 text-[11px] sm:text-xs rounded-md font-semibold text-gray-500 hover:text-gray-800";
+      document.getElementById("chartLabel").textContent =
+        mode === "kec" ? "Progress per Kecamatan" : "Progress PPL (Top 25)";
+      drawChartProgress();
+    }
+
+    function drawChartProgress() {
+      const agg = {};
+      progDataFiltered.forEach((r) => {
+        const k = progChartMode === "kec" ? r.kecCode : r.username;
+        if (!agg[k])
+          agg[k] = {
+            target: 0,
+            APP: 0,
+            SUB: 0,
+            DRF: 0,
+            OPN: 0,
+            REJ: 0,
+            RVK: 0,
+          };
+        agg[k].APP += r.APPROVED_BY_PENGAWAS + r.COMPLETED_BY_ADMIN_KABUPATEN + r.EDITED_BY_ADMIN_KABUPATEN + r.EDITED_BY_PENGAWAS;
+        agg[k].SUB += r.SUBMITTED_BY_PENCACAH + r.SUBMITTED_RESPONDENT;
+        agg[k].DRF += r.DRAFT;
+        agg[k].OPN += r.OPEN;
+        agg[k].REJ += r.REJECTED_BY_PENGAWAS + r.REJECTED_BY_ADMIN_KABUPATEN;
+        agg[k].RVK += r.REVOKED_BY_PENGAWAS;
+      });
+
+      let entries = Object.entries(agg)
+        .map(([k, v]) => ({
+          label: progChartMode === "ppl" ? k.split("@")[0] : getKecLabel(k),
+          ...v,
+          tot: v.APP + v.SUB + v.DRF + v.OPN + v.REJ + v.RVK,
+        }))
+        .sort((a, b) => b.tot - a.tot);
+      if (progChartMode === "ppl") entries = entries.slice(0, 25);
+
+      const ctx = document.getElementById("mainChart").getContext("2d");
+      if (chartInst) chartInst.destroy();
+      chartInst = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: entries.map((e) => e.label),
+          datasets: [
+            {
+              label: "Apprv",
+              data: entries.map((e) => (e.tot ? (e.APP / e.tot) * 100 : 0)),
+              backgroundColor: "#22c55e",
+            },
+            {
+              label: "Submt",
+              data: entries.map((e) => (e.tot ? (e.SUB / e.tot) * 100 : 0)),
+              backgroundColor: "#f97316",
+            },
+            {
+              label: "Draft",
+              data: entries.map((e) => (e.tot ? (e.DRF / e.tot) * 100 : 0)),
+              backgroundColor: "#facc15",
+            },
+            {
+              label: "Rejct",
+              data: entries.map((e) => (e.tot ? (e.REJ / e.tot) * 100 : 0)),
+              backgroundColor: "#f87171",
+            },
+            {
+              label: "Revoked",
+              data: entries.map((e) => (e.tot ? (e.RVK / e.tot) * 100 : 0)),
+              backgroundColor: "#fb923c",
+            },
+            {
+              label: "Open",
+              data: entries.map((e) => (e.tot ? (e.OPN / e.tot) * 100 : 0)),
+              backgroundColor: "#e2e8f0",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: true },
+            y: {
+              stacked: true,
+              max: 100,
+              ticks: { callback: (v) => v + "%" },
+            },
+          },
+          plugins: { legend: { position: "top" } },
+        },
+      });
+    }
+
+    function switchTableView(view) {
+      progTableView = view;
+      const btnP = document.getElementById("tBtnPPL");
+      const btnS = document.getElementById("tBtnSLS");
+      const btnK = document.getElementById("tBtnKec");
+      if (btnP && btnS && btnK) {
+        btnP.className =
+          view === "ppl"
+            ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
+            : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
+        btnS.className =
+          view === "sls"
+            ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
+            : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
+        btnK.className =
+          view === "kec"
+            ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
+            : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
+      }
+
+      const title = document.getElementById("tableTitle");
+      if (title) {
+        title.textContent =
+          view === "ppl"
+            ? "Rincian Data PPL"
+            : view === "sls"
+              ? "Rincian Data SLS"
+              : "Rincian Data Kecamatan";
+      }
+
+      applyFiltersProgress();
+    }
+    function sortByProgress(col) {
+      if (progSortCol === col)
+        progSortDir = progSortDir === "asc" ? "desc" : "asc";
+      else {
+        progSortCol = col;
+        progSortDir = "desc";
+      }
+      renderTableProgress();
+    }
+    function renderTableProgress() {
+      // Update progress sort icons visual state
+      const progIcons = [
+        "key", "loc", "target", "progVal", "pct", "deltaPct", "dailyTarget", "OPEN", "DRAFT",
+        "SUBMITTED_BY_PENCACAH", "SUBMITTED_RESPONDENT", "APPROVED_BY_PENGAWAS",
+        "REJECTED_BY_PENGAWAS", "REVOKED_BY_PENGAWAS", "EDITED_BY_PENGAWAS",
+        "COMPLETED_BY_ADMIN_KABUPATEN", "EDITED_BY_ADMIN_KABUPATEN", "REJECTED_BY_ADMIN_KABUPATEN"
+      ];
+
+      progIcons.forEach((colName) => {
+        const iconEl = document.getElementById("si" + colName);
+        if (iconEl) {
+          if (colName === progSortCol) {
+            iconEl.className = `fa-solid ${progSortDir === "asc" ? "fa-sort-up" : "fa-sort-down"} sort-icon active`;
+          } else {
+            iconEl.className = "fa-solid fa-sort sort-icon";
+          }
+        }
+      });
+
+      const agg = {};
+      progDataFiltered.forEach((r) => {
+        let key =
+          progTableView === "ppl"
+            ? r.username
+            : progTableView === "sls"
+              ? r.fullCode
+              : r.kecCode;
+        if (!agg[key])
+          agg[key] = {
+            loc: new Set(),
+            target: 0,
+            OPEN: 0,
+            DRAFT: 0,
+            SUBMITTED_BY_PENCACAH: 0,
+            SUBMITTED_RESPONDENT: 0,
+            APPROVED_BY_PENGAWAS: 0,
+            REJECTED_BY_PENGAWAS: 0,
+            REVOKED_BY_PENGAWAS: 0,
+            EDITED_BY_PENGAWAS: 0,
+            COMPLETED_BY_ADMIN_KABUPATEN: 0,
+            EDITED_BY_ADMIN_KABUPATEN: 0,
+            REJECTED_BY_ADMIN_KABUPATEN: 0,
+            hasHasilKemarinCount: 0,
+            OPEN_KEMARIN: 0,
+            DRAFT_KEMARIN: 0,
+            SUBMITTED_BY_PENCACAH_KEMARIN: 0,
+            SUBMITTED_RESPONDENT_KEMARIN: 0,
+            APPROVED_BY_PENGAWAS_KEMARIN: 0,
+            REJECTED_BY_PENGAWAS_KEMARIN: 0,
+            REVOKED_BY_PENGAWAS_KEMARIN: 0,
+            EDITED_BY_PENGAWAS_KEMARIN: 0,
+            COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
+            EDITED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
+            REJECTED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
+            name: r.namePPL,
+            kec: getKecLabel(r.kecCode),
+          };
+        agg[key].loc.add(
+          progTableView === "ppl"
+            ? r.fullCode
+            : progTableView === "kec"
+              ? r.username
+              : r.namePPL,
+        );
+        agg[key].target += r.target;
+        agg[key].OPEN += r.OPEN;
+        agg[key].DRAFT += r.DRAFT;
+        agg[key].SUBMITTED_BY_PENCACAH += r.SUBMITTED_BY_PENCACAH;
+        agg[key].SUBMITTED_RESPONDENT += r.SUBMITTED_RESPONDENT;
+        agg[key].APPROVED_BY_PENGAWAS += r.APPROVED_BY_PENGAWAS;
+        agg[key].REJECTED_BY_PENGAWAS += r.REJECTED_BY_PENGAWAS;
+        agg[key].REVOKED_BY_PENGAWAS += r.REVOKED_BY_PENGAWAS;
+        agg[key].EDITED_BY_PENGAWAS += r.EDITED_BY_PENGAWAS;
+        agg[key].COMPLETED_BY_ADMIN_KABUPATEN += r.COMPLETED_BY_ADMIN_KABUPATEN;
+        agg[key].EDITED_BY_ADMIN_KABUPATEN += r.EDITED_BY_ADMIN_KABUPATEN;
+        agg[key].REJECTED_BY_ADMIN_KABUPATEN += r.REJECTED_BY_ADMIN_KABUPATEN;
+
+        agg[key].OPEN_KEMARIN += r.OPEN_KEMARIN || 0;
+        agg[key].DRAFT_KEMARIN += r.DRAFT_KEMARIN || 0;
+        agg[key].SUBMITTED_BY_PENCACAH_KEMARIN += r.SUBMITTED_BY_PENCACAH_KEMARIN || 0;
+        agg[key].SUBMITTED_RESPONDENT_KEMARIN += r.SUBMITTED_RESPONDENT_KEMARIN || 0;
+        agg[key].APPROVED_BY_PENGAWAS_KEMARIN += r.APPROVED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].REJECTED_BY_PENGAWAS_KEMARIN += r.REJECTED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].REVOKED_BY_PENGAWAS_KEMARIN += r.REVOKED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].EDITED_BY_PENGAWAS_KEMARIN += r.EDITED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN += r.COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        agg[key].EDITED_BY_ADMIN_KABUPATEN_KEMARIN += r.EDITED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        agg[key].REJECTED_BY_ADMIN_KABUPATEN_KEMARIN += r.REJECTED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        if (r.hasHasilKemarin) agg[key].hasHasilKemarinCount += 1;
+      });
+
+      // Hitung sisa hari dari hari ini sampai 15 Ags 2026
+      const today = new Date();
+      const targetDate = new Date("2026-08-15T23:59:59");
+      let daysLeft = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+      if (daysLeft < 1) daysLeft = 1; // Mencegah pembagian 0 atau minus
+
+      let rows = Object.entries(agg).map(([k, v]) => {
+        const progVal = v.target - v.OPEN - v.DRAFT;
+        const progDen = v.target;
+        const progValKemarin = v.target - v.OPEN_KEMARIN - v.DRAFT_KEMARIN;
+        const deltaProg = progVal - progValKemarin;
+        const pct = progDen > 0 ? (progVal / progDen) * 100 : 0;
+        const pctKemarin = progDen > 0 ? (progValKemarin / progDen) * 100 : 0;
+        const deltaPct = pct - pctKemarin;
+        const hasHasilKemarin = v.hasHasilKemarinCount > 0;
+
+        // Kolom Kalkulasi Target/Hari
+        const target40 = Math.ceil(v.target);
+        const shortfall = Math.max(0, target40 - progVal);
+        const dailyTarget = shortfall > 0 ? shortfall / daysLeft : 0;
+
+        return {
+          key: k,
+          loc:
+            progTableView === "kec"
+              ? `${v.loc.size} PPL`
+              : [...v.loc].join(", "),
+          progVal,
+          progValKemarin,
+          deltaProg,
+          pct,
+          pctKemarin,
+          deltaPct,
+          hasHasilKemarin,
+          dailyTarget,
+          shortfall,
+          ...v,
+        };
+      });
+
+      rows.sort((a, b) => {
+        let va = a[progSortCol] !== undefined ? a[progSortCol] : 0;
+        let vb = b[progSortCol] !== undefined ? b[progSortCol] : 0;
+        if (typeof va === "string")
+          return progSortDir === "asc"
+            ? va.localeCompare(vb)
+            : vb.localeCompare(va);
+        return progSortDir === "asc" ? va - vb : vb - va;
+      });
+
+      const tbody = document.getElementById("tableBodyProgress");
+      tbody.innerHTML = rows
+        .map(
+          (item) => {
+            let deltaCell = `<td class="px-5 py-3 text-right text-gray-400 font-medium" title="Belum ada kolom hasil_kemarin di Spreadsheet">-</td>`;
+            if (item.hasHasilKemarin) {
+              if (item.deltaPct > 0.0001) {
+                deltaCell = `<td class="px-5 py-3 text-right font-bold text-emerald-600 bg-emerald-50/30" title="Penambahan +${item.deltaPct.toFixed(2)}% (+${item.deltaProg} dokumen) sejak kemarin (Kemarin: ${item.pctKemarin.toFixed(2)}%, Hari ini: ${item.pct.toFixed(2)}%)">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                    <i class="fa-solid fa-arrow-up text-[9px]"></i>+${item.deltaPct.toFixed(2)}%
+                  </span>
+                </td>`;
+              } else if (item.deltaPct < -0.0001) {
+                deltaCell = `<td class="px-5 py-3 text-right font-bold text-rose-600 bg-rose-50/30" title="Penurunan ${item.deltaPct.toFixed(2)}% (${item.deltaProg} dokumen) sejak kemarin (Kemarin: ${item.pctKemarin.toFixed(2)}%, Hari ini: ${item.pct.toFixed(2)}%)">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700">
+                    <i class="fa-solid fa-arrow-down text-[9px]"></i>${item.deltaPct.toFixed(2)}%
+                  </span>
+                </td>`;
+              } else {
+                deltaCell = `<td class="px-5 py-3 text-right font-medium text-gray-400" title="Tidak ada perubahan persentase sejak kemarin (Kemarin: ${item.pctKemarin.toFixed(2)}%, Hari ini: ${item.pct.toFixed(2)}%)">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">0.00%</span>
+                </td>`;
+              }
+            }
+
+            return `
+          <tr class="hover:bg-brand-50/40">
+            <td class="px-5 py-3 font-semibold text-gray-800"><div class="truncate max-w-[160px]">${progTableView === "ppl" ? item.name : progTableView === "kec" ? getKecLabel(item.key) : item.key}</div>${progTableView === "ppl" ? `<div class="text-[10px] text-gray-400">${item.key}</div>` : ""}</td>
+            <td class="px-5 py-3 text-gray-500 text-[11px]"><div class="truncate max-w-[150px]" title="${item.loc}">${item.loc}</div></td>
+            <td class="px-5 py-3 text-right text-gray-600">${item.target}</td>
+            <td class="px-5 py-3 text-right font-bold text-brand-600">${item.progVal}</td>
+            <td class="px-5 py-3 text-right font-bold ${item.pct >= 90 ? "text-green-600" : item.pct >= 50 ? "text-brand-600" : "text-gray-500"}">${item.pct.toFixed(2)}%</td>
+            ${deltaCell}
+            <td class="px-5 py-3 text-right font-bold text-blue-600 bg-blue-50/30" title="Kekurangan s.d 100%: ${item.shortfall} dokumen">
+               ${item.dailyTarget > 0 ? item.dailyTarget.toFixed(1) : '<i class="fa-solid fa-check text-green-500" title="Sudah Tercapai"></i>'}
+            </td>
+            <td class="px-5 py-3 text-right font-medium text-gray-400">${item.OPEN}</td>
+            <td class="px-5 py-3 text-right font-medium text-yellow-500">${item.DRAFT}</td>
+            <td class="px-5 py-3 text-right font-medium text-blue-500">${item.SUBMITTED_BY_PENCACAH}</td>
+            <td class="px-5 py-3 text-right font-medium text-indigo-500">${item.SUBMITTED_RESPONDENT}</td>
+            <td class="px-5 py-3 text-right font-semibold text-green-600">${item.APPROVED_BY_PENGAWAS}</td>
+            <td class="px-5 py-3 text-right font-medium text-red-500">${item.REJECTED_BY_PENGAWAS}</td>
+            <td class="px-5 py-3 text-right font-medium text-orange-500">${item.REVOKED_BY_PENGAWAS}</td>
+            <td class="px-5 py-3 text-right font-medium text-teal-500">${item.EDITED_BY_PENGAWAS}</td>
+            <td class="px-5 py-3 text-right font-medium text-emerald-500">${item.COMPLETED_BY_ADMIN_KABUPATEN}</td>
+            <td class="px-5 py-3 text-right font-medium text-cyan-500">${item.EDITED_BY_ADMIN_KABUPATEN}</td>
+            <td class="px-5 py-3 text-right font-medium text-rose-500">${item.REJECTED_BY_ADMIN_KABUPATEN}</td>
+          </tr>`;
+          }
+        )
+        .join("");
+    }
+
+    // Mengakomodir Format Download Langsung BPS & Template Kustom
+    function getAnomaliLink(row) {
+      const candidateKeys = [
+        "Link",
+        "link",
+        "URL",
+        "url",
+        "Tautan",
+        "tautan",
+        "Link Anomali",
+        "link_anomali",
+        "Link Detail",
+        "link_detail",
+        "Link Google Form",
+        "link_google_form",
+        "Link Form",
+        "link_form",
+        "Tautan Anomali",
+        "tautan_anomali",
+        "Link Dokumen",
+        "link_dokumen",
+      ];
+
+      for (const key of candidateKeys) {
+        const value = row[key];
+        if (typeof value === "string") {
+          const trimmed = value.trim();
+          if (trimmed && trimmed !== "-" && trimmed.toLowerCase() !== "nan") {
+            return trimmed;
+          }
+        }
+      }
+
+      return "";
+    }
+
+    function parseRowAnomali(row, type) {
+      // Handle variations of keys (BPS default vs custom template)
+      const kKec = String(row["Kode Kec"] || row.kode_kec || "")
+        .trim()
+        .padStart(3, "0");
+      const kDesa = String(row["Kode Desa"] || row.kode_desa || "")
+        .trim()
+        .padStart(3, "0");
+      const kSls = String(row["Kode SLS"] || row.kode_sls || "")
+        .trim()
+        .padStart(4, "0");
+      const nPetugas = String(
+        row["Email Petugas"] ||
+        row.nama_petugas ||
+        row.email_petugas ||
+        "Tidak Diketahui",
+      ).trim();
+
+      let subjek = "-";
+      if (type === "keluarga") {
+        subjek = String(row["Nama KRT"] || row.nama_krt || "-").trim();
+      } else {
+        subjek = String(row["Nama Usaha"] || row.nama_usaha || "-").trim();
+      }
+
+      const jAnomali = String(
+        row["Nama Anomali"] || row.jenis_anomali || "Anomali Lainnya",
+      ).trim();
+      const deskripsi = String(
+        row.deskripsi || row.deskripsi_anomali || jAnomali,
+      ).trim(); // BPS usually puts everything in "Nama Anomali"
+      const statusRaw = String(
+        row["tindak_lanjut"] || row.status_perbaikan || "Belum",
+      )
+        .trim()
+        .toLowerCase();
+
+      const sheetRow = row.__sheetRow || null;
+      const updateKey = `${type}_${sheetRow}`;
+
+      let isSelesai =
+        statusRaw.includes("sudah") ||
+        statusRaw === "1" ||
+        statusRaw === "selesai" ||
+        statusRaw === "true";
+
+      let statusText = isSelesai ? "Sudah" : "Belum";
+
+      // Sinkronisasi dengan localStatusUpdates (untuk mengatasi caching Google Sheets CSV)
+      if (sheetRow && localStatusUpdates[updateKey] !== undefined) {
+        const localStatus = localStatusUpdates[updateKey];
+        if (statusText === localStatus) {
+          // CSV sudah sinkron/up-to-date dengan local status, hapus key dari localStatusUpdates
+          delete localStatusUpdates[updateKey];
+          saveLocalStatusUpdates();
+        } else {
+          // Gunakan status lokal karena CSV masih out-of-sync (terkena cache)
+          statusText = localStatus;
+          isSelesai = localStatus === "Sudah";
+        }
+      }
+
+      return {
+        kecCode: kKec,
+        desaCode: kDesa,
+        slsCode: kSls,
+        wilayahStr: `[${kKec}] ${getKecLabel(kKec)} / Desa ${kDesa} / SLS ${kSls}`,
+        petugas: nPetugas,
+        subjek: subjek,
+        jenis: jAnomali,
+        desc: deskripsi,
+        link: getAnomaliLink(row),
+        statusText: statusText,
+        isSelesai: isSelesai,
+        sheetRow: sheetRow,
+        anoType: type,
+      };
+    }
+
+    function updateBadgeAnomali() {
+      const total = anoDataKeluarga.length + anoDataUsaha.length;
+      const belum =
+        anoDataKeluarga.filter((a) => !a.isSelesai).length +
+        anoDataUsaha.filter((a) => !a.isSelesai).length;
+      const badge = document.getElementById("badgeAnomali");
+      if (!badge) return; // elemen tidak ada di halaman ini
+      if (belum > 0) {
+        badge.textContent = belum > 99 ? "99+" : belum;
+        badge.classList.remove("hidden");
+      } else {
+        badge.classList.add("hidden");
+      }
+    }
+
+    function switchSubTabAnomali(type) {
+      anoActiveTab = type;
+      const btnKel = document.getElementById("subTabKeluarga");
+      const btnUsa = document.getElementById("subTabUsaha");
+      const btnPan = document.getElementById("subTabPanduan");
+      const dataSec = document.getElementById("anomaliDataSection");
+      const panSec = document.getElementById("anomaliPanduanSection");
+
+      if (type === "keluarga") {
+        btnKel.className =
+          "px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition";
+        btnUsa.className =
+          "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+        btnPan.className =
+          "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+        dataSec.classList.remove("hidden");
+        panSec.classList.add("hidden");
+        anoCurrentData = anoDataKeluarga;
+        document.getElementById("thSubjekAnomali").textContent = "Nama KRT";
+
+        document.getElementById("filterAKec").value = "";
+        populateDropdownsAnomali(anoCurrentData);
+        applyFiltersAnomali("all");
+      } else if (type === "usaha") {
+        btnUsa.className =
+          "px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition";
+        btnKel.className =
+          "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+        btnPan.className =
+          "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+        dataSec.classList.remove("hidden");
+        panSec.classList.add("hidden");
+        anoCurrentData = anoDataUsaha;
+        document.getElementById("thSubjekAnomali").textContent = "Nama Usaha";
+
+        document.getElementById("filterAKec").value = "";
+        populateDropdownsAnomali(anoCurrentData);
+        applyFiltersAnomali("all");
+      } else if (type === "panduan") {
+        btnPan.className =
+          "px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition";
+        btnKel.className =
+          "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+        btnUsa.className =
+          "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
+        dataSec.classList.add("hidden");
+        panSec.classList.remove("hidden");
+      }
+    }
+
+    function populateDropdownsAnomali(dataPool, cascadeFrom = null) {
+      const getDistinct = (arr, key) =>
+        [...new Set(arr.map((item) => item[key]))].sort();
+      const selKec = document.getElementById("filterAKec"),
+        selDesa = document.getElementById("filterADesa"),
+        selSls = document.getElementById("filterASls");
+      const selPetugas = document.getElementById("filterAPetugas"),
+        selJenis = document.getElementById("filterAJenis");
+      const valKec = selKec.value,
+        valDesa = selDesa.value,
+        valSls = selSls.value,
+        valPet = selPetugas.value,
+        valJen = selJenis.value;
+
+      if (
+        cascadeFrom === null ||
+        cascadeFrom === "all" ||
+        cascadeFrom === "kec"
+      ) {
+        selKec.innerHTML =
+          '<option value="">Semua Kecamatan</option>' +
+          getDistinct(dataPool, "kecCode")
+            .map((v) => `<option value="${v}">${getKecLabel(v)}</option>`)
+            .join("");
+        selKec.value =
+          valKec && getDistinct(dataPool, "kecCode").includes(valKec)
+            ? valKec
+            : "";
+      }
+
+      let poolForDesa = selKec.value
+        ? dataPool.filter((r) => r.kecCode === selKec.value)
+        : dataPool;
+
+      if (
+        cascadeFrom === null ||
+        cascadeFrom === "kec" ||
+        cascadeFrom === "desa" ||
+        cascadeFrom === "all"
+      ) {
+        const desaValues = getDistinct(poolForDesa, "desaCode");
+        selDesa.innerHTML =
+          '<option value="">Semua Desa</option>' +
+          desaValues
+            .map((v) => `<option value="${v}">${v}</option>`)
+            .join("");
+        selDesa.value =
+          valDesa && desaValues.includes(valDesa) ? valDesa : "";
+      }
+
+      let poolForSls = selKec.value
+        ? dataPool.filter((r) => r.kecCode === selKec.value)
+        : dataPool;
+      if (selDesa.value) {
+        poolForSls = poolForSls.filter((r) => r.desaCode === selDesa.value);
+      }
+      if (
+        cascadeFrom === null ||
+        cascadeFrom === "kec" ||
+        cascadeFrom === "desa" ||
+        cascadeFrom === "sls" ||
+        cascadeFrom === "all"
+      ) {
+        const slsValues = getDistinct(poolForSls, "slsCode");
+        selSls.innerHTML =
+          '<option value="">Semua SLS</option>' +
+          slsValues.map((v) => `<option value="${v}">${v}</option>`).join("");
+        selSls.value = valSls && slsValues.includes(valSls) ? valSls : "";
+      }
+
+      let poolForFilters = selKec.value
+        ? dataPool.filter((r) => r.kecCode === selKec.value)
+        : dataPool;
+      if (selDesa.value) {
+        poolForFilters = poolForFilters.filter(
+          (r) => r.desaCode === selDesa.value,
+        );
+      }
+      if (selSls.value) {
+        poolForFilters = poolForFilters.filter(
+          (r) => r.slsCode === selSls.value,
+        );
+      }
+
+      const petugasValues = getDistinct(poolForFilters, "petugas");
+      const jenisValues = getDistinct(poolForFilters, "jenis");
+
+      selPetugas.innerHTML =
+        '<option value="">Semua Petugas</option>' +
+        petugasValues
+          .map((v) => `<option value="${v}">${v}</option>`)
+          .join("");
+      selJenis.innerHTML =
+        '<option value="">Semua Jenis Anomali</option>' +
+        jenisValues.map((v) => `<option value="${v}">${v}</option>`).join("");
+
+      selPetugas.value =
+        valPet && petugasValues.includes(valPet) ? valPet : "";
+      selJenis.value = valJen && jenisValues.includes(valJen) ? valJen : "";
+    }
+
+    function applyFiltersAnomali(source) {
+      if (
+        source === "kec" ||
+        source === "desa" ||
+        source === "sls" ||
+        source === "all"
+      ) {
+        populateDropdownsAnomali(anoCurrentData, source);
+      }
+
+      const vKec = document.getElementById("filterAKec").value,
+        vDesa = document.getElementById("filterADesa").value,
+        vSls = document.getElementById("filterASls").value;
+      const vPetugas = document.getElementById("filterAPetugas").value,
+        vJenis = document.getElementById("filterAJenis").value;
+
+      anoFiltered = anoCurrentData.filter((r) => {
+        if (vKec && r.kecCode !== vKec) return false;
+        if (vDesa && r.desaCode !== vDesa) return false;
+        if (vSls && r.slsCode !== vSls) return false;
+        if (vPetugas && r.petugas !== vPetugas) return false;
+        if (vJenis && r.jenis !== vJenis) return false;
+        return true;
+      });
+
+      const tot = anoFiltered.length;
+      const sudah = anoFiltered.filter((r) => r.isSelesai).length;
+      const belum = tot - sudah;
+      document.getElementById("kAnomaliTotal").textContent =
+        tot.toLocaleString("id-ID");
+      document.getElementById("kAnomaliSudah").textContent =
+        sudah.toLocaleString("id-ID");
+      document.getElementById("kAnomaliBelum").textContent =
+        belum.toLocaleString("id-ID");
+      document.getElementById("infoAnomaliFiltered").textContent =
+        `Menampilkan ${tot} baris data`;
+
+      renderAnoKecSummary();
+      renderTableAnomali();
+    }
+
+    function resetFiltersAnomali() {
+      document.getElementById("filterAKec").value = "";
+      document.getElementById("filterADesa").value = "";
+      document.getElementById("filterASls").value = "";
+      document.getElementById("filterAPetugas").value = "";
+      document.getElementById("filterAJenis").value = "";
+      populateDropdownsAnomali(anoCurrentData, "all");
+      applyFiltersAnomali("all");
+    }
+
+    function sortByAnomali(col) {
+      if (anoSortCol === col) {
+        anoSortDir = anoSortDir === "asc" ? "desc" : "asc";
+      } else {
+        anoSortCol = col;
+        anoSortDir = "asc";
+      }
+      renderTableAnomali();
+    }
+
+    function renderTableAnomali() {
+      const tbody = document.getElementById("tableBodyAnomali");
+      if (anoFiltered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Tidak ada data anomali yang sesuai filter.</td></tr>`;
+        return;
+      }
+
+      // Update sort icons visual state for Anomali table
+      const anoIcons = {
+        wilayahStr: "siAnoWilayah",
+        petugas: "siAnoPetugas",
+        subjek: "siAnoSubjek",
+        desc: "siAnoDesc",
+        isSelesai: "siAnoStatus"
+      };
+
+      Object.entries(anoIcons).forEach(([colName, iconId]) => {
+        const iconEl = document.getElementById(iconId);
+        if (iconEl) {
+          if (colName === anoSortCol) {
+            iconEl.className = `fa-solid ${anoSortDir === "asc" ? "fa-sort-up" : "fa-sort-down"} sort-icon active`;
+          } else {
+            iconEl.className = "fa-solid fa-sort sort-icon";
+          }
+        }
+      });
+
+      // Sort data before slicing and rendering
+      const sortedData = [...anoFiltered];
+      sortedData.sort((a, b) => {
+        let va = a[anoSortCol];
+        let vb = b[anoSortCol];
+
+        if (va === undefined || va === null) va = "";
+        if (vb === undefined || vb === null) vb = "";
+
+        if (typeof va === "string") {
+          return anoSortDir === "asc"
+            ? va.localeCompare(vb, undefined, { numeric: true, sensitivity: 'base' })
+            : vb.localeCompare(va, undefined, { numeric: true, sensitivity: 'base' });
+        }
+
+        if (typeof va === "boolean") {
+          const na = va ? 1 : 0;
+          const nb = vb ? 1 : 0;
+          return anoSortDir === "asc" ? na - nb : nb - na;
+        }
+
+        return anoSortDir === "asc" ? (va > vb ? 1 : va < vb ? -1 : 0) : (va < vb ? 1 : va > vb ? -1 : 0);
+      });
+
+      const rows = sortedData
+        .map(
+          (r) => `
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-4 py-3"><div class="text-[11px] text-gray-500 font-mono">${r.wilayahStr}</div></td>
+            <td class="px-4 py-3 font-medium text-gray-800">${r.petugas}</td>
+            <td class="px-4 py-3 font-semibold text-brand-600">${r.subjek}</td>
+            <td class="px-4 py-3 text-gray-600 text-[11px] font-medium leading-tight max-w-[200px]" title="${r.desc}">${r.desc}</td>
+            <td class="px-4 py-3 text-center">
+              <div class="flex flex-col items-center gap-1">
+                <select
+                  onchange="updateAnomaliStatus(${r.sheetRow ?? "null"}, '${r.anoType}', this)"
+                  data-original="${r.statusText}"
+                  ${r.sheetRow ? "" : 'disabled title="Baris sheet tidak terdeteksi, tidak bisa diupdate otomatis"'}
+                  class="text-[11px] font-semibold rounded-full px-2 py-1.5 border focus:outline-none focus:ring-2 focus:ring-brand-50 cursor-pointer transition disabled:opacity-50 disabled:cursor-not-allowed ${r.isSelesai ? "bg-green-50 border-green-200 text-green-600" : "bg-gray-50 border-gray-200 text-gray-500"}"
+                >
+                  <option value="Belum" ${!r.isSelesai ? "selected" : ""}>Belum Selesai</option>
+                  <option value="Sudah" ${r.isSelesai ? "selected" : ""}>Sudah Selesai</option>
+                </select>
+                <i class="fa-solid fa-circle-notch fa-spin text-brand-500 text-[10px] hidden statusSpinner"></i>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-center">
+              ${r.link
+              ? `<a href="${r.link}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-semibold transition">
+                      <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Buka
+                    </a>`
+              : '<span class="text-gray-400 text-[10px]">-</span>'
+            }
+            </td>
+          </tr>
+        `,
+        )
+        .join("");
+
+      tbody.innerHTML = rows;
+    }
+
+    function renderAnoKecSummary() {
+      const container = document.getElementById("gridAnoKec");
+      if (!container) return;
+
+      if (anoFiltered.length === 0) {
+        container.innerHTML = `<div class="col-span-full py-8 text-center text-gray-400 text-xs bg-gray-50 border border-dashed border-gray-200 rounded-xl">Tidak ada data anomali yang sesuai filter.</div>`;
+        return;
+      }
+
+      // Aggregate anomalies by Kecamatan code from anoFiltered
+      const agg = {};
+      anoFiltered.forEach((item) => {
+        const kCode = item.kecCode;
+        if (!agg[kCode]) {
+          agg[kCode] = {
+            code: kCode,
+            name: getKecLabel(kCode),
+            total: 0,
+            selesai: 0,
+            belum: 0,
+          };
+        }
+        agg[kCode].total++;
+        if (item.isSelesai) {
+          agg[kCode].selesai++;
+        } else {
+          agg[kCode].belum++;
+        }
+      });
+
+      // Convert to array
+      let list = Object.values(agg);
+
+      // Sort list
+      list.sort((a, b) => {
+        if (anoKecSortBy === "name") {
+          return a.name.localeCompare(b.name);
+        } else if (anoKecSortBy === "total") {
+          return b.total - a.total; // highest count first
+        } else if (anoKecSortBy === "pct") {
+          const pctA = a.total > 0 ? (a.selesai / a.total) : 0;
+          const pctB = b.total > 0 ? (b.selesai / b.total) : 0;
+          if (pctA !== pctB) return pctB - pctA; // highest percentage first
+          return b.total - a.total; // then highest total
+        }
+        return 0;
+      });
+
+      // Render cards
+      container.innerHTML = list
+        .map((k) => {
+          const pct = k.total > 0 ? (k.selesai / k.total) * 100 : 0;
+          // Determine color scheme based on progress percentage
+          let progressColor = "bg-gray-50 border-gray-200";
+          let textColor = "text-gray-500";
+          let progressFillColor = "bg-gray-400";
+
+          if (pct >= 100) {
+            progressColor = "bg-green-50/50 border-green-100 hover:border-green-300";
+            textColor = "text-green-600";
+            progressFillColor = "bg-green-500";
+          } else if (pct >= 50) {
+            progressColor = "bg-brand-50/50 border-brand-100 hover:border-brand-300";
+            textColor = "text-brand-600";
+            progressFillColor = "bg-brand-500";
+          } else if (pct > 0) {
+            progressColor = "bg-amber-50/50 border-amber-100 hover:border-amber-300";
+            textColor = "text-amber-600";
+            progressFillColor = "bg-amber-500";
+          } else {
+            progressColor = "bg-red-50/50 border-red-100 hover:border-red-300";
+            textColor = "text-red-600";
+            progressFillColor = "bg-red-500";
+          }
+
+          return `
+            <div class="border rounded-xl p-3.5 flex flex-col justify-between hover:shadow-sm transition-all duration-200 bg-white ${progressColor}">
+              <div class="flex justify-between items-start gap-2 mb-2">
+                <span class="font-bold text-gray-800 text-[11px] tracking-tight uppercase truncate" title="${k.name}">
+                  ${k.name}
+                </span>
+                <span class="text-xs font-black ${textColor}">${pct.toFixed(1)}%</span>
+              </div>
+              <div class="mt-auto">
+                <div class="w-full bg-gray-200/60 h-1.5 rounded-full mb-2">
+                  <div class="${progressFillColor} h-1.5 rounded-full" style="width: ${pct}%"></div>
+                </div>
+                <div class="flex justify-between text-[10px] text-gray-500 font-medium">
+                  <span>Selesai: <strong class="text-gray-700">${k.selesai}</strong>/${k.total}</span>
+                  <span>Belum: <strong class="text-red-500 font-semibold">${k.belum}</strong></span>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function sortAnoKec(by) {
+      anoKecSortBy = by;
+      // Update UI active buttons
+      const btnName = document.getElementById("btnSortAnoKecName");
+      const btnTotal = document.getElementById("btnSortAnoKecTotal");
+      const btnPct = document.getElementById("btnSortAnoKecPct");
+
+      if (btnName && btnTotal && btnPct) {
+        btnName.className = by === "name"
+          ? "px-2.5 py-1 text-[11px] rounded-md font-semibold bg-white text-gray-800 shadow-sm transition"
+          : "px-2.5 py-1 text-[11px] rounded-md font-semibold text-gray-500 hover:text-gray-800 transition";
+        btnTotal.className = by === "total"
+          ? "px-2.5 py-1 text-[11px] rounded-md font-semibold bg-white text-gray-800 shadow-sm transition"
+          : "px-2.5 py-1 text-[11px] rounded-md font-semibold text-gray-500 hover:text-gray-800 transition";
+        btnPct.className = by === "pct"
+          ? "px-2.5 py-1 text-[11px] rounded-md font-semibold bg-white text-gray-800 shadow-sm transition"
+          : "px-2.5 py-1 text-[11px] rounded-md font-semibold text-gray-500 hover:text-gray-800 transition";
+      }
+
+      renderAnoKecSummary();
+    }
+
+    // Menulis balik status "Sudah/Belum" ke Google Spreadsheet lewat
+    // Apps Script Web App (lihat instruksi setup Apps Script terpisah).
+    async function updateAnomaliStatus(sheetRow, type, selectEl) {
+      const scriptUrl =
+        type === "keluarga" ? urls.scriptKel : urls.scriptUsaha;
+      const newStatus = selectEl.value;
+      const originalValue = selectEl.dataset.original;
+
+      if (!sheetRow) {
+        alert(
+          "Baris data ini tidak memiliki referensi baris Sheet yang valid, sehingga tidak bisa diupdate otomatis.",
+        );
+        selectEl.value = originalValue;
+        return;
+      }
+
+      if (!scriptUrl || scriptUrl.startsWith("GANTI_DENGAN")) {
+        alert(
+          "URL Apps Script Web App belum dikonfigurasi. Lihat instruksi setup Apps Script yang menyertai dashboard ini, lalu isi HARDCODED_SCRIPT_ANO_KEL / HARDCODED_SCRIPT_ANO_USA di kode.",
+        );
+        selectEl.value = originalValue;
+        return;
+      }
+
+      const wrapper = selectEl.closest("td");
+      const spinner = wrapper
+        ? wrapper.querySelector(".statusSpinner")
+        : null;
+      selectEl.disabled = true;
+      if (spinner) spinner.classList.remove("hidden");
+
+      try {
+        const res = await fetch(scriptUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            row: sheetRow,
+            status: newStatus,
+            secret: UPDATE_SECRET_KEY,
+          }),
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || "Gagal menyimpan.");
+
+        // Update state lokal supaya UI langsung sinkron tanpa perlu refresh
+        const isSelesai = newStatus === "Sudah";
+        const updateKey = `${type}_${sheetRow}`;
+        localStatusUpdates[updateKey] = newStatus;
+        saveLocalStatusUpdates();
+
+        const pool = type === "keluarga" ? anoDataKeluarga : anoDataUsaha;
+        const target = pool.find((r) => r.sheetRow === sheetRow);
+        if (target) {
+          target.isSelesai = isSelesai;
+          target.statusText = newStatus;
+        }
+        selectEl.dataset.original = newStatus;
+
+        updateBadgeAnomali();
+        applyFiltersAnomali(null); // re-hitung KPI & render ulang tabel tanpa reset filter dropdown
+      } catch (err) {
+        alert("Gagal menyimpan perubahan ke Spreadsheet: " + err.message);
+        selectEl.value = originalValue;
+      } finally {
+        selectEl.disabled = false;
+        if (spinner) spinner.classList.add("hidden");
+      }
+    }
+
+    function exportExcelAnomali() {
+      if (!anoFiltered.length) return alert("Data kosong.");
+      const exportRows = anoFiltered.map((r) => ({
+        Kecamatan: getKecLabel(r.kecCode),
+        "Kode Desa": r.desaCode,
+        "Kode SLS": r.slsCode,
+        Petugas: r.petugas,
+        [anoActiveTab === "keluarga" ? "Nama KRT" : "Nama Usaha"]: r.subjek,
+        "Keterangan Anomali": r.desc,
+        "Status Perbaikan": r.statusText,
+        Link: r.link || "",
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, `Anomali_${anoActiveTab}`);
+      XLSX.writeFile(
+        wb,
+        `Data_Anomali_${anoActiveTab}_${new Date().getTime()}.xlsx`,
+      );
+    }
+
+    function exportExcelProgress() {
+      if (!progDataFiltered || progDataFiltered.length === 0)
+        return alert("Data kosong.");
+
+      // Aggregate data similarly to renderTableProgress()
+      const agg = {};
+      progDataFiltered.forEach((r) => {
+        let key =
+          progTableView === "ppl"
+            ? r.username
+            : progTableView === "sls"
+              ? r.fullCode
+              : r.kecCode;
+        if (!agg[key])
+          agg[key] = {
+            loc: new Set(),
+            target: 0,
+            OPEN: 0,
+            DRAFT: 0,
+            SUBMITTED_BY_PENCACAH: 0,
+            SUBMITTED_RESPONDENT: 0,
+            APPROVED_BY_PENGAWAS: 0,
+            REJECTED_BY_PENGAWAS: 0,
+            REVOKED_BY_PENGAWAS: 0,
+            EDITED_BY_PENGAWAS: 0,
+            COMPLETED_BY_ADMIN_KABUPATEN: 0,
+            EDITED_BY_ADMIN_KABUPATEN: 0,
+            REJECTED_BY_ADMIN_KABUPATEN: 0,
+            hasHasilKemarinCount: 0,
+            OPEN_KEMARIN: 0,
+            DRAFT_KEMARIN: 0,
+            SUBMITTED_BY_PENCACAH_KEMARIN: 0,
+            SUBMITTED_RESPONDENT_KEMARIN: 0,
+            APPROVED_BY_PENGAWAS_KEMARIN: 0,
+            REJECTED_BY_PENGAWAS_KEMARIN: 0,
+            REVOKED_BY_PENGAWAS_KEMARIN: 0,
+            EDITED_BY_PENGAWAS_KEMARIN: 0,
+            COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
+            EDITED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
+            REJECTED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
+            name: r.namePPL,
+            kec: getKecLabel(r.kecCode),
+          };
+        agg[key].loc.add(
+          progTableView === "ppl"
+            ? r.fullCode
+            : progTableView === "kec"
+              ? r.username
+              : r.namePPL,
+        );
+        agg[key].target += r.target;
+        agg[key].OPEN += r.OPEN;
+        agg[key].DRAFT += r.DRAFT;
+        agg[key].SUBMITTED_BY_PENCACAH += r.SUBMITTED_BY_PENCACAH;
+        agg[key].SUBMITTED_RESPONDENT += r.SUBMITTED_RESPONDENT;
+        agg[key].APPROVED_BY_PENGAWAS += r.APPROVED_BY_PENGAWAS;
+        agg[key].REJECTED_BY_PENGAWAS += r.REJECTED_BY_PENGAWAS;
+        agg[key].REVOKED_BY_PENGAWAS += r.REVOKED_BY_PENGAWAS;
+        agg[key].EDITED_BY_PENGAWAS += r.EDITED_BY_PENGAWAS;
+        agg[key].COMPLETED_BY_ADMIN_KABUPATEN += r.COMPLETED_BY_ADMIN_KABUPATEN;
+        agg[key].EDITED_BY_ADMIN_KABUPATEN += r.EDITED_BY_ADMIN_KABUPATEN;
+        agg[key].REJECTED_BY_ADMIN_KABUPATEN += r.REJECTED_BY_ADMIN_KABUPATEN;
+
+        agg[key].OPEN_KEMARIN += r.OPEN_KEMARIN || 0;
+        agg[key].DRAFT_KEMARIN += r.DRAFT_KEMARIN || 0;
+        agg[key].SUBMITTED_BY_PENCACAH_KEMARIN += r.SUBMITTED_BY_PENCACAH_KEMARIN || 0;
+        agg[key].SUBMITTED_RESPONDENT_KEMARIN += r.SUBMITTED_RESPONDENT_KEMARIN || 0;
+        agg[key].APPROVED_BY_PENGAWAS_KEMARIN += r.APPROVED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].REJECTED_BY_PENGAWAS_KEMARIN += r.REJECTED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].REVOKED_BY_PENGAWAS_KEMARIN += r.REVOKED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].EDITED_BY_PENGAWAS_KEMARIN += r.EDITED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN += r.COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        agg[key].EDITED_BY_ADMIN_KABUPATEN_KEMARIN += r.EDITED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        agg[key].REJECTED_BY_ADMIN_KABUPATEN_KEMARIN += r.REJECTED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        if (r.hasHasilKemarin) agg[key].hasHasilKemarinCount += 1;
+      });
+
+      // Hitung sisa hari dari hari ini sampai 15 Ags 2026
+      const today = new Date();
+      const targetDate = new Date("2026-08-15T23:59:59");
+      let daysLeft = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+      if (daysLeft < 1) daysLeft = 1;
+
+      const exportRows = Object.entries(agg).map(([k, v]) => {
+        const progVal = v.target - v.OPEN - v.DRAFT;
+        const progValKemarin = v.target - v.OPEN_KEMARIN - v.DRAFT_KEMARIN;
+        const deltaProg = progVal - progValKemarin;
+        const pct = v.target > 0 ? (progVal / v.target) * 100 : 0;
+        const pctKemarin = v.target > 0 ? (progValKemarin / v.target) * 100 : 0;
+        const deltaPct = pct - pctKemarin;
+
+        // Kalkulasi Target harian 15 Ags 100%
+        const target40 = Math.ceil(v.target);
+        const shortfall = Math.max(0, target40 - progVal);
+        const dailyTarget = shortfall > 0 ? shortfall / daysLeft : 0;
+
+        return {
+          Key: k,
+          Nama: v.name,
+          Kecamatan: v.kec,
+          Lokasi:
+            progTableView === "kec"
+              ? `${v.loc.size} PPL`
+              : [...v.loc].join(", "),
+          Target: v.target,
+          Progress: progVal,
+          "Pct Selesai (%)": parseFloat(pct.toFixed(2)),
+          "Delta % (H vs H-1)": v.hasHasilKemarinCount > 0 ? parseFloat(deltaPct.toFixed(2)) : "-",
+          "Progress Kemarin (%)": v.hasHasilKemarinCount > 0 ? parseFloat(pctKemarin.toFixed(2)) : "-",
+          "Delta Dokumen (Dok)": v.hasHasilKemarinCount > 0 ? deltaProg : "-",
+          "Target 100% (15 Ags)": target40,
+          "Kekurangan (Dok)": shortfall,
+          "Target/Hari (s.d 15 Ags)": parseFloat(dailyTarget.toFixed(1)),
+          Open: v.OPEN,
+          Draft: v.DRAFT,
+          "Submitted Pencacah": v.SUBMITTED_BY_PENCACAH,
+          "Submitted Respondent": v.SUBMITTED_RESPONDENT,
+          "Approved Pengawas": v.APPROVED_BY_PENGAWAS,
+          "Rejected Pengawas": v.REJECTED_BY_PENGAWAS,
+          "Revoked Pengawas": v.REVOKED_BY_PENGAWAS,
+          "Edited Pengawas": v.EDITED_BY_PENGAWAS,
+          "Completed Admin": v.COMPLETED_BY_ADMIN_KABUPATEN,
+          "Edited Admin": v.EDITED_BY_ADMIN_KABUPATEN,
+          "Rejected Admin": v.REJECTED_BY_ADMIN_KABUPATEN,
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(exportRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, `Progress_${progTableView}`);
+      XLSX.writeFile(
+        wb,
+        `Data_Progress_${progTableView}_${new Date().getTime()}.xlsx`,
+      );
+    }
+
+    // ============================================================
+    //  LOGIC FOR REALISASI PML & PPL (NEW)
+    // ============================================================
+    function switchRealisasiView(view) {
+      realisasiView = view;
+      const btnPml = document.getElementById("rBtnPML");
+      const btnPpl = document.getElementById("rBtnPPL");
+      const btnKec = document.getElementById("rBtnKec");
+      if (btnPml && btnPpl && btnKec) {
+        btnPml.className = view === "pml"
+          ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
+          : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
+        btnPpl.className = view === "ppl"
+          ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
+          : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
+        btnKec.className = view === "kec"
+          ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
+          : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
+      }
+
+      const title = document.getElementById("realisasiTableTitle");
+      if (title) {
+        title.textContent = view === "pml"
+          ? "Progress PML"
+          : view === "ppl"
+            ? "Progress PPL"
+            : "Progress Kecamatan";
+      }
+
+      renderRealisasiTableHeader();
+      applyFiltersRealisasi();
+    }
+
+    function renderRealisasiTableHeader() {
+      const header = document.getElementById("realisasiTableHeader");
+      if (!header) return;
+
+      if (realisasiView === "pml") {
+        header.innerHTML = `
+          <tr class="text-gray-400 border-b border-gray-100 uppercase tracking-wider text-[10px]">
+            <th class="px-5 py-3 font-bold sortable text-left" onclick="sortByRealisasi('key')">
+              Nama / Email PML <i class="fa-solid fa-sort sort-icon" id="riKey"></i>
+            </th>
+            <th class="px-5 py-3 font-bold sortable text-left" onclick="sortByRealisasi('kecStr')">
+              Kecamatan <i class="fa-solid fa-sort sort-icon" id="riKecStr"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold sortable" onclick="sortByRealisasi('pplCount')">
+              Jumlah PPL <i class="fa-solid fa-sort sort-icon" id="riPplCount"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold sortable" onclick="sortByRealisasi('target')">
+              Total Target <i class="fa-solid fa-sort sort-icon" id="riTarget"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold text-green-600 sortable" onclick="sortByRealisasi('approved')">
+              Total Approve <i class="fa-solid fa-sort sort-icon" id="riApproved"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold sortable w-36" onclick="sortByRealisasi('pctProgress')">
+              % Progress PML <i class="fa-solid fa-sort sort-icon" id="riPctProgress"></i>
+            </th>
+          </tr>
+        `;
+      } else if (realisasiView === "ppl") {
+        header.innerHTML = `
+          <tr class="text-gray-400 border-b border-gray-100 uppercase tracking-wider text-[10px]">
+            <th class="px-5 py-3 font-bold sortable text-left" onclick="sortByRealisasi('key')">
+              Nama / Email PPL <i class="fa-solid fa-sort sort-icon" id="riKey"></i>
+            </th>
+            <th class="px-5 py-3 font-bold sortable text-left" onclick="sortByRealisasi('pml')">
+              Email PML <i class="fa-solid fa-sort sort-icon" id="riPml"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold sortable" onclick="sortByRealisasi('target')">
+              Target PPL <i class="fa-solid fa-sort sort-icon" id="riTarget"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold text-green-600 sortable" onclick="sortByRealisasi('approved')">
+              Approve PPL <i class="fa-solid fa-sort sort-icon" id="riApproved"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold sortable w-36" onclick="sortByRealisasi('pctProgress')">
+              % Progress PPL <i class="fa-solid fa-sort sort-icon" id="riPctProgress"></i>
+            </th>
+          </tr>
+        `;
+      } else {
+        header.innerHTML = `
+          <tr class="text-gray-400 border-b border-gray-100 uppercase tracking-wider text-[10px]">
+            <th class="px-5 py-3 font-bold sortable text-left" onclick="sortByRealisasi('key')">
+              Kecamatan <i class="fa-solid fa-sort sort-icon" id="riKey"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold sortable" onclick="sortByRealisasi('pmlCount')">
+              Jumlah PML <i class="fa-solid fa-sort sort-icon" id="riPmlCount"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold sortable" onclick="sortByRealisasi('pplCount')">
+              Jumlah PPL <i class="fa-solid fa-sort sort-icon" id="riPplCount"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold sortable" onclick="sortByRealisasi('target')">
+              Total Target <i class="fa-solid fa-sort sort-icon" id="riTarget"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold text-green-600 sortable" onclick="sortByRealisasi('approved')">
+              Total Approve <i class="fa-solid fa-sort sort-icon" id="riApproved"></i>
+            </th>
+            <th class="px-5 py-3 text-right font-bold sortable w-36" onclick="sortByRealisasi('pctProgress')">
+              % Progress Kec <i class="fa-solid fa-sort sort-icon" id="riPctProgress"></i>
+            </th>
+          </tr>
+        `;
+      }
+    }
+
+    function applyFiltersRealisasi() {
+      if (progDataAll.length === 0) return;
+
+      const searchInput = document.getElementById("searchRealisasiInput");
+      const search = (searchInput ? searchInput.value || "" : "").toLowerCase();
+
+      const agg = {};
+
+      if (realisasiView === "pml") {
+        progDataAll.forEach((r) => {
+          if (progActiveKec && r.kecCode !== progActiveKec) return;
+
+          const pmlKey = r.emailPml || "Tanpa PML";
+          if (!agg[pmlKey]) {
+            agg[pmlKey] = {
+              key: pmlKey,
+              name: r.namePML || "Tanpa PML",
+              ppls: new Set(),
+              target: 0,
+              prelistAwal: 0,
+              approved: 0,
+              pplCount: 0,
+              kecCodes: new Set()
+            };
+          }
+          agg[pmlKey].ppls.add(r.username);
+          agg[pmlKey].target += r.target;
+          agg[pmlKey].prelistAwal += r.prelistAwal;
+          agg[pmlKey].approved += r.APPROVED_BY_PENGAWAS + r.COMPLETED_BY_ADMIN_KABUPATEN + r.EDITED_BY_ADMIN_KABUPATEN + r.EDITED_BY_PENGAWAS;
+          agg[pmlKey].kecCodes.add(r.kecCode);
+        });
+
+        Object.keys(agg).forEach(k => {
+          agg[k].pplCount = agg[k].ppls.size;
+          agg[k].kecStr = [...agg[k].kecCodes].map(code => getKecLabel(code)).join(", ");
+        });
+      } else if (realisasiView === "ppl") {
+        progDataAll.forEach((r) => {
+          if (progActiveKec && r.kecCode !== progActiveKec) return;
+
+          const pplKey = r.username;
+          if (!agg[pplKey]) {
+            agg[pplKey] = {
+              key: pplKey,
+              name: r.namePPL,
+              pml: r.emailPml || "Tanpa PML",
+              pmlName: r.namePML || "Tanpa PML",
+              target: 0,
+              prelistAwal: 0,
+              approved: 0
+            };
+          }
+          agg[pplKey].target += r.target;
+          agg[pplKey].prelistAwal += r.prelistAwal;
+          agg[pplKey].approved += r.APPROVED_BY_PENGAWAS + r.COMPLETED_BY_ADMIN_KABUPATEN + r.EDITED_BY_ADMIN_KABUPATEN + r.EDITED_BY_PENGAWAS;
+        });
+      } else {
+        progDataAll.forEach((r) => {
+          if (progActiveKec && r.kecCode !== progActiveKec) return;
+
+          const kecKey = r.kecCode;
+          if (!agg[kecKey]) {
+            agg[kecKey] = {
+              key: kecKey,
+              name: getKecLabel(kecKey),
+              pmls: new Set(),
+              ppls: new Set(),
+              pmlCount: 0,
+              pplCount: 0,
+              target: 0,
+              prelistAwal: 0,
+              approved: 0
+            };
+          }
+          if (r.emailPml) agg[kecKey].pmls.add(r.emailPml);
+          agg[kecKey].ppls.add(r.username);
+          agg[kecKey].target += r.target;
+          agg[kecKey].prelistAwal += r.prelistAwal;
+          agg[kecKey].approved += r.APPROVED_BY_PENGAWAS + r.COMPLETED_BY_ADMIN_KABUPATEN + r.EDITED_BY_ADMIN_KABUPATEN + r.EDITED_BY_PENGAWAS;
+        });
+
+        Object.keys(agg).forEach(k => {
+          agg[k].pmlCount = agg[k].pmls.size;
+          agg[k].pplCount = agg[k].ppls.size;
+        });
+      }
+
+      let rows = Object.values(agg).map((item) => {
+        const pctProgress = item.target > 0 ? (item.approved / item.target) * 100 : 0;
+        const pctRealisasi = item.prelistAwal > 0 ? (item.approved / item.prelistAwal) * 100 : 0;
+        return {
+          ...item,
+          pctProgress: pctProgress,
+          pctRealisasi: pctRealisasi
+        };
+      });
+
+      if (search) {
+        rows = rows.filter((r) => {
+          if (realisasiView === "pml") {
+            return r.name.toLowerCase().includes(search) || r.key.toLowerCase().includes(search) || r.kecStr.toLowerCase().includes(search);
+          } else if (realisasiView === "ppl") {
+            return r.name.toLowerCase().includes(search) || r.key.toLowerCase().includes(search) || r.pml.toLowerCase().includes(search);
+          } else {
+            return r.name.toLowerCase().includes(search) || r.key.toLowerCase().includes(search);
+          }
+        });
+      }
+
+      let sortCol = realisasiSortCol;
+      if (sortCol === "pct") sortCol = "pctProgress";
+      if (sortCol === "pctRealisasi" || sortCol === "prelistAwal") sortCol = "pctProgress"; // Fallback if trying to sort hidden cols
+
+      rows.sort((a, b) => {
+        let va = a[sortCol];
+        let vb = b[sortCol];
+
+        if (va === undefined || va === null) va = 0;
+        if (vb === undefined || vb === null) vb = 0;
+
+        if (typeof va === "string") {
+          return realisasiSortDir === "asc"
+            ? va.localeCompare(vb)
+            : vb.localeCompare(va);
+        }
+        return realisasiSortDir === "asc" ? va - vb : vb - va;
+      });
+
+      const countInfo = document.getElementById("realisasiCountInfo");
+      if (countInfo) {
+        countInfo.textContent = `Menampilkan ${rows.length} data`;
+      }
+
+      renderTableRealisasi(rows);
+    }
+
+    function renderTableRealisasi(rows) {
+      const getPctColor = (pct) => {
+        if (pct >= 90) return "text-green-600";
+        if (pct >= 50) return "text-brand-600";
+        if (pct > 0) return "text-amber-600";
+        return "text-red-500";
+      };
+      const getBarColor = (pct) => {
+        if (pct >= 90) return "bg-green-500";
+        if (pct >= 50) return "bg-brand-500";
+        if (pct > 0) return "bg-amber-500";
+        return "bg-red-400";
+      };
+
+      // Hide all active sort states first
+      ["key", "kecStr", "pplCount", "pmlCount", "target", "approved", "pctProgress", "pml"].forEach((colName) => {
+        const iconEl = document.getElementById("ri" + colName.charAt(0).toUpperCase() + colName.slice(1));
+        if (iconEl) {
+          iconEl.className = "fa-solid fa-sort sort-icon";
+        }
+      });
+
+      let showCol = realisasiSortCol;
+      if (showCol === "pct" || showCol === "pctRealisasi" || showCol === "prelistAwal") showCol = "pctProgress";
+      const activeIconId = "ri" + showCol.charAt(0).toUpperCase() + showCol.slice(1);
+      const iconEl = document.getElementById(activeIconId);
+      if (iconEl) {
+        iconEl.className = `fa-solid ${realisasiSortDir === "asc" ? "fa-sort-up" : "fa-sort-down"} sort-icon active`;
+      }
+
+      const tbody = document.getElementById("tableBodyRealisasi");
+      if (!tbody) return;
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-5 py-8 text-center text-gray-400">Tidak ada data progress yang cocok.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows
+        .map((item) => {
+          if (realisasiView === "pml") {
+            return `
+              <tr class="hover:bg-brand-50/40">
+                <td class="px-5 py-3 font-semibold text-gray-800">
+                  <div class="truncate max-w-[200px]" title="${item.name}">${item.name}</div>
+                  <div class="text-[10px] text-gray-400 font-mono">${item.key}</div>
+                </td>
+                <td class="px-5 py-3 text-gray-600 font-medium">${item.kecStr}</td>
+                <td class="px-5 py-3 text-right text-gray-600 font-medium">${item.pplCount} PPL</td>
+                <td class="px-5 py-3 text-right text-gray-600 font-medium">${item.target}</td>
+                <td class="px-5 py-3 text-right font-semibold text-green-600">${item.approved}</td>
+                <td class="px-5 py-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <span class="${getPctColor(item.pctProgress)} font-bold">${item.pctProgress.toFixed(2)}%</span>
+                    <div class="w-12 bg-gray-100 rounded-full h-1.5 hidden sm:block">
+                      <div class="${getBarColor(item.pctProgress)} h-1.5 rounded-full" style="width: ${Math.min(100, item.pctProgress)}%"></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            `;
+          } else if (realisasiView === "ppl") {
+            return `
+              <tr class="hover:bg-brand-50/40">
+                <td class="px-5 py-3 font-semibold text-gray-800">
+                  <div class="truncate max-w-[200px]" title="${item.name}">${item.name}</div>
+                  <div class="text-[10px] text-gray-400 font-mono">${item.key}</div>
+                </td>
+                <td class="px-5 py-3 text-gray-600">
+                  <div class="truncate max-w-[150px]" title="${item.pmlName}">${item.pmlName}</div>
+                  <div class="text-[10px] text-gray-400 font-mono">${item.pml}</div>
+                </td>
+                <td class="px-5 py-3 text-right text-gray-600 font-medium">${item.target}</td>
+                <td class="px-5 py-3 text-right font-semibold text-green-600">${item.approved}</td>
+                <td class="px-5 py-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <span class="${getPctColor(item.pctProgress)} font-bold">${item.pctProgress.toFixed(2)}%</span>
+                    <div class="w-12 bg-gray-100 rounded-full h-1.5 hidden sm:block">
+                      <div class="${getBarColor(item.pctProgress)} h-1.5 rounded-full" style="width: ${Math.min(100, item.pctProgress)}%"></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            `;
+          } else {
+            return `
+              <tr class="hover:bg-brand-50/40">
+                <td class="px-5 py-3 font-semibold text-gray-800">
+                  ${item.name}
+                </td>
+                <td class="px-5 py-3 text-right text-gray-600 font-medium">${item.pmlCount} PML</td>
+                <td class="px-5 py-3 text-right text-gray-600 font-medium">${item.pplCount} PPL</td>
+                <td class="px-5 py-3 text-right text-gray-600 font-medium">${item.target}</td>
+                <td class="px-5 py-3 text-right font-semibold text-green-600">${item.approved}</td>
+                <td class="px-5 py-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <span class="${getPctColor(item.pctProgress)} font-bold">${item.pctProgress.toFixed(2)}%</span>
+                    <div class="w-12 bg-gray-100 rounded-full h-1.5 hidden sm:block">
+                      <div class="${getBarColor(item.pctProgress)} h-1.5 rounded-full" style="width: ${Math.min(100, item.pctProgress)}%"></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }
+        })
+        .join("");
+    }
+
+    function sortByRealisasi(col) {
+      if (realisasiSortCol === col) {
+        realisasiSortDir = realisasiSortDir === "asc" ? "desc" : "asc";
+      } else {
+        realisasiSortCol = col;
+        realisasiSortDir = "desc";
+      }
+      applyFiltersRealisasi();
+    }
+
+    function exportExcelRealisasi() {
+      const agg = {};
+
+      if (realisasiView === "pml") {
+        progDataAll.forEach((r) => {
+          if (progActiveKec && r.kecCode !== progActiveKec) return;
+
+          const pmlKey = r.emailPml || "Tanpa PML";
+          if (!agg[pmlKey]) {
+            agg[pmlKey] = {
+              name: r.namePML || "Tanpa PML",
+              emailPml: r.emailPml || "",
+              ppls: new Set(),
+              target: 0,
+              approved: 0,
+              kecCodes: new Set()
+            };
+          }
+          agg[pmlKey].ppls.add(r.username);
+          agg[pmlKey].target += r.target;
+          agg[pmlKey].approved += r.APPROVED_BY_PENGAWAS + r.COMPLETED_BY_ADMIN_KABUPATEN + r.EDITED_BY_ADMIN_KABUPATEN + r.EDITED_BY_PENGAWAS;
+          agg[pmlKey].kecCodes.add(r.kecCode);
+        });
+
+        const exportRows = Object.entries(agg).map(([k, v]) => {
+          const pctProgress = v.target > 0 ? (v.approved / v.target) * 100 : 0;
+          const kecStr = [...v.kecCodes].map(code => getKecLabel(code)).join(", ");
+          return {
+            "Nama PML": v.name,
+            "Email PML": v.emailPml || "-",
+            "Kecamatan": kecStr,
+            "Jumlah PPL": v.ppls.size,
+            "Total Target": v.target,
+            "Total Approve": v.approved,
+            "Progress (%)": parseFloat(pctProgress.toFixed(2))
+          };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(exportRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Progress_PML");
+        XLSX.writeFile(wb, `Progress_PML_${new Date().getTime()}.xlsx`);
+
+      } else if (realisasiView === "ppl") {
+        progDataAll.forEach((r) => {
+          if (progActiveKec && r.kecCode !== progActiveKec) return;
+
+          const pplKey = r.username;
+          if (!agg[pplKey]) {
+            agg[pplKey] = {
+              name: r.namePPL,
+              emailPpl: r.username,
+              pml: r.emailPml || "Tanpa PML",
+              pmlName: r.namePML || "Tanpa PML",
+              target: 0,
+              approved: 0
+            };
+          }
+          agg[pplKey].target += r.target;
+          agg[pplKey].approved += r.APPROVED_BY_PENGAWAS + r.COMPLETED_BY_ADMIN_KABUPATEN + r.EDITED_BY_ADMIN_KABUPATEN + r.EDITED_BY_PENGAWAS;
+        });
+
+        const exportRows = Object.values(agg).map((v) => {
+          const pctProgress = v.target > 0 ? (v.approved / v.target) * 100 : 0;
+          return {
+            "Nama PPL": v.name,
+            "Email PPL": v.emailPpl,
+            "PML Pengawas": v.pmlName,
+            "Email PML": v.pml,
+            Target: v.target,
+            Approve: v.approved,
+            "Progress (%)": parseFloat(pctProgress.toFixed(2))
+          };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(exportRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Progress_PPL");
+        XLSX.writeFile(wb, `Progress_PPL_${new Date().getTime()}.xlsx`);
+
+      } else {
+        progDataAll.forEach((r) => {
+          if (progActiveKec && r.kecCode !== progActiveKec) return;
+
+          const kecKey = r.kecCode;
+          if (!agg[kecKey]) {
+            agg[kecKey] = {
+              name: getKecLabel(kecKey),
+              pmls: new Set(),
+              ppls: new Set(),
+              target: 0,
+              approved: 0
+            };
+          }
+          if (r.emailPml) agg[kecKey].pmls.add(r.emailPml);
+          agg[kecKey].ppls.add(r.username);
+          agg[kecKey].target += r.target;
+          agg[kecKey].approved += r.APPROVED_BY_PENGAWAS + r.COMPLETED_BY_ADMIN_KABUPATEN + r.EDITED_BY_ADMIN_KABUPATEN + r.EDITED_BY_PENGAWAS;
+        });
+
+        const exportRows = Object.values(agg).map((v) => {
+          const pctProgress = v.target > 0 ? (v.approved / v.target) * 100 : 0;
+          return {
+            Kecamatan: v.name,
+            "Jumlah PML": v.pmls.size,
+            "Jumlah PPL": v.ppls.size,
+            "Total Target": v.target,
+            "Total Approve": v.approved,
+            "Progress (%)": parseFloat(pctProgress.toFixed(2))
+          };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(exportRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Progress_Kecamatan");
+        XLSX.writeFile(wb, `Progress_Kecamatan_${new Date().getTime()}.xlsx`);
+      }
+    }
+
+    // Inisialisasi Saat Load
+    document.addEventListener("DOMContentLoaded", () => {
+      // Render headers for realisasi table
+      renderRealisasiTableHeader();
+
+      // Terapkan hardcoded URL langsung ke dalam input box di Pengaturan
+      document.getElementById("sheetUrlProgress").value = urls.progress || "";
+      document.getElementById("sheetUrlAnomaliKeluarga").value =
+        urls.anoKel || "Belum ada link hardcode untuk Anomali Keluarga";
+      document.getElementById("sheetUrlAnomaliUsaha").value =
+        urls.anoUsaha || "Belum ada link hardcode untuk Anomali Usaha";
+
+      // Coba baca parameter auto-refresh yang mungkin tersimpan
+      const sInt = localStorage.getItem("fasih_interval");
+      if (sInt) document.getElementById("intervalSelect").value = sInt;
+
+      // Jalankan Fetch otomatis (Karena Data sekarang Di-hardcode)
+      fetchDataAll(false);
+    });
+  </script>
+</body>
+
+</html>
