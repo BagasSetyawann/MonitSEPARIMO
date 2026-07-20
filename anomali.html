@@ -230,7 +230,7 @@
         </div>
       </div>
 
-            <!-- MAIN NAVIGATION TABS -->
+      <!-- MAIN NAVIGATION TABS -->
       <div class="flex gap-6 mt-1">
         <a href="index.html" id="mainTabProgress"
           class="nav-tab-inactive pb-3 text-sm transition-colors flex items-center gap-2">
@@ -244,7 +244,7 @@
     </div>
   </header>
 
-<!-- ========== SETUP PANEL ========== -->
+  <!-- ========== SETUP PANEL ========== -->
   <div id="setupPanel" class="hidden bg-white border-b border-gray-100 shadow-sm relative z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -319,8 +319,8 @@
     </p>
   </div>
 
-  
-<!-- ========== VIEW: MONITORING ANOMALI ========== -->
+
+  <!-- ========== VIEW: MONITORING ANOMALI ========== -->
   <main id="view-anomali" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full fade-in">
     <!-- Sub-Tabs Anomali -->
     <div class="flex justify-center mb-6">
@@ -759,8 +759,8 @@
     </div>
   </main>
 
-  
-<footer class="text-gray-400 py-6 text-center text-xs mt-auto">
+
+  <footer class="text-gray-400 py-6 text-center text-xs mt-auto">
     &copy; 2026 Badan Pusat Statistik Kabupaten Parigi Moutong
   </footer>
 
@@ -1262,6 +1262,17 @@
           }
         }
 
+        let strHasilKemarin = "";
+        for (const key in row) {
+          const normKey = key.toLowerCase().replace(/[\s_]/g, "");
+          if (normKey === "hasilkemarin") {
+            strHasilKemarin = String(row[key] || "").trim();
+            break;
+          }
+        }
+        const stKemarin = parseStatusProgress(strHasilKemarin);
+        const hasHasilKemarin = Boolean(strHasilKemarin);
+
         return {
           userId: row.userId || "",
           username,
@@ -1275,6 +1286,18 @@
           target: targetVal,
           prelistAwal,
           ...st,
+          hasHasilKemarin,
+          OPEN_KEMARIN: stKemarin.OPEN,
+          DRAFT_KEMARIN: stKemarin.DRAFT,
+          SUBMITTED_BY_PENCACAH_KEMARIN: stKemarin.SUBMITTED_BY_PENCACAH,
+          SUBMITTED_RESPONDENT_KEMARIN: stKemarin.SUBMITTED_RESPONDENT,
+          APPROVED_BY_PENGAWAS_KEMARIN: stKemarin.APPROVED_BY_PENGAWAS,
+          REJECTED_BY_PENGAWAS_KEMARIN: stKemarin.REJECTED_BY_PENGAWAS,
+          REVOKED_BY_PENGAWAS_KEMARIN: stKemarin.REVOKED_BY_PENGAWAS,
+          EDITED_BY_PENGAWAS_KEMARIN: stKemarin.EDITED_BY_PENGAWAS,
+          COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.COMPLETED_BY_ADMIN_KABUPATEN,
+          EDITED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.EDITED_BY_ADMIN_KABUPATEN,
+          REJECTED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.REJECTED_BY_ADMIN_KABUPATEN,
         };
       } catch (e) {
         return null;

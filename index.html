@@ -327,6 +327,8 @@
       <div class="flex flex-wrap items-center gap-2 text-xs">
         <span id="infoRows"
           class="bg-white text-gray-600 shadow-sm border border-gray-100 rounded-full px-4 py-2 font-medium flex items-center gap-2"></span>
+        <span id="infoDeltaKab"
+          class="shadow-sm border rounded-full px-4 py-2 font-semibold flex items-center gap-1.5 text-xs hidden"></span>
         <span id="infoLastUpdate"
           class="bg-white text-gray-500 shadow-sm border border-gray-100 rounded-full px-4 py-2 flex items-center gap-2"></span>
       </div>
@@ -394,11 +396,12 @@
               Progress Lapangan
             </p>
           </div>
-          <div class="flex items-end gap-2 mb-2">
+          <div class="flex items-end gap-2 mb-2 flex-wrap">
             <h3 class="text-2xl sm:text-3xl font-black leading-none" id="kProgress">
               —
             </h3>
             <span class="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full mb-1" id="kProgressPct">0%</span>
+            <span class="text-xs font-bold px-2 py-0.5 rounded-full mb-1 hidden" id="kDeltaKabPct"></span>
           </div>
           <div class="w-full bg-black/10 h-1.5 rounded-full">
             <div class="bg-white h-1.5 rounded-full progress-bar" id="barProgress" style="width: 0%"></div>
@@ -518,6 +521,10 @@
               </th>
               <th class="px-5 py-3 text-right font-bold sortable w-24" onclick="sortByProgress('pct')">
                 % Selesai<i class="fa-solid fa-sort sort-icon" id="siPct"></i>
+              </th>
+              <th class="px-5 py-3 text-right font-bold text-emerald-600 sortable" onclick="sortByProgress('deltaPct')"
+                title="Selisih % Selesai antara Hari Ini (statusBreakdown) dan Hari Kemarin (hasil_kemarin)">
+                Delta % (H vs H-1)<i class="fa-solid fa-sort sort-icon" id="sideltaPct"></i>
               </th>
               <th class="px-5 py-3 text-right font-bold text-blue-600 sortable" onclick="sortByProgress('dailyTarget')"
                 title="Target yang harus diselesaikan tiap harinya sampai tanggal 15 Ags agar tercapai 100%">
@@ -1063,6 +1070,17 @@
           }
         }
 
+        let strHasilKemarin = "";
+        for (const key in row) {
+          const normKey = key.toLowerCase().replace(/[\s_]/g, "");
+          if (normKey === "hasilkemarin") {
+            strHasilKemarin = String(row[key] || "").trim();
+            break;
+          }
+        }
+        const stKemarin = parseStatusProgress(strHasilKemarin);
+        const hasHasilKemarin = Boolean(strHasilKemarin);
+
         return {
           userId: row.userId || "",
           username,
@@ -1076,6 +1094,18 @@
           target: targetVal,
           prelistAwal,
           ...st,
+          hasHasilKemarin,
+          OPEN_KEMARIN: stKemarin.OPEN,
+          DRAFT_KEMARIN: stKemarin.DRAFT,
+          SUBMITTED_BY_PENCACAH_KEMARIN: stKemarin.SUBMITTED_BY_PENCACAH,
+          SUBMITTED_RESPONDENT_KEMARIN: stKemarin.SUBMITTED_RESPONDENT,
+          APPROVED_BY_PENGAWAS_KEMARIN: stKemarin.APPROVED_BY_PENGAWAS,
+          REJECTED_BY_PENGAWAS_KEMARIN: stKemarin.REJECTED_BY_PENGAWAS,
+          REVOKED_BY_PENGAWAS_KEMARIN: stKemarin.REVOKED_BY_PENGAWAS,
+          EDITED_BY_PENGAWAS_KEMARIN: stKemarin.EDITED_BY_PENGAWAS,
+          COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.COMPLETED_BY_ADMIN_KABUPATEN,
+          EDITED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.EDITED_BY_ADMIN_KABUPATEN,
+          REJECTED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.REJECTED_BY_ADMIN_KABUPATEN,
         };
       } catch (e) {
         return null;
@@ -1173,6 +1203,14 @@
       const numProg = total - open - draft;
       const pctProg = total > 0 ? (numProg / total) * 100 : 0;
 
+      const openKemarin = sum("OPEN_KEMARIN");
+      const draftKemarin = sum("DRAFT_KEMARIN");
+      const numProgKemarin = total - openKemarin - draftKemarin;
+      const pctProgKemarin = total > 0 ? (numProgKemarin / total) * 100 : 0;
+      const deltaProgKab = numProg - numProgKemarin;
+      const deltaPctKab = pctProg - pctProgKemarin;
+      const hasHasilKemarinKab = progDataFiltered.some((r) => r.hasHasilKemarin);
+
       document.getElementById("kTarget").textContent =
         total.toLocaleString("id-ID");
       document.getElementById("kProgress").textContent =
@@ -1181,6 +1219,58 @@
         pctProg.toFixed(2) + "%";
       document.getElementById("barProgress").style.width =
         Math.min(100, pctProg) + "%";
+
+      const kDeltaKabEl = document.getElementById("kDeltaKabPct");
+      const infoDeltaEl = document.getElementById("infoDeltaKab");
+
+      if (kDeltaKabEl) {
+        if (hasHasilKemarinKab) {
+          kDeltaKabEl.classList.remove("hidden");
+          const sign = deltaPctKab > 0 ? "+" : "";
+          const badgeClass =
+            deltaPctKab > 0.0001
+              ? "bg-emerald-400/30 text-emerald-100 border border-emerald-300/30"
+              : deltaPctKab < -0.0001
+                ? "bg-rose-400/30 text-rose-100 border border-rose-300/30"
+                : "bg-white/20 text-white/90";
+          const icon =
+            deltaPctKab > 0.0001
+              ? '<i class="fa-solid fa-arrow-up text-[9px]"></i>'
+              : deltaPctKab < -0.0001
+                ? '<i class="fa-solid fa-arrow-down text-[9px]"></i>'
+                : "";
+
+          kDeltaKabEl.className = `text-xs font-bold px-2 py-0.5 rounded-full mb-1 flex items-center gap-1 ${badgeClass}`;
+          kDeltaKabEl.innerHTML = `${icon}${sign}${deltaPctKab.toFixed(2)}% (H-1)`;
+          kDeltaKabEl.title = `Delta Progress Kabupaten: ${sign}${deltaPctKab.toFixed(2)}% (${sign}${deltaProgKab.toLocaleString("id-ID")} dokumen dibanding kemarin)`;
+        } else {
+          kDeltaKabEl.classList.add("hidden");
+        }
+      }
+
+      if (infoDeltaEl) {
+        if (hasHasilKemarinKab) {
+          infoDeltaEl.classList.remove("hidden");
+          const sign = deltaPctKab > 0 ? "+" : "";
+          const infoBadgeClass =
+            deltaPctKab > 0.0001
+              ? "text-emerald-600 bg-emerald-50 border-emerald-100"
+              : deltaPctKab < -0.0001
+                ? "text-rose-600 bg-rose-50 border-rose-100"
+                : "text-gray-600 bg-white border-gray-100";
+          const icon =
+            deltaPctKab > 0.0001
+              ? '<i class="fa-solid fa-arrow-up text-[10px]"></i>'
+              : deltaPctKab < -0.0001
+                ? '<i class="fa-solid fa-arrow-down text-[10px]"></i>'
+                : "";
+
+          infoDeltaEl.className = `shadow-sm border rounded-full px-4 py-2 font-semibold flex items-center gap-1.5 text-xs ${infoBadgeClass}`;
+          infoDeltaEl.innerHTML = `<i class="fa-solid fa-chart-line text-brand-500"></i> Delta Kabupaten: ${icon}<span class="font-bold">${sign}${deltaPctKab.toFixed(2)}%</span> <span class="text-[10px] opacity-75">(${sign}${deltaProgKab.toLocaleString("id-ID")} dok)</span>`;
+        } else {
+          infoDeltaEl.classList.add("hidden");
+        }
+      }
 
       const approvedPml = appPML + compAdm + edAdm + edPML;
       document.getElementById("kApproved").textContent =
@@ -1424,7 +1514,7 @@
     function renderTableProgress() {
       // Update progress sort icons visual state
       const progIcons = [
-        "key", "loc", "target", "progVal", "pct", "dailyTarget", "OPEN", "DRAFT",
+        "key", "loc", "target", "progVal", "pct", "deltaPct", "dailyTarget", "OPEN", "DRAFT",
         "SUBMITTED_BY_PENCACAH", "SUBMITTED_RESPONDENT", "APPROVED_BY_PENGAWAS",
         "REJECTED_BY_PENGAWAS", "REVOKED_BY_PENGAWAS", "EDITED_BY_PENGAWAS",
         "COMPLETED_BY_ADMIN_KABUPATEN", "EDITED_BY_ADMIN_KABUPATEN", "REJECTED_BY_ADMIN_KABUPATEN"
@@ -1464,6 +1554,18 @@
             COMPLETED_BY_ADMIN_KABUPATEN: 0,
             EDITED_BY_ADMIN_KABUPATEN: 0,
             REJECTED_BY_ADMIN_KABUPATEN: 0,
+            hasHasilKemarinCount: 0,
+            OPEN_KEMARIN: 0,
+            DRAFT_KEMARIN: 0,
+            SUBMITTED_BY_PENCACAH_KEMARIN: 0,
+            SUBMITTED_RESPONDENT_KEMARIN: 0,
+            APPROVED_BY_PENGAWAS_KEMARIN: 0,
+            REJECTED_BY_PENGAWAS_KEMARIN: 0,
+            REVOKED_BY_PENGAWAS_KEMARIN: 0,
+            EDITED_BY_PENGAWAS_KEMARIN: 0,
+            COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
+            EDITED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
+            REJECTED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
             name: r.namePPL,
             kec: getKecLabel(r.kecCode),
           };
@@ -1486,6 +1588,19 @@
         agg[key].COMPLETED_BY_ADMIN_KABUPATEN += r.COMPLETED_BY_ADMIN_KABUPATEN;
         agg[key].EDITED_BY_ADMIN_KABUPATEN += r.EDITED_BY_ADMIN_KABUPATEN;
         agg[key].REJECTED_BY_ADMIN_KABUPATEN += r.REJECTED_BY_ADMIN_KABUPATEN;
+
+        agg[key].OPEN_KEMARIN += r.OPEN_KEMARIN || 0;
+        agg[key].DRAFT_KEMARIN += r.DRAFT_KEMARIN || 0;
+        agg[key].SUBMITTED_BY_PENCACAH_KEMARIN += r.SUBMITTED_BY_PENCACAH_KEMARIN || 0;
+        agg[key].SUBMITTED_RESPONDENT_KEMARIN += r.SUBMITTED_RESPONDENT_KEMARIN || 0;
+        agg[key].APPROVED_BY_PENGAWAS_KEMARIN += r.APPROVED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].REJECTED_BY_PENGAWAS_KEMARIN += r.REJECTED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].REVOKED_BY_PENGAWAS_KEMARIN += r.REVOKED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].EDITED_BY_PENGAWAS_KEMARIN += r.EDITED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN += r.COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        agg[key].EDITED_BY_ADMIN_KABUPATEN_KEMARIN += r.EDITED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        agg[key].REJECTED_BY_ADMIN_KABUPATEN_KEMARIN += r.REJECTED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        if (r.hasHasilKemarin) agg[key].hasHasilKemarinCount += 1;
       });
 
       // Hitung sisa hari dari hari ini sampai 15 Ags 2026
@@ -1497,6 +1612,12 @@
       let rows = Object.entries(agg).map(([k, v]) => {
         const progVal = v.target - v.OPEN - v.DRAFT;
         const progDen = v.target;
+        const progValKemarin = v.target - v.OPEN_KEMARIN - v.DRAFT_KEMARIN;
+        const deltaProg = progVal - progValKemarin;
+        const pct = progDen > 0 ? (progVal / progDen) * 100 : 0;
+        const pctKemarin = progDen > 0 ? (progValKemarin / progDen) * 100 : 0;
+        const deltaPct = pct - pctKemarin;
+        const hasHasilKemarin = v.hasHasilKemarinCount > 0;
 
         // Kolom Kalkulasi Target/Hari
         const target40 = Math.ceil(v.target);
@@ -1510,7 +1631,12 @@
               ? `${v.loc.size} PPL`
               : [...v.loc].join(", "),
           progVal,
-          pct: progDen > 0 ? (progVal / progDen) * 100 : 0,
+          progValKemarin,
+          deltaProg,
+          pct,
+          pctKemarin,
+          deltaPct,
+          hasHasilKemarin,
           dailyTarget,
           shortfall,
           ...v,
@@ -1530,13 +1656,36 @@
       const tbody = document.getElementById("tableBodyProgress");
       tbody.innerHTML = rows
         .map(
-          (item) => `
+          (item) => {
+            let deltaCell = `<td class="px-5 py-3 text-right text-gray-400 font-medium" title="Belum ada kolom hasil_kemarin di Spreadsheet">-</td>`;
+            if (item.hasHasilKemarin) {
+              if (item.deltaPct > 0.0001) {
+                deltaCell = `<td class="px-5 py-3 text-right font-bold text-emerald-600 bg-emerald-50/30" title="Penambahan +${item.deltaPct.toFixed(2)}% (+${item.deltaProg} dokumen) sejak kemarin (Kemarin: ${item.pctKemarin.toFixed(2)}%, Hari ini: ${item.pct.toFixed(2)}%)">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                    <i class="fa-solid fa-arrow-up text-[9px]"></i>+${item.deltaPct.toFixed(2)}%
+                  </span>
+                </td>`;
+              } else if (item.deltaPct < -0.0001) {
+                deltaCell = `<td class="px-5 py-3 text-right font-bold text-rose-600 bg-rose-50/30" title="Penurunan ${item.deltaPct.toFixed(2)}% (${item.deltaProg} dokumen) sejak kemarin (Kemarin: ${item.pctKemarin.toFixed(2)}%, Hari ini: ${item.pct.toFixed(2)}%)">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700">
+                    <i class="fa-solid fa-arrow-down text-[9px]"></i>${item.deltaPct.toFixed(2)}%
+                  </span>
+                </td>`;
+              } else {
+                deltaCell = `<td class="px-5 py-3 text-right font-medium text-gray-400" title="Tidak ada perubahan persentase sejak kemarin (Kemarin: ${item.pctKemarin.toFixed(2)}%, Hari ini: ${item.pct.toFixed(2)}%)">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">0.00%</span>
+                </td>`;
+              }
+            }
+
+            return `
           <tr class="hover:bg-brand-50/40">
             <td class="px-5 py-3 font-semibold text-gray-800"><div class="truncate max-w-[160px]">${progTableView === "ppl" ? item.name : progTableView === "kec" ? getKecLabel(item.key) : item.key}</div>${progTableView === "ppl" ? `<div class="text-[10px] text-gray-400">${item.key}</div>` : ""}</td>
             <td class="px-5 py-3 text-gray-500 text-[11px]"><div class="truncate max-w-[150px]" title="${item.loc}">${item.loc}</div></td>
             <td class="px-5 py-3 text-right text-gray-600">${item.target}</td>
             <td class="px-5 py-3 text-right font-bold text-brand-600">${item.progVal}</td>
             <td class="px-5 py-3 text-right font-bold ${item.pct >= 90 ? "text-green-600" : item.pct >= 50 ? "text-brand-600" : "text-gray-500"}">${item.pct.toFixed(2)}%</td>
+            ${deltaCell}
             <td class="px-5 py-3 text-right font-bold text-blue-600 bg-blue-50/30" title="Kekurangan s.d 100%: ${item.shortfall} dokumen">
                ${item.dailyTarget > 0 ? item.dailyTarget.toFixed(1) : '<i class="fa-solid fa-check text-green-500" title="Sudah Tercapai"></i>'}
             </td>
@@ -1551,7 +1700,8 @@
             <td class="px-5 py-3 text-right font-medium text-emerald-500">${item.COMPLETED_BY_ADMIN_KABUPATEN}</td>
             <td class="px-5 py-3 text-right font-medium text-cyan-500">${item.EDITED_BY_ADMIN_KABUPATEN}</td>
             <td class="px-5 py-3 text-right font-medium text-rose-500">${item.REJECTED_BY_ADMIN_KABUPATEN}</td>
-          </tr>`,
+          </tr>`;
+          }
         )
         .join("");
     }
@@ -2226,6 +2376,18 @@
             COMPLETED_BY_ADMIN_KABUPATEN: 0,
             EDITED_BY_ADMIN_KABUPATEN: 0,
             REJECTED_BY_ADMIN_KABUPATEN: 0,
+            hasHasilKemarinCount: 0,
+            OPEN_KEMARIN: 0,
+            DRAFT_KEMARIN: 0,
+            SUBMITTED_BY_PENCACAH_KEMARIN: 0,
+            SUBMITTED_RESPONDENT_KEMARIN: 0,
+            APPROVED_BY_PENGAWAS_KEMARIN: 0,
+            REJECTED_BY_PENGAWAS_KEMARIN: 0,
+            REVOKED_BY_PENGAWAS_KEMARIN: 0,
+            EDITED_BY_PENGAWAS_KEMARIN: 0,
+            COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
+            EDITED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
+            REJECTED_BY_ADMIN_KABUPATEN_KEMARIN: 0,
             name: r.namePPL,
             kec: getKecLabel(r.kecCode),
           };
@@ -2248,6 +2410,19 @@
         agg[key].COMPLETED_BY_ADMIN_KABUPATEN += r.COMPLETED_BY_ADMIN_KABUPATEN;
         agg[key].EDITED_BY_ADMIN_KABUPATEN += r.EDITED_BY_ADMIN_KABUPATEN;
         agg[key].REJECTED_BY_ADMIN_KABUPATEN += r.REJECTED_BY_ADMIN_KABUPATEN;
+
+        agg[key].OPEN_KEMARIN += r.OPEN_KEMARIN || 0;
+        agg[key].DRAFT_KEMARIN += r.DRAFT_KEMARIN || 0;
+        agg[key].SUBMITTED_BY_PENCACAH_KEMARIN += r.SUBMITTED_BY_PENCACAH_KEMARIN || 0;
+        agg[key].SUBMITTED_RESPONDENT_KEMARIN += r.SUBMITTED_RESPONDENT_KEMARIN || 0;
+        agg[key].APPROVED_BY_PENGAWAS_KEMARIN += r.APPROVED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].REJECTED_BY_PENGAWAS_KEMARIN += r.REJECTED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].REVOKED_BY_PENGAWAS_KEMARIN += r.REVOKED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].EDITED_BY_PENGAWAS_KEMARIN += r.EDITED_BY_PENGAWAS_KEMARIN || 0;
+        agg[key].COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN += r.COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        agg[key].EDITED_BY_ADMIN_KABUPATEN_KEMARIN += r.EDITED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        agg[key].REJECTED_BY_ADMIN_KABUPATEN_KEMARIN += r.REJECTED_BY_ADMIN_KABUPATEN_KEMARIN || 0;
+        if (r.hasHasilKemarin) agg[key].hasHasilKemarinCount += 1;
       });
 
       // Hitung sisa hari dari hari ini sampai 15 Ags 2026
@@ -2258,7 +2433,11 @@
 
       const exportRows = Object.entries(agg).map(([k, v]) => {
         const progVal = v.target - v.OPEN - v.DRAFT;
+        const progValKemarin = v.target - v.OPEN_KEMARIN - v.DRAFT_KEMARIN;
+        const deltaProg = progVal - progValKemarin;
         const pct = v.target > 0 ? (progVal / v.target) * 100 : 0;
+        const pctKemarin = v.target > 0 ? (progValKemarin / v.target) * 100 : 0;
+        const deltaPct = pct - pctKemarin;
 
         // Kalkulasi Target harian 15 Ags 100%
         const target40 = Math.ceil(v.target);
@@ -2276,6 +2455,9 @@
           Target: v.target,
           Progress: progVal,
           "Pct Selesai (%)": parseFloat(pct.toFixed(2)),
+          "Delta % (H vs H-1)": v.hasHasilKemarinCount > 0 ? parseFloat(deltaPct.toFixed(2)) : "-",
+          "Progress Kemarin (%)": v.hasHasilKemarinCount > 0 ? parseFloat(pctKemarin.toFixed(2)) : "-",
+          "Delta Dokumen (Dok)": v.hasHasilKemarinCount > 0 ? deltaProg : "-",
           "Target 100% (15 Ags)": target40,
           "Kekurangan (Dok)": shortfall,
           "Target/Hari (s.d 15 Ags)": parseFloat(dailyTarget.toFixed(1)),
