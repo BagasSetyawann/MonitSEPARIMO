@@ -1050,7 +1050,16 @@
           slsCode = code.slice(10);
         const username = (row.username || row.email || "").trim();
         const st = parseStatusProgress(row.statusBreakdown);
-        const targetVal = st.OPEN + st.DRAFT + st.SUBMITTED_BY_PENCACAH + st.SUBMITTED_RESPONDENT + st.APPROVED_BY_PENGAWAS + st.REJECTED_BY_PENGAWAS + st.REVOKED_BY_PENGAWAS + st.EDITED_BY_PENGAWAS + st.COMPLETED_BY_ADMIN_KABUPATEN + st.EDITED_BY_ADMIN_KABUPATEN + st.REJECTED_BY_ADMIN_KABUPATEN;
+        let targetVal = st.OPEN + st.DRAFT + st.SUBMITTED_BY_PENCACAH + st.SUBMITTED_RESPONDENT + st.APPROVED_BY_PENGAWAS + st.REJECTED_BY_PENGAWAS + st.REVOKED_BY_PENGAWAS + st.EDITED_BY_PENGAWAS + st.COMPLETED_BY_ADMIN_KABUPATEN + st.EDITED_BY_ADMIN_KABUPATEN + st.REJECTED_BY_ADMIN_KABUPATEN;
+        if (targetVal === 0) {
+          for (const key in row) {
+            const normKey = key.toLowerCase().replace(/[\s_]/g, "");
+            if (["target", "alokasi", "prelistawal"].includes(normKey)) {
+              const tv = parseInt(row[key]) || 0;
+              if (tv > 0) { targetVal = tv; break; }
+            }
+          }
+        }
 
         let emailPml = "";
         for (const key in row) {
@@ -1204,9 +1213,16 @@
       const numProg = total - open - draft;
       const pctProg = total > 0 ? (numProg / total) * 100 : 0;
 
-      const openKemarin = sum("OPEN_KEMARIN");
-      const draftKemarin = sum("DRAFT_KEMARIN");
-      const numProgKemarin = total - openKemarin - draftKemarin;
+      const numProgKemarin =
+        sum("SUBMITTED_BY_PENCACAH_KEMARIN") +
+        sum("SUBMITTED_RESPONDENT_KEMARIN") +
+        sum("APPROVED_BY_PENGAWAS_KEMARIN") +
+        sum("REJECTED_BY_PENGAWAS_KEMARIN") +
+        sum("REVOKED_BY_PENGAWAS_KEMARIN") +
+        sum("EDITED_BY_PENGAWAS_KEMARIN") +
+        sum("COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN") +
+        sum("EDITED_BY_ADMIN_KABUPATEN_KEMARIN") +
+        sum("REJECTED_BY_ADMIN_KABUPATEN_KEMARIN");
       const pctProgKemarin = total > 0 ? (numProgKemarin / total) * 100 : 0;
       const deltaProgKab = numProg - numProgKemarin;
       const deltaPctKab = pctProg - pctProgKemarin;
@@ -1613,7 +1629,16 @@
       let rows = Object.entries(agg).map(([k, v]) => {
         const progVal = v.target - v.OPEN - v.DRAFT;
         const progDen = v.target;
-        const progValKemarin = v.target - v.OPEN_KEMARIN - v.DRAFT_KEMARIN;
+        const progValKemarin =
+          (v.SUBMITTED_BY_PENCACAH_KEMARIN || 0) +
+          (v.SUBMITTED_RESPONDENT_KEMARIN || 0) +
+          (v.APPROVED_BY_PENGAWAS_KEMARIN || 0) +
+          (v.REJECTED_BY_PENGAWAS_KEMARIN || 0) +
+          (v.REVOKED_BY_PENGAWAS_KEMARIN || 0) +
+          (v.EDITED_BY_PENGAWAS_KEMARIN || 0) +
+          (v.COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN || 0) +
+          (v.EDITED_BY_ADMIN_KABUPATEN_KEMARIN || 0) +
+          (v.REJECTED_BY_ADMIN_KABUPATEN_KEMARIN || 0);
         const deltaProg = progVal - progValKemarin;
         const pct = progDen > 0 ? (progVal / progDen) * 100 : 0;
         const pctKemarin = progDen > 0 ? (progValKemarin / progDen) * 100 : 0;
@@ -2434,7 +2459,16 @@
 
       const exportRows = Object.entries(agg).map(([k, v]) => {
         const progVal = v.target - v.OPEN - v.DRAFT;
-        const progValKemarin = v.target - v.OPEN_KEMARIN - v.DRAFT_KEMARIN;
+        const progValKemarin =
+          (v.SUBMITTED_BY_PENCACAH_KEMARIN || 0) +
+          (v.SUBMITTED_RESPONDENT_KEMARIN || 0) +
+          (v.APPROVED_BY_PENGAWAS_KEMARIN || 0) +
+          (v.REJECTED_BY_PENGAWAS_KEMARIN || 0) +
+          (v.REVOKED_BY_PENGAWAS_KEMARIN || 0) +
+          (v.EDITED_BY_PENGAWAS_KEMARIN || 0) +
+          (v.COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN || 0) +
+          (v.EDITED_BY_ADMIN_KABUPATEN_KEMARIN || 0) +
+          (v.REJECTED_BY_ADMIN_KABUPATEN_KEMARIN || 0);
         const deltaProg = progVal - progValKemarin;
         const pct = v.target > 0 ? (progVal / v.target) * 100 : 0;
         const pctKemarin = v.target > 0 ? (progValKemarin / v.target) * 100 : 0;
