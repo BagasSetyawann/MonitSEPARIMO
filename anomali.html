@@ -3045,6 +3045,71 @@
 
       // Jalankan Fetch otomatis (Karena Data sekarang Di-hardcode)
       fetchDataAll(false);
+
+      // Munculkan Pop-up Delta otomatis saat website dibuka
+      setTimeout(() => {
+        openDeltaModal();
+      }, 500);
+    });
+  </script>
+
+  <!-- Modal Popup Informasional Delta -->
+  <div id="deltaModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+    <div id="deltaModalCard" class="relative w-full max-w-md p-6 bg-white rounded-2xl shadow-2xl border border-slate-100 scale-95 transition-all duration-300">
+      <!-- Tombol Close (X) -->
+      <button onclick="closeDeltaModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="text-center">
+        <!-- Icon Header -->
+        <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-brand-500/10 text-brand-600 flex items-center justify-center ring-8 ring-brand-500/5">
+          <i class="fa-solid fa-chart-line text-2xl"></i>
+        </div>
+
+        <!-- Judul Pop-up -->
+        <h3 class="text-lg font-bold text-slate-800 mb-2">Informasi Perhitungan Delta</h3>
+        
+        <!-- Isi Pesan -->
+        <p class="text-sm text-slate-600 leading-relaxed mb-6">
+          Delta ini dihitung dari perbandingan data 
+          <span class="inline-block font-semibold text-brand-600 bg-brand-50 border border-brand-200/60 px-2 py-0.5 rounded-md">Hari Ini</span> 
+          terhadap data 
+          <span class="inline-block font-semibold text-slate-700 bg-slate-100 border border-slate-200/60 px-2 py-0.5 rounded-md">Tanggal 25</span>.
+        </p>
+
+        <!-- Tombol Aksi -->
+        <button onclick="closeDeltaModal()" class="w-full py-2.5 px-4 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-brand-500/25 transition-all transform active:scale-95">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openDeltaModal() {
+      const modal = document.getElementById('deltaModal');
+      const card = document.getElementById('deltaModalCard');
+      if (!modal || !card) return;
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      card.classList.remove('scale-95');
+      card.classList.add('scale-100');
+    }
+
+    function closeDeltaModal() {
+      const modal = document.getElementById('deltaModal');
+      const card = document.getElementById('deltaModalCard');
+      if (!modal || !card) return;
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      card.classList.remove('scale-100');
+      card.classList.add('scale-95');
+    }
+
+    document.getElementById('deltaModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'deltaModal') closeDeltaModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDeltaModal();
     });
   </script>
 </body>
