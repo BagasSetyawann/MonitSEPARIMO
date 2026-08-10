@@ -284,9 +284,6 @@
             Tautan ditarik otomatis dari konfigurasi hardcode.
           </p>
           <div class="space-y-2">
-            <input type="text" id="sheetUrlAnomaliKeluarga"
-              class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-danger-400 focus:ring-2 focus:ring-danger-50 transition bg-gray-50"
-              readonly />
             <input type="text" id="sheetUrlAnomaliUsaha"
               class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-danger-400 focus:ring-2 focus:ring-danger-50 transition bg-gray-50"
               readonly />
@@ -325,14 +322,9 @@
     <!-- Sub-Tabs Anomali -->
     <div class="flex justify-center mb-6">
       <div class="bg-gray-100 p-1 rounded-full inline-flex">
-        <button onclick="switchSubTabAnomali('keluarga')" id="subTabKeluarga"
+        <button onclick="switchSubTabAnomali('semua')" id="subTabSemua"
           class="px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition">
-          <i class="fa-solid fa-users mr-2 text-brand-500"></i> Anomali
-          Keluarga
-        </button>
-        <button onclick="switchSubTabAnomali('usaha')" id="subTabUsaha"
-          class="px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition">
-          <i class="fa-solid fa-store mr-2 text-brand-500"></i> Anomali Usaha
+          <i class="fa-solid fa-layer-group mr-2 text-brand-500"></i> Anomali
         </button>
         <button onclick="switchSubTabAnomali('panduan')" id="subTabPanduan"
           class="px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition">
@@ -474,7 +466,7 @@
                   Petugas<i class="fa-solid fa-sort sort-icon" id="siAnoPetugas"></i>
                 </th>
                 <th class="px-4 py-3 font-bold sortable" onclick="sortByAnomali('subjek')">
-                  <span id="thSubjekAnomali">Nama KRT</span><i class="fa-solid fa-sort sort-icon" id="siAnoSubjek"></i>
+                  <span id="thSubjekAnomali">Nama Usaha</span><i class="fa-solid fa-sort sort-icon" id="siAnoSubjek"></i>
                 </th>
                 <th class="px-4 py-3 font-bold max-w-[200px] sortable" onclick="sortByAnomali('desc')">
                   Jenis Anomali / Keterangan<i class="fa-solid fa-sort sort-icon" id="siAnoDesc"></i>
@@ -513,7 +505,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div class="grid grid-cols-1 gap-6 mb-8">
         <!-- Panduan Usaha Card -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
           <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
@@ -658,103 +650,7 @@
           </div>
         </div>
 
-        <!-- Panduan Keluarga Card -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
-          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-            <div class="bg-brand-50 text-brand-600 rounded-xl p-2.5 flex items-center justify-center">
-              <i class="fa-solid fa-users text-lg"></i>
-            </div>
-            <div>
-              <h3 class="font-bold text-gray-800 text-base">Panduan Anomali Keluarga</h3>
-              <p class="text-[11px] text-gray-400">Daftar aturan validasi dan verifikasi untuk data keluarga</p>
-            </div>
-          </div>
 
-          <div class="space-y-4 flex-grow overflow-y-auto max-h-[600px] pr-2 scrollbar-hide">
-            <!-- Item 1 -->
-            <div
-              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
-              <div class="flex items-start justify-between gap-2 mb-2">
-                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
-                  Keluarga 2</span>
-              </div>
-              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
-                Anomali Kepala Keluarga &lt; 10 Th di Rumah Sendiri ("Umur Kepala Keluarga &lt; 10 tahun dan tinggal di
-                rumah milik sendiri")
-              </h4>
-              <div class="bg-white rounded-lg p-3 border border-gray-100">
-                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
-                  Solusi</span>
-                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
-                  <li>Cek isian umur kepala rumah tangga</li>
-                  <li>Cek isian terkait status perumahan</li>
-                </ol>
-              </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div
-              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
-              <div class="flex items-start justify-between gap-2 mb-2">
-                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
-                  Keluarga 4</span>
-              </div>
-              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
-                Luas lantai per kapita &lt; 3 m2 atau &gt; 200 m2
-              </h4>
-              <div class="bg-white rounded-lg p-3 border border-gray-100">
-                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
-                  Solusi</span>
-                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
-                  <li>Cek isian terkait luas lantai tempat tinggal (Blok IV R.5) dan bagi dengan jumlah anggota keluarga
-                    yang tinggal untuk memperoleh luas lantai perkapita</li>
-                  <li>Perbaiki isian luas lantai jika tidak sesuai kondisi lapangan.</li>
-                </ol>
-              </div>
-            </div>
-
-            <!-- Item 3 -->
-            <div
-              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
-              <div class="flex items-start justify-between gap-2 mb-2">
-                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
-                  Keluarga 5</span>
-              </div>
-              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
-                Selisih pendapatan dan pengeluaran negatif
-              </h4>
-              <div class="bg-white rounded-lg p-3 border border-gray-100">
-                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
-                  Solusi</span>
-                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
-                  <li>Cek isian rincian pengeluaran pada (IV)</li>
-                </ol>
-              </div>
-            </div>
-
-            <!-- Item 4 -->
-            <div
-              class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-brand-300 hover:bg-white hover:shadow-sm transition-all duration-200">
-              <div class="flex items-start justify-between gap-2 mb-2">
-                <span class="bg-brand-100 text-brand-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">Anomali
-                  Keluarga 6</span>
-              </div>
-              <h4 class="font-bold text-gray-800 text-xs leading-relaxed mb-3">
-                Anomali Listrik Rendah &amp; Ada Barang Mewah ("Pengeluaran listrik sebulan &lt; Rp100.000 atau daya
-                listrik &lt; 900 watt tetapi memiliki lemari es/kulkas, AC, komputer/laptop/tablet")
-              </h4>
-              <div class="bg-white rounded-lg p-3 border border-gray-100">
-                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Langkah
-                  Solusi</span>
-                <ol class="text-xs text-gray-600 space-y-1.5 list-decimal pl-4 leading-relaxed">
-                  <li>Cek terkait isian daya listrik</li>
-                  <li>Cek isian pengeluaran listrik sebulan</li>
-                  <li>Cek isian terkait aset kepemilikan seperti lemari es/kulkas, AC, Komputer/laptop/tablet</li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </main>
@@ -832,7 +728,7 @@
       }
     }
 
-    let anoActiveTab = "keluarga"; // 'keluarga' or 'usaha'
+    let anoActiveTab = "semua"; // 'semua' or 'panduan'
     let anoCurrentData = [];
     let anoFiltered = [];
     let anoSortCol = "wilayahStr";
@@ -1041,22 +937,7 @@
 
       // Progress data tidak dimuat di halaman Anomali ini.
 
-      // 2. Fetch Anomali Keluarga (Smart Cleanup BPS)
-      if (urls.anoKel && urls.anoKel.includes("docs.google")) {
-        promises.push(
-          fetchBPSCSV(urls.anoKel).then((res) => {
-            if (res.data) {
-              anoDataKeluarga = res.data
-                .map((r) => parseRowAnomali(r, "keluarga"))
-                .filter(Boolean);
-              const ts = getLatestUpdatedAt(res.data);
-              if (ts && (!latestDataTimestamp || ts > latestDataTimestamp)) {
-                latestDataTimestamp = ts;
-              }
-            }
-          }),
-        );
-      }
+
 
       // 3. Fetch Anomali Usaha (Smart Cleanup BPS)
       if (urls.anoUsaha && urls.anoUsaha.includes("docs.google")) {
@@ -1100,7 +981,7 @@
 
 
       // Update anomaly data while preserving the user's active dropdown filters
-      anoCurrentData = anoActiveTab === "keluarga" ? anoDataKeluarga : anoDataUsaha;
+      anoCurrentData = [...anoDataUsaha];
 
       const currentKec = document.getElementById("filterAKec").value;
       const currentDesa = document.getElementById("filterADesa").value;
@@ -1912,48 +1793,28 @@
 
     function switchSubTabAnomali(type) {
       anoActiveTab = type;
-      const btnKel = document.getElementById("subTabKeluarga");
-      const btnUsa = document.getElementById("subTabUsaha");
+      const btnSemua = document.getElementById("subTabSemua");
       const btnPan = document.getElementById("subTabPanduan");
       const dataSec = document.getElementById("anomaliDataSection");
       const panSec = document.getElementById("anomaliPanduanSection");
 
-      if (type === "keluarga") {
-        btnKel.className =
+      if (type === "semua") {
+        if (btnSemua) btnSemua.className =
           "px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition";
-        btnUsa.className =
-          "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
-        btnPan.className =
+        if (btnPan) btnPan.className =
           "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
         dataSec.classList.remove("hidden");
         panSec.classList.add("hidden");
-        anoCurrentData = anoDataKeluarga;
-        document.getElementById("thSubjekAnomali").textContent = "Nama KRT";
-
-        document.getElementById("filterAKec").value = "";
-        populateDropdownsAnomali(anoCurrentData);
-        applyFiltersAnomali("all");
-      } else if (type === "usaha") {
-        btnUsa.className =
-          "px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition";
-        btnKel.className =
-          "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
-        btnPan.className =
-          "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
-        dataSec.classList.remove("hidden");
-        panSec.classList.add("hidden");
-        anoCurrentData = anoDataUsaha;
+        anoCurrentData = [...anoDataUsaha];
         document.getElementById("thSubjekAnomali").textContent = "Nama Usaha";
 
         document.getElementById("filterAKec").value = "";
         populateDropdownsAnomali(anoCurrentData);
         applyFiltersAnomali("all");
       } else if (type === "panduan") {
-        btnPan.className =
+        if (btnPan) btnPan.className =
           "px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-800 shadow-sm transition";
-        btnKel.className =
-          "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
-        btnUsa.className =
+        if (btnSemua) btnSemua.className =
           "px-6 py-2 rounded-full text-sm font-bold text-gray-500 hover:text-gray-800 transition";
         dataSec.classList.add("hidden");
         panSec.classList.remove("hidden");
@@ -3034,8 +2895,6 @@
 
       // Terapkan hardcoded URL langsung ke dalam input box di Pengaturan
       document.getElementById("sheetUrlProgress").value = urls.progress || "";
-      document.getElementById("sheetUrlAnomaliKeluarga").value =
-        urls.anoKel || "Belum ada link hardcode untuk Anomali Keluarga";
       document.getElementById("sheetUrlAnomaliUsaha").value =
         urls.anoUsaha || "Belum ada link hardcode untuk Anomali Usaha";
 
