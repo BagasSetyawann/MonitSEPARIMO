@@ -1713,7 +1713,7 @@
                ${item.dailyTarget > 0 ? item.dailyTarget.toFixed(1) : '<i class="fa-solid fa-check text-green-500" title="Sudah Tercapai"></i>'}
             </td>
             <td class="px-5 py-3 text-right font-medium text-gray-400">${item.OPEN}</td>
-            <td class="px-5 py-3 text-right font-medium text-yellow-500">${item.DRAFT}</td>
+            <td class="px-5 py-3 text-right font-medium text-yellow-500" title="${item.target > 0 ? ((item.DRAFT / item.target) * 100).toFixed(1) : 0}% dari Target">${item.DRAFT}<br><span class="text-[9px] opacity-75">(${item.target > 0 ? ((item.DRAFT / item.target) * 100).toFixed(1) : 0}%)</span></td>
             <td class="px-5 py-3 text-right font-medium text-blue-500">${item.SUBMITTED_BY_PENCACAH}</td>
             <td class="px-5 py-3 text-right font-medium text-indigo-500">${item.SUBMITTED_RESPONDENT}</td>
             <td class="px-5 py-3 text-right font-semibold text-green-600">${item.APPROVED_BY_PENGAWAS}</td>
