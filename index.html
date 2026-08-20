@@ -619,6 +619,67 @@
         <span id="realisasiCountInfo"></span>
       </div>
     </div>
+
+    <!-- Table Delta Harian Per Petugas 17-31 Agustus 2025 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 flex flex-col" id="deltaHarianSection">
+      <div class="p-4 sm:p-5 border-b border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div>
+          <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2 shrink-0">
+            <span class="w-2 h-6 bg-indigo-500 rounded-full"></span>
+            <span>Monitoring Delta Submit Harian per Petugas</span>
+            <span class="text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-full ml-1">17 – 31 Agustus 2025</span>
+          </h3>
+          <p class="text-[11px] text-gray-400 mt-1 ml-4">Submit kumulatif tiap hari per petugas. Delta <span class="text-indigo-500 font-semibold">▲</span> = penambahan vs hari sebelumnya. Data dari kolom <code class="bg-gray-100 px-1 rounded">d17</code>–<code class="bg-gray-100 px-1 rounded">d31</code> di spreadsheet.</p>
+        </div>
+        <div class="flex items-center gap-3 flex-shrink-0 flex-wrap justify-end">
+          <div class="flex bg-gray-50 p-1 rounded-xl border border-gray-100">
+            <button onclick="switchDeltaHarianView('ppl')" id="dhBtnPPL"
+              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition">
+              Per PPL
+            </button>
+            <button onclick="switchDeltaHarianView('pml')" id="dhBtnPML"
+              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition">
+              Per PML
+            </button>
+          </div>
+          <div class="flex items-center gap-1.5 ml-2">
+            <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wide mr-0.5">Kecamatan:</span>
+            <select id="dhKecSelect" onchange="setDeltaHarianKec(this.value)" class="text-[11px] sm:text-xs border border-gray-200 text-gray-600 rounded-lg py-1 pl-2 pr-6 focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="">Semua Kecamatan</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wide mr-0.5">Filter Hari Ini:</span>
+            <button onclick="setDeltaHarianFilter(null)" id="dhFilterAll"
+              class="px-2.5 py-1 text-[10px] rounded-full font-semibold bg-indigo-500 text-white shadow-sm transition">Semua</button>
+            <button onclick="setDeltaHarianFilter(60)" id="dhFilter60"
+              class="px-2.5 py-1 text-[10px] rounded-full font-semibold bg-white border border-gray-200 text-gray-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition">< 60%</button>
+            <button onclick="setDeltaHarianFilter(70)" id="dhFilter70"
+              class="px-2.5 py-1 text-[10px] rounded-full font-semibold bg-white border border-gray-200 text-gray-500 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition">< 70%</button>
+            <button onclick="setDeltaHarianFilter(80)" id="dhFilter80"
+              class="px-2.5 py-1 text-[10px] rounded-full font-semibold bg-white border border-gray-200 text-gray-500 hover:bg-yellow-50 hover:border-yellow-200 hover:text-yellow-600 transition">< 80%</button>
+          </div>
+          <button onclick="exportExcelDeltaHarian()" class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-green-50 text-green-600 hover:bg-green-100 transition border border-green-200 flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-file-excel"></i> Export Excel
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-xs text-left" id="deltaHarianTable">
+          <thead id="deltaHarianTableHeader"></thead>
+          <tbody id="tableBodyDeltaHarian" class="divide-y divide-gray-50 bg-white"></tbody>
+        </table>
+      </div>
+      <div class="px-5 py-3 text-[10px] text-gray-400 border-t border-gray-100 flex flex-col sm:flex-row justify-between gap-1 bg-gray-50/50">
+        <span>
+          * Nilai = submit kumulatif s.d. hari itu (dari kolom <code class="bg-gray-100 px-1 rounded">d17</code>–<code class="bg-gray-100 px-1 rounded">d31</code> di Spreadsheet).
+          <span class="inline-flex items-center gap-0.5 bg-indigo-100 text-indigo-700 px-1.5 rounded font-semibold">▲N</span> = delta vs hari sebelumnya.
+          <span class="text-amber-500 font-semibold">Kolom amber</span> = Sabtu/Minggu.
+          <span class="text-gray-300 font-semibold">—</span> = belum ada data.
+        </span>
+        <span id="deltaHarianFooterInfo" class="font-semibold text-indigo-500 whitespace-nowrap"></span>
+      </div>
+    </div>
   </main>
 
 
@@ -663,6 +724,11 @@
     let progTableView = "ppl";
     let progSortCol = "OPEN";
     let progSortDir = "desc";
+
+    // Konstanta untuk tabel delta harian 17-31 Agustus 2025
+    const DAILY_DATES = [17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
+    const DAILY_YEAR  = 2025;
+    const DAILY_MONTH = 7; // 0-indexed, 7 = Agustus
 
     // State Realisasi PML
     let realisasiView = "pml"; // 'pml', 'ppl', 'kec'
@@ -1088,6 +1154,31 @@
         }
         const stKemarin = parseStatusProgress(strHasilKemarin);
 
+        // Ekstrak data submit harian d17–d31
+        // Format kolom: "APPROVED BY Pengawas:142 | COMPLETED BY Admin Kabupaten:1"
+        // Submit kumulatif = semua status selain OPEN dan DRAFT
+        const dailySubmits = {};
+        DAILY_DATES.forEach(d => {
+          const colKey = `d${d}`;
+          const rawVal = row[colKey];
+          if (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== "") {
+            const stDay = parseStatusProgress(String(rawVal));
+            // Submit = semua yang sudah keluar dari OPEN/DRAFT
+            const submitKum = stDay.SUBMITTED_BY_PENCACAH
+              + stDay.SUBMITTED_RESPONDENT
+              + stDay.APPROVED_BY_PENGAWAS
+              + stDay.REJECTED_BY_PENGAWAS
+              + stDay.REVOKED_BY_PENGAWAS
+              + stDay.EDITED_BY_PENGAWAS
+              + stDay.COMPLETED_BY_ADMIN_KABUPATEN
+              + stDay.EDITED_BY_ADMIN_KABUPATEN
+              + stDay.REJECTED_BY_ADMIN_KABUPATEN;
+            dailySubmits[d] = submitKum;
+          } else {
+            dailySubmits[d] = null;
+          }
+        });
+
         return {
           userId: row.userId || "",
           username,
@@ -1113,6 +1204,7 @@
           COMPLETED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.COMPLETED_BY_ADMIN_KABUPATEN,
           EDITED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.EDITED_BY_ADMIN_KABUPATEN,
           REJECTED_BY_ADMIN_KABUPATEN_KEMARIN: stKemarin.REJECTED_BY_ADMIN_KABUPATEN,
+          dailySubmits,
         };
       } catch (e) {
         return null;
@@ -1180,6 +1272,7 @@
       updateKPIsProgress();
       drawChartProgress();
       renderTableProgress();
+      renderDeltaHarianTable();
     }
 
     function resetFiltersProgress() {
@@ -2996,6 +3089,259 @@
       }
     }
 
+    // ============================================================
+    //  DELTA HARIAN PER PETUGAS 17-31 AGUSTUS 2025
+    // ============================================================
+
+    const NAMA_HARI_ID = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+
+    // Minggu=0, Sabtu=6
+    function isWeekend(day) {
+      const d = new Date(DAILY_YEAR, DAILY_MONTH, day).getDay();
+      return d === 0 || d === 6;
+    }
+    function getDayName(day) {
+      return NAMA_HARI_ID[new Date(DAILY_YEAR, DAILY_MONTH, day).getDay()];
+    }
+
+    let deltaHarianView = "ppl"; // 'ppl' | 'pml'
+    let deltaHarianFilterPct = null; // null = semua, 60/70/80 = filter < X%
+    let dhActiveKec = "";
+    let currentDeltaHarianList = [];
+    let currentDeltaHarianFilterDay = null;
+
+    function setDeltaHarianKec(kecCode) {
+      dhActiveKec = kecCode;
+      renderDeltaHarianTable();
+    }
+
+    function exportExcelDeltaHarian() {
+      if (!currentDeltaHarianList || currentDeltaHarianList.length === 0) {
+        alert("Tidak ada data untuk diexport.");
+        return;
+      }
+      
+      const exportRows = currentDeltaHarianList.map(p => {
+        const row = {
+          "Petugas": p.name,
+          "ID/Email": p.key,
+          "Kecamatan": [...p.kecCodes].map(c => getKecLabel(c)).join(", "),
+          "Target": p.target
+        };
+        
+        DAILY_DATES.forEach(d => {
+          row[`${d} Ags`] = p.daily[d] !== null ? p.daily[d] : "";
+        });
+        
+        const todayKum = currentDeltaHarianFilterDay !== null ? p.daily[currentDeltaHarianFilterDay] : null;
+        row["Progress Hari Ini (%)"] = (todayKum !== null && p.target > 0) 
+          ? parseFloat(((todayKum / p.target) * 100).toFixed(2)) 
+          : "";
+          
+        return row;
+      });
+      
+      const ws = XLSX.utils.json_to_sheet(exportRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Delta_Harian");
+      XLSX.writeFile(wb, `Delta_Harian_${deltaHarianView}_${new Date().getTime()}.xlsx`);
+    }
+
+    function setDeltaHarianFilter(pct) {
+      deltaHarianFilterPct = pct;
+      // Update button active states
+      const filterDefs = [
+        { id: "dhFilterAll", val: null, activeClass: "bg-indigo-500 text-white shadow-sm", inactiveClass: "bg-white border border-gray-200 text-gray-500 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600" },
+        { id: "dhFilter60",  val: 60,   activeClass: "bg-rose-500 text-white shadow-sm",   inactiveClass: "bg-white border border-gray-200 text-gray-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600" },
+        { id: "dhFilter70",  val: 70,   activeClass: "bg-amber-500 text-white shadow-sm",  inactiveClass: "bg-white border border-gray-200 text-gray-500 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600" },
+        { id: "dhFilter80",  val: 80,   activeClass: "bg-yellow-500 text-white shadow-sm", inactiveClass: "bg-white border border-gray-200 text-gray-500 hover:bg-yellow-50 hover:border-yellow-200 hover:text-yellow-600" },
+      ];
+      filterDefs.forEach(({ id, val, activeClass, inactiveClass }) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        const isActive = val === pct;
+        btn.className = `px-2.5 py-1 text-[10px] rounded-full font-semibold transition ${isActive ? activeClass : inactiveClass}`;
+      });
+      renderDeltaHarianTable();
+    }
+
+    function switchDeltaHarianView(view) {
+      deltaHarianView = view;
+      const btnPPL = document.getElementById("dhBtnPPL");
+      const btnPML = document.getElementById("dhBtnPML");
+      if (btnPPL && btnPML) {
+        btnPPL.className = view === "ppl"
+          ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
+          : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
+        btnPML.className = view === "pml"
+          ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
+          : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
+      }
+      renderDeltaHarianTable();
+    }
+
+    function renderDeltaHarianTable() {
+      const tbody = document.getElementById("tableBodyDeltaHarian");
+      const header = document.getElementById("deltaHarianTableHeader");
+      const footerInfo = document.getElementById("deltaHarianFooterInfo");
+      if (!tbody) return;
+
+      // --- AGREGASI DATA PER PETUGAS ---
+      const sourceData = progDataAll.filter(r => !dhActiveKec || r.kecCode === dhActiveKec);
+      const agg = {};
+      sourceData.forEach(r => {
+        const key = deltaHarianView === "ppl" ? r.username : (r.emailPml || "Tanpa PML");
+        if (!agg[key]) {
+          agg[key] = {
+            name: deltaHarianView === "ppl" ? r.namePPL : (r.namePML || "Tanpa PML"),
+            key,
+            kecCodes: new Set(),
+            target: 0,
+            daily: {},
+          };
+          DAILY_DATES.forEach(d => { agg[key].daily[d] = null; });
+        }
+        agg[key].kecCodes.add(r.kecCode);
+        agg[key].target += r.target;
+        DAILY_DATES.forEach(d => {
+          const val = r.dailySubmits ? r.dailySubmits[d] : null;
+          if (val !== null && val !== undefined) {
+            agg[key].daily[d] = (agg[key].daily[d] || 0) + val;
+          }
+        });
+      });
+
+      const petugasList = Object.values(agg).sort((a, b) => a.name.localeCompare(b.name));
+      const daysWithData = DAILY_DATES.filter(d => petugasList.some(p => p.daily[d] !== null));
+
+      // Tentukan "hari filter": hari ini jika dalam range, atau hari terakhir yang ada data
+      const todayObj = new Date();
+      const todayIsInRange = todayObj.getFullYear() === DAILY_YEAR
+        && todayObj.getMonth() === DAILY_MONTH
+        && DAILY_DATES.includes(todayObj.getDate());
+      const filterDay = todayIsInRange
+        ? todayObj.getDate()
+        : (daysWithData.length > 0 ? daysWithData[daysWithData.length - 1] : null);
+
+      // Terapkan filter progress
+      let displayList = petugasList;
+      if (deltaHarianFilterPct !== null && filterDay !== null) {
+        displayList = petugasList.filter(p => {
+          const kum = p.daily[filterDay];
+          if (kum === null) return true; // tampilkan jika belum ada data
+          const pct = p.target > 0 ? (kum / p.target) * 100 : 0;
+          return pct < deltaHarianFilterPct;
+        });
+      }
+
+      // --- RENDER HEADER ---
+      if (header) {
+        const dateHeaderCells = DAILY_DATES.map(d => {
+          const we = isWeekend(d);
+          const hn = getDayName(d);
+          const isFilterDay = d === filterDay;
+          const bgClass = isFilterDay
+            ? "bg-indigo-500 text-white"
+            : (we ? "bg-amber-50 text-amber-600" : "text-indigo-600");
+          return `<th class="px-3 py-3 text-center font-bold min-w-[100px] ${bgClass}" style="border-left:1px solid #f1f5f9">
+            <div class="text-[11px] font-black">${d}/8</div>
+            <div class="text-[9px] font-normal opacity-70">${hn}${isFilterDay ? ' ★' : ''}</div>
+          </th>`;
+        }).join("");
+        header.innerHTML = `
+          <tr class="text-gray-400 border-b border-gray-100 uppercase tracking-wider text-[10px] bg-gray-50/80">
+            <th class="px-5 py-3 font-bold text-left sticky left-0 bg-gray-50/95 z-10" style="min-width:160px">
+              ${deltaHarianView === "ppl" ? "Nama / Email PPL" : "Nama / Email PML"}
+            </th>
+            <th class="px-4 py-3 font-bold text-left" style="min-width:120px">Kecamatan</th>
+            <th class="px-4 py-3 text-right font-bold text-gray-600">Target</th>
+            ${dateHeaderCells}
+          </tr>
+        `;
+      }
+
+      // Helper: render satu sel hari (kumulatif + progress % + delta badge)
+      function buildDayCell(kumulatif, delta, target, isToday) {
+        if (kumulatif === null) {
+          return `<td class="px-3 py-2.5 text-center text-gray-200" style="border-left:1px solid #f1f5f9">—</td>`;
+        }
+        const pct = target > 0 ? (kumulatif / target) * 100 : 0;
+        const valColor = pct >= 90 ? "text-green-600" : pct >= 80 ? "text-emerald-600" : pct >= 70 ? "text-brand-600" : pct >= 60 ? "text-amber-600" : "text-rose-600";
+        const pctBarColor = pct >= 90 ? "#16a34a" : pct >= 80 ? "#059669" : pct >= 70 ? "#2563eb" : pct >= 60 ? "#d97706" : "#e11d48";
+        let deltaBadge = "";
+        if (delta !== null && delta > 0) {
+          deltaBadge = `<span class="inline-flex items-center gap-0.5 text-[9px] font-bold bg-indigo-100 text-indigo-700 px-1 py-0 rounded-full"><i class="fa-solid fa-arrow-up" style="font-size:6px"></i>+${delta.toLocaleString("id-ID")}</span>`;
+        } else if (delta !== null && delta < 0) {
+          deltaBadge = `<span class="inline-flex items-center gap-0.5 text-[9px] font-bold bg-rose-100 text-rose-700 px-1 py-0 rounded-full"><i class="fa-solid fa-arrow-down" style="font-size:6px"></i>${delta.toLocaleString("id-ID")}</span>`;
+        } else if (delta === 0) {
+          deltaBadge = `<span class="text-[8px] text-gray-300">=</span>`;
+        }
+        const todayRing = isToday ? "ring-2 ring-inset ring-indigo-400" : "";
+        // Mini progress bar
+        const barWidth = Math.min(pct, 100).toFixed(1);
+        return `<td class="px-2 py-2 text-center ${todayRing}" style="border-left:1px solid #f1f5f9">
+          <div class="font-bold text-xs ${valColor}">${kumulatif.toLocaleString("id-ID")}</div>
+          <div class="text-[10px] font-semibold ${valColor} opacity-80">${pct.toFixed(1)}%</div>
+          <div style="height:3px;background:#f1f5f9;border-radius:2px;margin:2px 0;width:100%">
+            <div style="height:3px;border-radius:2px;width:${barWidth}%;background:${pctBarColor};transition:width 0.4s"></div>
+          </div>
+          ${deltaBadge}
+        </td>`;
+      }
+
+      // --- RENDER ROWS ---
+      if (displayList.length === 0) {
+        const msg = deltaHarianFilterPct !== null
+          ? `Tidak ada petugas dengan progress < ${deltaHarianFilterPct}% pada hari ini (${filterDay}/8).`
+          : `Tidak ada data petugas. Pastikan kolom <code>d17</code>–<code>d31</code> sudah ada di spreadsheet.`;
+        tbody.innerHTML = `<tr><td colspan="${3 + DAILY_DATES.length}" class="px-5 py-8 text-center text-gray-400">${msg}</td></tr>`;
+      } else {
+        tbody.innerHTML = displayList.map(p => {
+          const kecStr = [...p.kecCodes].map(c => getKecLabel(c)).join(", ");
+          // Hitung progress hari ini untuk warna baris
+          const todayKum = filterDay !== null ? p.daily[filterDay] : null;
+          const todayPct = (todayKum !== null && p.target > 0) ? (todayKum / p.target) * 100 : null;
+          const rowAccent = todayPct !== null
+            ? (todayPct < 60 ? "border-l-4 border-rose-400" : todayPct < 70 ? "border-l-4 border-amber-400" : todayPct < 80 ? "border-l-4 border-yellow-400" : "")
+            : "";
+          const dayCells = DAILY_DATES.map((d, idx) => {
+            const kum = p.daily[d];
+            const prevD = idx > 0 ? DAILY_DATES[idx - 1] : null;
+            const prevKum = prevD !== null ? p.daily[prevD] : null;
+            let delta = null;
+            if (kum !== null && prevKum !== null) delta = kum - prevKum;
+            else if (kum !== null && idx === 0) delta = kum;
+            return buildDayCell(kum, delta, p.target, d === filterDay);
+          }).join("");
+          return `
+            <tr class="hover:bg-indigo-50/20 transition-colors ${rowAccent}">
+              <td class="px-5 py-2.5 sticky left-0 bg-white border-r border-gray-100 z-10">
+                <div class="font-semibold text-gray-800 text-xs truncate max-w-[150px]" title="${p.name}">${p.name}</div>
+                <div class="text-[10px] text-gray-400 font-mono truncate max-w-[150px]">${p.key}</div>
+                ${todayPct !== null ? `<div class="text-[10px] font-bold mt-0.5 ${todayPct < 60 ? 'text-rose-500' : todayPct < 70 ? 'text-amber-500' : todayPct < 80 ? 'text-yellow-600' : 'text-green-600'}">${todayPct.toFixed(1)}% hari ini</div>` : ''}
+              </td>
+              <td class="px-4 py-2.5 text-gray-500 text-[11px]">${kecStr}</td>
+              <td class="px-4 py-2.5 text-right font-semibold text-gray-600">${p.target.toLocaleString("id-ID")}</td>
+              ${dayCells}
+            </tr>
+          `;
+        }).join("");
+      }
+
+      if (footerInfo) {
+        const filterLabel = deltaHarianFilterPct !== null
+          ? ` · Filter < ${deltaHarianFilterPct}%: ${displayList.length} petugas`
+          : "";
+        footerInfo.textContent = daysWithData.length > 0
+          ? `${daysWithData.length}/15 hari ada data · ${petugasList.length} ${deltaHarianView === "ppl" ? "PPL" : "PML"}${filterLabel}`
+          : `${petugasList.length} petugas terdeteksi · Belum ada data kolom d17–d31`;
+      }
+      
+      // Simpan referensi ke variabel global untuk Export Excel
+      currentDeltaHarianList = displayList;
+      currentDeltaHarianFilterDay = filterDay;
+    }
+
     // Inisialisasi Saat Load
     document.addEventListener("DOMContentLoaded", () => {
       // Render headers for realisasi table
@@ -3012,6 +3358,19 @@
 
       // Jalankan Fetch otomatis (Karena Data sekarang Di-hardcode)
       fetchDataAll(false);
+
+      // Populate opsi kecamatan untuk tabel Delta Harian
+      const dhKecSelect = document.getElementById("dhKecSelect");
+      if (dhKecSelect) {
+        Object.keys(KEC_CODES).sort().forEach(code => {
+          const opt = document.createElement("option");
+          opt.value = code;
+          opt.textContent = `${code} - ${KEC_CODES[code]}`;
+          dhKecSelect.appendChild(opt);
+        });
+      }
+
+      renderDeltaHarianTable();
     });
   </script>
 </body>
