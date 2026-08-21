@@ -585,6 +585,14 @@
             <input type="text" id="searchRealisasiInput" oninput="applyFiltersRealisasi()" placeholder="Cari nama..."
               class="w-full sm:w-48 border border-gray-200 rounded-xl pl-8 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-50 bg-gray-50 focus:bg-white transition" />
           </div>
+          <!-- Filter PML (hanya muncul saat view=ppl) -->
+          <div id="realisasiPmlFilterWrap" class="hidden items-center gap-1.5">
+            <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wide">PML:</span>
+            <select id="realisasiPmlFilter" onchange="applyFiltersRealisasi()"
+              class="text-[11px] sm:text-xs border border-gray-200 text-gray-600 rounded-lg py-1 pl-2 pr-6 focus:ring-brand-400 focus:border-brand-400 bg-white">
+              <option value="">Semua PML</option>
+            </select>
+          </div>
           <div class="flex bg-gray-50 p-1 rounded-xl">
             <button onclick="switchRealisasiView('pml')" id="rBtnPML"
               class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition">
@@ -620,63 +628,67 @@
       </div>
     </div>
 
-    <!-- Table Delta Harian Per Petugas 17-31 Agustus 2025 -->
+    <!-- Table Delta Harian Per Petugas 17-31 Agustus 2026 -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 flex flex-col"
       id="deltaHarianSection">
-      <div
-        class="p-4 sm:p-5 border-b border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div>
-          <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2 shrink-0">
-            <span class="w-2 h-6 bg-indigo-500 rounded-full"></span>
-            <span>Monitoring Delta Submit Harian per Petugas</span>
+      <div class="p-4 sm:p-5 border-b border-gray-100 flex flex-col gap-3">
+        <!-- Baris 1: Judul + Toggle + Export -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="w-2 h-6 bg-indigo-500 rounded-full flex-shrink-0"></span>
+            <h3 class="font-bold text-gray-700 text-sm">Monitoring Delta Submit Harian per Petugas</h3>
             <span
-              class="text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-full ml-1">17
-              – 31 Agustus 2025</span>
-          </h3>
-          <p class="text-[11px] text-gray-400 mt-1 ml-4">Submit kumulatif tiap hari per petugas. Delta <span
-              class="text-indigo-500 font-semibold">▲</span> = penambahan vs hari sebelumnya. Data dari kolom <code
-              class="bg-gray-100 px-1 rounded">d17</code>–<code class="bg-gray-100 px-1 rounded">d31</code> di
-            spreadsheet.</p>
-        </div>
-        <div class="flex items-center gap-3 flex-shrink-0 flex-wrap justify-end">
-          <div class="flex bg-gray-50 p-1 rounded-xl border border-gray-100">
-            <button onclick="switchDeltaHarianView('ppl')" id="dhBtnPPL"
-              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition">
-              Per PPL
-            </button>
-            <button onclick="switchDeltaHarianView('pml')" id="dhBtnPML"
-              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition">
-              Per PML
+              class="text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-full">17–31
+              Ags 2026</span>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="flex bg-gray-50 p-1 rounded-xl border border-gray-100">
+              <button onclick="switchDeltaHarianView('ppl')" id="dhBtnPPL"
+                class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition">
+                Per PPL
+              </button>
+              <button onclick="switchDeltaHarianView('pml')" id="dhBtnPML"
+                class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition">
+                Per PML
+              </button>
+            </div>
+            <button onclick="exportExcelDeltaHarian()"
+              class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-green-50 text-green-600 hover:bg-green-100 transition border border-green-200 flex items-center gap-1.5 shadow-sm flex-shrink-0">
+              <i class="fa-solid fa-file-excel"></i> Export
             </button>
           </div>
-          <div class="flex items-center gap-1.5 ml-2">
-            <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wide mr-0.5">Kecamatan:</span>
+        </div>
+        <!-- Baris 2: Semua Filter -->
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex items-center gap-1.5">
+            <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wide">Kec:</span>
             <select id="dhKecSelect" onchange="setDeltaHarianKec(this.value)"
-              class="text-[11px] sm:text-xs border border-gray-200 text-gray-600 rounded-lg py-1 pl-2 pr-6 focus:ring-indigo-500 focus:border-indigo-500">
+              class="text-[11px] border border-gray-200 text-gray-600 rounded-lg py-1 pl-2 pr-5 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
               <option value="">Semua Kecamatan</option>
             </select>
           </div>
-          <div class="flex items-center gap-1.5">
-            <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wide mr-0.5">Filter Hari Ini:</span>
-            <button onclick="setDeltaHarianFilter(null)" id="dhFilterAll"
-              class="px-2.5 py-1 text-[10px] rounded-full font-semibold bg-indigo-500 text-white shadow-sm transition">Semua</button>
-            <button onclick="setDeltaHarianFilter(60)" id="dhFilter60"
-              class="px-2.5 py-1 text-[10px] rounded-full font-semibold bg-white border border-gray-200 text-gray-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition">
-              < 60%</button>
-                <button onclick="setDeltaHarianFilter(70)" id="dhFilter70"
-                  class="px-2.5 py-1 text-[10px] rounded-full font-semibold bg-white border border-gray-200 text-gray-500 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition">
-                  < 70%</button>
-                    <button onclick="setDeltaHarianFilter(80)" id="dhFilter80"
-                      class="px-2.5 py-1 text-[10px] rounded-full font-semibold bg-white border border-gray-200 text-gray-500 hover:bg-yellow-50 hover:border-yellow-200 hover:text-yellow-600 transition">
-                      < 80%</button>
+          <!-- Filter PML (hanya muncul saat Per PPL) -->
+          <div id="dhPmlFilterWrap" class="flex items-center gap-1.5">
+            <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wide">PML:</span>
+            <select id="dhPmlSelect" onchange="setDeltaHarianPml(this.value)"
+              class="text-[11px] border border-indigo-200 text-indigo-700 bg-indigo-50 rounded-lg py-1 pl-2 pr-5 focus:ring-indigo-500 focus:border-indigo-500 font-semibold">
+              <option value="">Semua PML</option>
+            </select>
           </div>
-          <button onclick="exportExcelDeltaHarian()"
-            class="px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-green-50 text-green-600 hover:bg-green-100 transition border border-green-200 flex items-center gap-1.5 shadow-sm">
-            <i class="fa-solid fa-file-excel"></i> Export Excel
-          </button>
+          <div class="flex items-center gap-1 flex-wrap">
+            <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wide">Filter %:</span>
+            <button onclick="setDeltaHarianFilter(null)" id="dhFilterAll"
+              class="px-2 py-0.5 text-[10px] rounded-full font-semibold bg-indigo-500 text-white shadow-sm transition">Semua</button>
+            <button onclick="setDeltaHarianFilter(60)" id="dhFilter60"
+              class="px-2 py-0.5 text-[10px] rounded-full font-semibold bg-white border border-gray-200 text-gray-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition">&lt;60%</button>
+            <button onclick="setDeltaHarianFilter(70)" id="dhFilter70"
+              class="px-2 py-0.5 text-[10px] rounded-full font-semibold bg-white border border-gray-200 text-gray-500 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition">&lt;70%</button>
+            <button onclick="setDeltaHarianFilter(80)" id="dhFilter80"
+              class="px-2 py-0.5 text-[10px] rounded-full font-semibold bg-white border border-gray-200 text-gray-500 hover:bg-yellow-50 hover:border-yellow-200 hover:text-yellow-600 transition">&lt;80%</button>
+          </div>
         </div>
       </div>
-      <div class="overflow-x-auto">
+      <div class="table-wrap overflow-x-auto" style="max-height:520px">
         <table class="min-w-full text-xs text-left" id="deltaHarianTable">
           <thead id="deltaHarianTableHeader"></thead>
           <tbody id="tableBodyDeltaHarian" class="divide-y divide-gray-50 bg-white"></tbody>
@@ -741,9 +753,9 @@
     let progSortCol = "OPEN";
     let progSortDir = "desc";
 
-    // Konstanta untuk tabel delta harian 17-31 Agustus 2025
+    // Konstanta untuk tabel delta harian 17-31 Agustus 2026
     const DAILY_DATES = [17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
-    const DAILY_YEAR = 2025;
+    const DAILY_YEAR = 2026;
     const DAILY_MONTH = 7; // 0-indexed, 7 = Agustus
 
     // State Realisasi PML
@@ -2654,8 +2666,48 @@
             : "Progress Kecamatan";
       }
 
+      // Tampilkan/sembunyikan filter PML (hanya untuk view PPL)
+      const pmlFilterWrap = document.getElementById("realisasiPmlFilterWrap");
+      if (pmlFilterWrap) {
+        if (view === "ppl") {
+          pmlFilterWrap.classList.remove("hidden");
+          pmlFilterWrap.classList.add("flex");
+          // Populate daftar PML
+          populatePmlFilterDropdown();
+        } else {
+          pmlFilterWrap.classList.add("hidden");
+          pmlFilterWrap.classList.remove("flex");
+        }
+      }
+
       renderRealisasiTableHeader();
       applyFiltersRealisasi();
+    }
+
+    function populatePmlFilterDropdown() {
+      const sel = document.getElementById("realisasiPmlFilter");
+      if (!sel) return;
+      const currentVal = sel.value;
+      // Kumpulkan semua PML unik dari data aktif
+      const pmlSet = new Set();
+      const pmlNames = {};
+      progDataAll.forEach(r => {
+        if (progActiveKec && r.kecCode !== progActiveKec) return;
+        if (r.emailPml) {
+          pmlSet.add(r.emailPml);
+          pmlNames[r.emailPml] = r.namePML || r.emailPml.split("@")[0];
+        }
+      });
+      const sortedPmls = [...pmlSet].sort();
+      sel.innerHTML = '<option value="">Semua PML</option>' +
+        sortedPmls.map(email => {
+          const name = pmlNames[email] || email.split("@")[0];
+          return `<option value="${email}">${name} (${email.split("@")[0]})</option>`;
+        }).join("");
+      // Pertahankan nilai yang sudah dipilih jika masih ada
+      if (currentVal && sortedPmls.includes(currentVal)) {
+        sel.value = currentVal;
+      }
     }
 
     function renderRealisasiTableHeader() {
@@ -2737,6 +2789,26 @@
       const searchInput = document.getElementById("searchRealisasiInput");
       const search = (searchInput ? searchInput.value || "" : "").toLowerCase();
 
+      // Filter PML untuk view PPL
+      const pmlFilterEl = document.getElementById("realisasiPmlFilter");
+      const pmlFilterVal = (pmlFilterEl && realisasiView === "ppl") ? pmlFilterEl.value : "";
+
+      // Update dropdown PML jika view PPL
+      if (realisasiView === "ppl") {
+        const pmlFilterWrap = document.getElementById("realisasiPmlFilterWrap");
+        if (pmlFilterWrap) {
+          pmlFilterWrap.classList.remove("hidden");
+          pmlFilterWrap.classList.add("flex");
+        }
+        populatePmlFilterDropdown();
+      } else {
+        const pmlFilterWrap = document.getElementById("realisasiPmlFilterWrap");
+        if (pmlFilterWrap) {
+          pmlFilterWrap.classList.add("hidden");
+          pmlFilterWrap.classList.remove("flex");
+        }
+      }
+
       const agg = {};
 
       if (realisasiView === "pml") {
@@ -2770,6 +2842,8 @@
       } else if (realisasiView === "ppl") {
         progDataAll.forEach((r) => {
           if (progActiveKec && r.kecCode !== progActiveKec) return;
+          // Filter berdasarkan PML yang dipilih
+          if (pmlFilterVal && r.emailPml !== pmlFilterVal) return;
 
           const pplKey = r.username;
           if (!agg[pplKey]) {
@@ -3123,8 +3197,50 @@
     let deltaHarianView = "ppl"; // 'ppl' | 'pml'
     let deltaHarianFilterPct = null; // null = semua, 60/70/80 = filter < X%
     let dhActiveKec = "";
+    let dhFilterPml = ""; // filter berdasarkan emailPml (hanya untuk view ppl)
     let currentDeltaHarianList = [];
     let currentDeltaHarianFilterDay = null;
+    // Sort state untuk tabel delta harian
+    let dhSortCol = "name"; // 'name' | 'target' | number (tanggal)
+    let dhSortDir = "asc";
+
+    function setDeltaHarianPml(emailPml) {
+      dhFilterPml = emailPml;
+      renderDeltaHarianTable();
+    }
+
+    function populateDhPmlDropdown() {
+      const sel = document.getElementById("dhPmlSelect");
+      if (!sel) return;
+      const currentVal = sel.value;
+      const pmlMap = {}; // email -> name
+      progDataAll.forEach(r => {
+        if (dhActiveKec && r.kecCode !== dhActiveKec) return;
+        if (r.emailPml) {
+          pmlMap[r.emailPml] = r.namePML || r.emailPml.split("@")[0];
+        }
+      });
+      const sortedEmails = Object.keys(pmlMap).sort();
+      sel.innerHTML = '<option value="">Semua PML</option>' +
+        sortedEmails.map(email => {
+          const name = pmlMap[email];
+          return `<option value="${email}"${email === currentVal ? ' selected' : ''}>${name} (${email.split("@")[0]})</option>`;
+        }).join("");
+      // Pertahankan seleksi jika masih tersedia
+      if (currentVal && sortedEmails.includes(currentVal)) sel.value = currentVal;
+      else if (currentVal) dhFilterPml = "";
+    }
+
+    function sortDeltaHarian(col) {
+      if (dhSortCol === col) {
+        dhSortDir = dhSortDir === "asc" ? "desc" : "asc";
+      } else {
+        dhSortCol = col;
+        // Untuk sort nama: default asc, untuk sort tanggal/target: default desc (terbesar dulu)
+        dhSortDir = (col === "name") ? "asc" : "desc";
+      }
+      renderDeltaHarianTable();
+    }
 
     function setDeltaHarianKec(kecCode) {
       dhActiveKec = kecCode;
@@ -3193,6 +3309,15 @@
           ? "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold bg-white text-gray-800 shadow-sm transition"
           : "px-3 py-1.5 text-[11px] sm:text-xs rounded-lg font-semibold text-gray-500 hover:text-gray-800 transition";
       }
+      // Tampilkan filter PML hanya saat Per PPL
+      const pmlWrap = document.getElementById("dhPmlFilterWrap");
+      if (pmlWrap) {
+        pmlWrap.style.display = (view === "ppl") ? "flex" : "none";
+      }
+      // Reset filter PML saat ganti view
+      dhFilterPml = "";
+      const dhPmlSel = document.getElementById("dhPmlSelect");
+      if (dhPmlSel) dhPmlSel.value = "";
       renderDeltaHarianTable();
     }
 
@@ -3202,8 +3327,23 @@
       const footerInfo = document.getElementById("deltaHarianFooterInfo");
       if (!tbody) return;
 
+      // Populate dropdown PML (hanya saat Per PPL)
+      if (deltaHarianView === "ppl") {
+        const pmlWrap = document.getElementById("dhPmlFilterWrap");
+        if (pmlWrap) pmlWrap.style.display = "flex";
+        populateDhPmlDropdown();
+      } else {
+        const pmlWrap = document.getElementById("dhPmlFilterWrap");
+        if (pmlWrap) pmlWrap.style.display = "none";
+      }
+
       // --- AGREGASI DATA PER PETUGAS ---
-      const sourceData = progDataAll.filter(r => !dhActiveKec || r.kecCode === dhActiveKec);
+      // Filter awal: kecamatan + PML (jika view PPL dan filter PML aktif)
+      const sourceData = progDataAll.filter(r => {
+        if (dhActiveKec && r.kecCode !== dhActiveKec) return false;
+        if (deltaHarianView === "ppl" && dhFilterPml && r.emailPml !== dhFilterPml) return false;
+        return true;
+      });
       const agg = {};
       sourceData.forEach(r => {
         const key = deltaHarianView === "ppl" ? r.username : (r.emailPml || "Tanpa PML");
@@ -3211,6 +3351,7 @@
           agg[key] = {
             name: deltaHarianView === "ppl" ? r.namePPL : (r.namePML || "Tanpa PML"),
             key,
+            pmlName: deltaHarianView === "ppl" ? (r.namePML || "-") : "", // info PML untuk per PPL
             kecCodes: new Set(),
             target: 0,
             daily: {},
@@ -3250,27 +3391,51 @@
         });
       }
 
+      // Terapkan SORT
+      displayList = [...displayList].sort((a, b) => {
+        if (dhSortCol === "name") {
+          return dhSortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+        } else if (dhSortCol === "target") {
+          return dhSortDir === "asc" ? a.target - b.target : b.target - a.target;
+        } else if (typeof dhSortCol === "number") {
+          // Sort berdasarkan % progress pada hari dhSortCol
+          const pctA = (a.daily[dhSortCol] !== null && a.target > 0) ? (a.daily[dhSortCol] / a.target) * 100 : -1;
+          const pctB = (b.daily[dhSortCol] !== null && b.target > 0) ? (b.daily[dhSortCol] / b.target) * 100 : -1;
+          return dhSortDir === "asc" ? pctA - pctB : pctB - pctA;
+        }
+        return 0;
+      });
+
       // --- RENDER HEADER ---
       if (header) {
+        // Helper sort icon
+        const getSortIcon = (col) => {
+          if (dhSortCol !== col) return '<i class="fa-solid fa-sort sort-icon" style="opacity:0.3;font-size:9px;margin-left:2px"></i>';
+          return dhSortDir === "asc"
+            ? '<i class="fa-solid fa-sort-up sort-icon active" style="font-size:9px;margin-left:2px;color:#6366f1"></i>'
+            : '<i class="fa-solid fa-sort-down sort-icon active" style="font-size:9px;margin-left:2px;color:#6366f1"></i>';
+        };
         const dateHeaderCells = DAILY_DATES.map(d => {
           const we = isWeekend(d);
           const hn = getDayName(d);
           const isFilterDay = d === filterDay;
-          const bgClass = isFilterDay
+          const isSortedByThis = dhSortCol === d;
+          let bgClass = isFilterDay
             ? "bg-indigo-500 text-white"
             : (we ? "bg-amber-50 text-amber-600" : "text-indigo-600");
-          return `<th class="px-3 py-3 text-center font-bold min-w-[100px] ${bgClass}" style="border-left:1px solid #f1f5f9">
-            <div class="text-[11px] font-black">${d}/8</div>
+          if (isSortedByThis && !isFilterDay) bgClass += " bg-indigo-50";
+          return `<th class="px-3 py-3 text-center font-bold min-w-[100px] ${bgClass} sortable hover:opacity-80 cursor-pointer select-none" onclick="sortDeltaHarian(${d})" style="border-left:1px solid #f1f5f9">
+            <div class="text-[11px] font-black">${d}/8 ${getSortIcon(d)}</div>
             <div class="text-[9px] font-normal opacity-70">${hn}${isFilterDay ? ' ★' : ''}</div>
           </th>`;
         }).join("");
         header.innerHTML = `
           <tr class="text-gray-400 border-b border-gray-100 uppercase tracking-wider text-[10px] bg-gray-50/80">
-            <th class="px-5 py-3 font-bold text-left sticky left-0 bg-gray-50/95 z-10" style="min-width:160px">
-              ${deltaHarianView === "ppl" ? "Nama / Email PPL" : "Nama / Email PML"}
+            <th class="px-5 py-3 font-bold text-left sticky left-0 bg-gray-50/95 z-10 sortable cursor-pointer select-none hover:text-indigo-600" onclick="sortDeltaHarian('name')" style="min-width:160px">
+              ${deltaHarianView === "ppl" ? "Nama / Email PPL" : "Nama / Email PML"} ${getSortIcon("name")}
             </th>
             <th class="px-4 py-3 font-bold text-left" style="min-width:120px">Kecamatan</th>
-            <th class="px-4 py-3 text-right font-bold text-gray-600">Target</th>
+            <th class="px-4 py-3 text-right font-bold text-gray-600 sortable cursor-pointer select-none hover:text-indigo-600" onclick="sortDeltaHarian('target')">Target ${getSortIcon("target")}</th>
             ${dateHeaderCells}
           </tr>
         `;
@@ -3334,6 +3499,7 @@
               <td class="px-5 py-2.5 sticky left-0 bg-white border-r border-gray-100 z-10">
                 <div class="font-semibold text-gray-800 text-xs truncate max-w-[150px]" title="${p.name}">${p.name}</div>
                 <div class="text-[10px] text-gray-400 font-mono truncate max-w-[150px]">${p.key}</div>
+                ${deltaHarianView === "ppl" && p.pmlName ? `<div class="text-[9px] text-indigo-500 font-semibold mt-0.5 truncate max-w-[150px]" title="Diawasi: ${p.pmlName}"><i class="fa-solid fa-user-tie" style="font-size:7px"></i> ${p.pmlName}</div>` : ''}
                 ${todayPct !== null ? `<div class="text-[10px] font-bold mt-0.5 ${todayPct < 60 ? 'text-rose-500' : todayPct < 70 ? 'text-amber-500' : todayPct < 80 ? 'text-yellow-600' : 'text-green-600'}">${todayPct.toFixed(1)}% hari ini</div>` : ''}
               </td>
               <td class="px-4 py-2.5 text-gray-500 text-[11px]">${kecStr}</td>
